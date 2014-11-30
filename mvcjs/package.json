@@ -1,0 +1,22 @@
+{
+  "name" : "mvcjs",
+  "main" : "./loader.js",
+  "description": "Powerful lightweight mvc framework for nodejs",
+  "version": "0.1.0",
+  "dependencies" : {
+      "mongoose": "3.8.x",
+      "swig": "1.4.x",
+      "promise": "6.0.x",
+      "static-type-js": "0.2.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/igorzg/node-mvc.git"
+  },
+  "keywords": [
+    "mvcjs",
+    "framework",
+    "mvc"
+  ],
+  "license": "MIT"
+}
