@@ -5,6 +5,9 @@ var loader = require('../../../'),
 
 Posts = Type.inherit({}, {
 
+    index: function () {
+        
+    }
 });
 
 

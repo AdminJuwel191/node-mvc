@@ -9,11 +9,11 @@ var loader = require('../loader'),
  * @license Mit Licence 2014
  * @since 0.0.1
  * @author Igor Ivanovic
- * @name Cache
+ * @name ControllerInterface
  *
  * @constructor
  * @description
- * Cache class
+ * Controller interface
  */
 ControllerInterface = Type.create({
     forward: Type.FUNCTION,
@@ -22,7 +22,7 @@ ControllerInterface = Type.create({
     addHeader: Type.FUNCTION,
     getView: Type.FUNCTION
 }, {
-    _construct: function ControllerInterface(api) {
+    _invoke: function ControllerInterface(api) {
         core.extend(this, api);
         ["hasAction", "getAction"].forEach(function (method) {
             if (!(method in this)) {

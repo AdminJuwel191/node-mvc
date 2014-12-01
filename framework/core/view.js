@@ -1,4 +1,13 @@
 "use strict";
-/**
- * Created by igi on 11/11/14.
- */
+var  loader = require('../loader'),
+     ViewInterface = loader.load('interface/view'),
+     View;
+
+
+View = ViewInterface.inherit({
+
+}, {
+
+});
+
+module.exports = View;

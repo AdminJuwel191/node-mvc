@@ -210,7 +210,7 @@ Framework = Type.create({
                 throw new error.Exception('Component "' + name + '" is not initialized', e);
             }
         } else {
-            throw new error.Exception('Component "' + name + '" already exist in system', config);
+            throw new error.DataError(config, 'Component "' + name + '" already exist in system');
         }
         return this.getComponent(name);
     },

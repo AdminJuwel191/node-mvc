@@ -8,14 +8,14 @@ var loader = require('../loader'),
  * @license Mit Licence 2014
  * @since 0.0.1
  * @author Igor Ivanovic
- * @name Cache
+ * @name RouteRuleInterface
  *
  * @constructor
  * @description
- * Cache class
+ * Route rule interface
  */
 RouteRuleInterface = Type.create({}, {
-    _construct: function RouteRuleInterface() {
+    _invoke: function RouteRuleInterface() {
         ["parseRequest", "createUrl"].forEach(function (method) {
             if (!(method in this)) {
                 throw new error.DataError({method: method}, 'RouteRuleInterface: missing method in routerRule class');

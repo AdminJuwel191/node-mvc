@@ -20,7 +20,7 @@ CacheInterface = Type.create({
     config: Type.OBJECT,
     ttl: Type.NUMBER
 }, {
-    _construct: function CacheInterface(api, config) {
+    _invoke: function CacheInterface(api, config) {
         this.cache = {};
         this.logger = api.getComponent('core/logger');
         this.config = config;
