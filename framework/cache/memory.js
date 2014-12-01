@@ -2,7 +2,7 @@
 /* global loader: true, Type: true, CacheInterface: true, MemoryCache: true */
 var loader = require('../loader'),
     Type = loader.load('static-type-js'),
-    CacheInterface = loader.load('cache/cache'),
+    CacheInterface = loader.load('interface/cache'),
     MemoryCache;
 /**
  * @license Mit Licence 2014

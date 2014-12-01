@@ -1,6 +1,7 @@
 "use strict";
-/* global loader: true, Promise: true, Type: true, core: true, error: true, util: true, Request: true */
+/* global loader: true, Promise: true, Type: true, core: true, error: true, util: true, Request: true, Controller: true */
 var loader = require('../loader'),
+    ControllerInterface = loader.load('interface/controller'),
     Type = loader.load('static-type-js'),
     core = loader.load('core'),
     error = loader.load('error'),
@@ -159,9 +160,6 @@ Request = Type.create({
             action,
             promise;
 
-        this.logger.print(controllerToLoad);
-        this.logger.print('LoadingController', controllerToLoad);
-
         try {
             LoadedController = loader.load(controllerToLoad);
         } catch (e) {
@@ -170,8 +168,13 @@ Request = Type.create({
 
         controller = new LoadedController(api);
 
+        if (!(controller instanceof  ControllerInterface)) {
+            throw new error.HttpError(404, controller, 'Controller must be instance of ControllerInterface "core/controller"');
+        }
+
         this.logger.print('LoadRequest', {
             controller: controller,
+            controllerToLoad: controllerToLoad,
             route: {
                 controller: this.controller,
                 action: this.action,
@@ -180,16 +183,16 @@ Request = Type.create({
             }
         });
 
-        if (Type.isFunction(controller.beforeEach)) {
-            promise = this._chain(null, controller.beforeEach.bind(controller, this.action));
+        if (Type.isFunction(controller.hasAction("beforeEach"))) {
+            promise = this._chain(null, controller.beforeEach.bind(controller, this.action, this.params));
         }
-        action = 'before_' + this.action;
-        if (Type.isFunction(controller[action])) {
-            promise = this._chain(promise, controller[action].bind(controller, this.params));
+
+        if (Type.isFunction(controller.hasAction('before_' + this.action))) {
+            promise = this._chain(promise, controller.getAction('before_' + this.action).bind(controller, this.params));
         }
-        action = this.action;
-        if (Type.isFunction(controller[action])) {
-            promise = this._chain(promise, controller[action].bind(controller, this.params));
+
+        if (Type.isFunction(controller.hasAction(this.action))) {
+            promise = this._chain(promise, controller.getAction(this.action).bind(controller, this.params));
         } else {
             throw new error.HttpError(404, {
                 controller: controller,
@@ -201,11 +204,13 @@ Request = Type.create({
                 }
             }, 'Missing action in controller');
         }
-        action = 'after_' + this.action;
-        if (Type.isFunction(controller[action])) {
-            promise = this._chain(promise, controller[action].bind(controller, this.params));
+
+
+        if (Type.isFunction(controller.hasAction('after_' + this.action))) {
+            promise = this._chain(promise, controller.getAction('after_' + this.action).bind(controller, this.params));
         }
-        if (Type.isFunction(controller.afterEach)) {
+
+        if (Type.isFunction(controller.hasAction("afterEach"))) {
             promise = this._chain(promise, controller.afterEach.bind(controller, this.action, this.params));
         }
 
@@ -223,9 +228,7 @@ Request = Type.create({
         this.router
             .process(this.request, this.response)
             .then(resolveRoute.bind(this), this._handleError.bind(this)) // resolve route chain
-            .then(this._render.bind(this), this._handleError.bind(this)) // render chain
-            .then(this._render.bind(this), this._handleError.bind(this)); // error render chain
-
+            .then(this._render.bind(this), this._handleError.bind(this)); // render chain
         /**
          * Resolve route
          * @param routeRule
@@ -242,7 +245,6 @@ Request = Type.create({
             this.controller = route.shift();
             this.action = route.shift();
             this.addHeader('Content-type', 'text/html');
-
             return this._handleRoute();
         }
     },

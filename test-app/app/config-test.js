@@ -22,9 +22,22 @@ module.exports = function(app) {
         route: 'user/view',
         method: ['GET']
     });
+
+    router.add({
+        pattern: 'test',
+        route: 'test/index',
+        method: ['GET']
+    });
+
     router.add({
         pattern: 'home',
         route: 'home/index',
+        method: ['GET']
+    });
+
+    router.add({
+        pattern: '<controller>/<action>',
+        route: '<controller>/<action>',
         method: ['GET']
     });
     router.add({

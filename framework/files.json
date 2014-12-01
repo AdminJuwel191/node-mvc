@@ -9,6 +9,9 @@
   "core/request": "@{framework}/core/request",
   "core/controller": "@{framework}/core/controller",
   "core/routeRule": "@{framework}/core/routeRule",
-  "cache/cache": "@{framework}/cache/cache",
-  "cache/memory": "@{framework}/cache/memory"
+  "interface/cache": "@{framework}/interface/cache",
+  "interface/controller": "@{framework}/interface/controller",
+  "interface/routeRule": "@{framework}/interface/routeRule",
+  "cache/memory": "@{framework}/cache/memory",
+  "typejs": "static-type-js"
 }

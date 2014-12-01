@@ -8,6 +8,7 @@ var loader = require('../loader'),
     ROUTE_MATCH = /<(\w+)>/ig,
     PATTERN_CAPTURE_REGEX = /\(((\?P?<(\w+)>)((\:?(\((.*)\)))?|([^\)]+))|([^\)]+))\)/g,
     IS_NAMED = /\(\?P?<(\w+)>([^\)]+)\)/,
+    RouteRuleInterface = loader.load('interface/routeRule'),
     RouteRule;
 /**
  * @license Mit Licence 2014
@@ -19,7 +20,7 @@ var loader = require('../loader'),
  * @description
  * RouteRule is used to create route rule
  */
-RouteRule = Type.create({
+RouteRule = RouteRuleInterface.inherit({
     routeParams: Type.ARRAY,
     paramRules: Type.ARRAY,
     api: Type.OBJECT,

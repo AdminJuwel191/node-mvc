@@ -7,6 +7,7 @@ var loader = require('../loader'),
     RouteRule = loader.load('core/routeRule'),
     Promise = loader.load('promise'),
     URLParser = loader.load('url'),
+    RouteRuleInterface = loader.load('interface/routeRule'),
     Router;
 /**
  * @license Mit Licence 2014
@@ -73,17 +74,17 @@ Router = Type.create({
         if (route.dynamic) {
             if (core.isFunction(route.constructor)) {
                 rule = new route.constructor(this.api);
-                if (!core.isFunction(rule.parseRequest)) {
-                    throw new error.HttpError(404, route, 'Router.add: dynamic route don\'t have parseRequest method');
-                } else if (!core.isFunction(rule.createUrl)) {
-                    throw new error.HttpError(404, route, 'Router.add: dynamic route don\'t have createUrl method');
-                }
             } else {
                 throw new error.HttpError(404, route, 'Router.add: dynamic route is not constructor');
             }
         } else {
             rule = new RouteRule(this.api, route);
         }
+
+        if (!(rule instanceof RouteRuleInterface)) {
+            throw new error.HttpError(404, rule, 'Router.add: rule must be instance of RouteRuleInterface');
+        }
+
         this.logger.print('Router.add: route', route);
         this.routes.push(rule);
 

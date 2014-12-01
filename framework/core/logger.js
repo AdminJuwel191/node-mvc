@@ -11,7 +11,7 @@ var loader = require('../loader'),
     Logger;
 // remove colors from inspect
 for (var i = 0; i < 100; ++i) {
-    replace.push(new RegExp('\\[' + i + 'm', 'ig'))
+    replace.push(new RegExp('\\[' + i + 'm', 'ig'));
 }
 /**
  * @license Mit Licence 2014
