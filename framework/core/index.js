@@ -1,4 +1,5 @@
 "use strict";
+/* global Type: true */
 var Type = require('static-type-js');
 /**
  * @since 0.0.1

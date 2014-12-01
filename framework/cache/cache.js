@@ -1,4 +1,5 @@
 "use strict";
+/* global loader: true,  Type: true,, error: true, CacheInterface: true */
 var loader = require('../loader'),
     Type = loader.load('static-type-js'),
     error = loader.load('error'),

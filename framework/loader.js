@@ -1,4 +1,5 @@
 "use strict";
+/* global Type: true, error: true, path: true, util: true, fs: true, INVALID_ALIAS_VALUE: true */
 var Type = require('static-type-js');
 var error = require('./error/index');
 var path = require('path');

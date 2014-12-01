@@ -1,4 +1,5 @@
 "use strict";
+/* global loader: true, Promise: true, Type: true, core: true, error: true, util: true, RouteRule: true, URLParser: true, Router: true */
 var loader = require('../loader'),
     Type = loader.load('static-type-js'),
     core = loader.load('core'),

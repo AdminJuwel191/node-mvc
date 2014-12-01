@@ -1,4 +1,5 @@
 "use strict";
+/* global loader: true, Promise: true, Type: true, core: true, error: true, util: true, Request: true */
 var loader = require('../loader'),
     Type = loader.load('static-type-js'),
     core = loader.load('core'),
@@ -150,8 +151,7 @@ Request = Type.create({
                 redirect: this.redirect.bind(this),
                 createUrl: this.createUrl.bind(this),
                 addHeader: this.addHeader.bind(this),
-                getView: this.getView.bind(this),
-                Promise: Promise
+                getView: this.getView.bind(this)
             },
             controllerToLoad = '@{controllersPath}/' + this.controller,
             LoadedController,
@@ -181,15 +181,15 @@ Request = Type.create({
         });
 
         if (Type.isFunction(controller.beforeEach)) {
-            promise = this._chain(null, controller.beforeEach.bind(api, this.action));
+            promise = this._chain(null, controller.beforeEach.bind(controller, this.action));
         }
         action = 'before_' + this.action;
         if (Type.isFunction(controller[action])) {
-            promise = this._chain(promise, controller[action].bind(api, this.params));
+            promise = this._chain(promise, controller[action].bind(controller, this.params));
         }
         action = this.action;
         if (Type.isFunction(controller[action])) {
-            promise = this._chain(promise, controller[action].bind(api, this.params));
+            promise = this._chain(promise, controller[action].bind(controller, this.params));
         } else {
             throw new error.HttpError(404, {
                 controller: controller,
@@ -203,10 +203,10 @@ Request = Type.create({
         }
         action = 'after_' + this.action;
         if (Type.isFunction(controller[action])) {
-            promise = this._chain(promise, controller[action].bind(api, this.params));
+            promise = this._chain(promise, controller[action].bind(controller, this.params));
         }
         if (Type.isFunction(controller.afterEach)) {
-            promise = this._chain(promise, controller.afterEach.bind(api, this.action, this.params));
+            promise = this._chain(promise, controller.afterEach.bind(controller, this.action, this.params));
         }
 
         return promise;

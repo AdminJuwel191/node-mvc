@@ -1,6 +1,6 @@
 {
   "name" : "mvcjs",
-  "main" : "./loader.js",
+  "main" : "./framework/loader.js",
   "description": "Powerful lightweight mvc framework for nodejs",
   "version": "0.1.0",
   "dependencies" : {
