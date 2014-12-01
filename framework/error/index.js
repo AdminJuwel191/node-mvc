@@ -69,7 +69,7 @@ Exception = Type.create({
             args.push({
                 key: key,
                 value: util.inspect(this.__dynamic__[key])
-            })
+            });
         }.bind(this));
 
         args.sort(function (a, b) {

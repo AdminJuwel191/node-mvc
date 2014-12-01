@@ -15,9 +15,6 @@ var loader = require('../loader'),
  * Memory cache
  */
 MemoryCache = CacheInterface.inherit({},{
-    _construct: function MemoryCache(api, config) {
-        this._super(api, config);
-    },
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
