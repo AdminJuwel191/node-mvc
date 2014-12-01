@@ -341,8 +341,8 @@ RouteRule = Type.create({
             rgx = this.toRegex(rgx);
 
         }
-        if (Type.isObject(rgx) && Type.isRegExp(rgx.regex) && rgx.group) {
-            if (rgx.group.length) {
+        if (Type.isObject(rgx) && Type.isRegExp(rgx.regex)) {
+            if (rgx.group && rgx.group.length) {
                 group = rgx.group;
                 matched = core.match(rgx.regex, str).shift();
                 if (Type.isArray(matched)) {

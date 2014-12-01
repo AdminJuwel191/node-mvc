@@ -1,6 +1,7 @@
 "use strict";
-/* global Type: true */
+/* global Type: true, error: true, Object: true */
 var Type = require('static-type-js');
+var error = require('../error/index');
 /**
  * @since 0.0.1
  * @author Igor Ivanovic
@@ -37,7 +38,7 @@ function copy(source) {
             });
             return destination;
         } catch (e) {
-            throw new Error('To many recursions on copy', e);
+            throw new error.Exception('To many recursions on copy', e);
         }
     }
     return source;
@@ -65,7 +66,7 @@ function extend(destination, source, keys) {
             }
         });
     } else {
-        throw new Error('Extend: invalid source or destination type:', source, destination);
+        throw new error.DataError({source: source, destination: destination}, 'Extend: invalid source or destination type:');
     }
     return destination;
 }
@@ -97,11 +98,7 @@ function match(re, str) {
             }));
         });
     } else {
-        str.toString().replace(re, function () {
-            matches.push([].slice.call(arguments).filter(function (item) {
-                return item !== undefined;
-            }));
-        });
+        throw new error.DataError({str: str, re: re}, 'String is not valid type');
     }
     return matches;
 }
