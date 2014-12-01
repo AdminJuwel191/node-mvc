@@ -1,3 +1,4 @@
+"use strict";
 var loader = require('../loader'),
     Type = loader.load('static-type-js'),
     core = loader.load('core'),
@@ -218,7 +219,7 @@ Router = Type.create({
      * Strip whitespace in string and as well strip extra parameter
      */
     trim: function Router_trim(str, strip) {
-        if (!core.isString(str)) {
+        if (!Type.isString(str)) {
             return str;
         }
         str = str.trim();

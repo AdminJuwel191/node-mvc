@@ -1,3 +1,4 @@
+"use strict";
 var loader = require('../loader'),
     Type = loader.load('static-type-js'),
     core = loader.load('core'),
@@ -35,7 +36,6 @@ RouteRule = Type.create({
         this.api = api;
         this.template = null;
         this.routeRule = null;
-        this.method = 'GET';
         this.logger = this.api.getComponent('core/logger');
 
         if (!config.pattern) {
@@ -213,13 +213,16 @@ RouteRule = Type.create({
 
         for (i = 0; i < len; ++i) {
             c = this.paramRules[i];
-            if (params.hasOwnProperty(c.key) && (c.value === '' || this.match(c.value, params[c.key]).length > 0)) {
+
+            this.logger.print('template2', c.value, params[c.key], this.match(c.value, params[c.key]));
+
+            if (params.hasOwnProperty(c.key) && (c.value === '' || (Type.isRegExp(c.value) && c.value.test(params[c.key])) ||  this.match(c.value, params[c.key]).length > 0) ) {
                 escape.push({
                     key: '<' + c.key + '>',
                     value: params[c.key]
                 });
                 delete params[c.key];
-            } else if (!!params[c.key]) {
+            } else if (Type.isUndefined(params[c.key])) {
                 return false;
             }
         }

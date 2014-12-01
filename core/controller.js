@@ -1,3 +1,4 @@
+"use strict";
 var loader = require('../loader'),
     Type = loader.load('static-type-js'),
     Controller;

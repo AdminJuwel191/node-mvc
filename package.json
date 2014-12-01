@@ -1,0 +1,37 @@
+{
+  "name" : "mvcjs",
+  "main" : "./loader.js",
+  "description": "Powerful lightweight mvc framework for nodejs",
+  "version": "0.1.0",
+  "dependencies" : {
+      "mongoose": "3.8.x",
+      "swig": "1.4.x",
+      "promise": "6.0.x",
+      "static-type-js": "0.2.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/AdminJuwel191/mvcjs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AdminJuwel191/mvcjs/issues",
+    "email": "igor.zg1987@gmail.com"
+  },
+  "homepage": "https://github.com/AdminJuwel191/mvcjs",
+  "author": {
+    "name": "Igor Ivanovic",
+    "email": "igor.zg1987@gmail.com"
+  },
+  "keywords": [
+    "mvcjs",
+    "framework",
+    "mvc"
+  ],
+  "maintainers": [
+    {
+      "name": "igorzg",
+      "email": "igor.zg1987@gmail.com"
+    }
+  ],
+  "license": "MIT"
+}

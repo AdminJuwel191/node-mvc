@@ -1,6 +1,7 @@
+"use strict";
 var Type = require('static-type-js'),
     util = require('util'),
-    core = require('../core'),
+    core = require('../core/index'),
     DataError,
     SilentError,
     Exception,

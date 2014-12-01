@@ -1,3 +1,4 @@
+"use strict";
 var Type = require('static-type-js');
 /**
  * @since 0.0.1
@@ -90,6 +91,12 @@ function match(re, str) {
     var matches = [];
     if (Type.isString(str)) {
         str.replace(re, function () {
+            matches.push([].slice.call(arguments).filter(function (item) {
+                return item !== undefined;
+            }));
+        });
+    } else {
+        str.toString().replace(re, function () {
             matches.push([].slice.call(arguments).filter(function (item) {
                 return item !== undefined;
             }));

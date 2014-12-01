@@ -1,3 +1,4 @@
+"use strict";
 var loader = require('../loader'),
     Type = loader.load('static-type-js'),
     core = loader.load('core'),
@@ -32,7 +33,7 @@ Request = Type.create({
     _construct: function Request(request, response, api) {
         this.router = api.getComponent('core/router');
         this.logger = api.getComponent('core/logger');
-        this.createUrl = api.createUrl;
+        this.createUrl = api.createUrl.bind(api);
         this.request = request;
         this.response = response;
         this.statusCode = 200;
@@ -98,10 +99,16 @@ Request = Type.create({
      * End request
      */
     _render: function Request_render(response) {
+
         if (response instanceof Error) {
             this.statusCode = 404;
             this.response.writeHead(this.statusCode, this.headers);
-            this.response.end(response.trace);
+            if (response.trace) {
+                this.response.end(response.trace);
+            } else {
+                this.response.end(util.inspect(response));
+            }
+
         } else if (!response) {
             throw new error.HttpError(404, {}, 'No data to render');
         } else if (Type.isString(response)) {
@@ -110,6 +117,8 @@ Request = Type.create({
         } else {
             throw new error.HttpError(404, {}, 'Invalid response type, it must be string!!');
         }
+
+
     },
     /**
      * @since 0.0.1
