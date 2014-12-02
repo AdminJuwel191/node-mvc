@@ -183,19 +183,20 @@ Request = Type.create({
             }
         });
 
-        if (Type.isFunction(controller.hasAction("beforeEach"))) {
+        if (controller.hasAction("beforeEach")) {
             promise = this._chain(null, controller.beforeEach.bind(controller, this.action, this.params));
         }
 
-        if (Type.isFunction(controller.hasAction('before_' + this.action))) {
+        if (controller.hasAction('before_' + this.action)) {
             promise = this._chain(promise, controller.getAction('before_' + this.action).bind(controller, this.params));
         }
 
-        if (Type.isFunction(controller.hasAction(this.action))) {
+        if (controller.hasAction(this.action)) {
             promise = this._chain(promise, controller.getAction(this.action).bind(controller, this.params));
         } else {
             throw new error.HttpError(404, {
                 controller: controller,
+                hasAction: controller.hasAction(this.action),
                 route: {
                     controller: this.controller,
                     action: this.action,
@@ -206,11 +207,11 @@ Request = Type.create({
         }
 
 
-        if (Type.isFunction(controller.hasAction('after_' + this.action))) {
+        if (controller.hasAction('after_' + this.action)) {
             promise = this._chain(promise, controller.getAction('after_' + this.action).bind(controller, this.params));
         }
 
-        if (Type.isFunction(controller.hasAction("afterEach"))) {
+        if (controller.hasAction("afterEach")) {
             promise = this._chain(promise, controller.afterEach.bind(controller, this.action, this.params));
         }
 
