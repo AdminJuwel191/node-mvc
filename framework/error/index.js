@@ -19,11 +19,11 @@ var Type = require('static-type-js'),
  * Exception is used to throw exception
  */
 Exception = Type.create({
-    customMessage: Type.STIRNG,
-    stack: Type.STIRNG,
-    message: Type.STIRNG,
-    combine: Type.STIRNG,
-    trace: Type.STIRNG
+    customMessage: Type.STRING,
+    stack: Type.STRING,
+    message: Type.STRING,
+    combine: Type.STRING,
+    trace: Type.STRING
 }, {
     _construct: function Exception(msg, error) {
         var message = '', errorTrace, nError;

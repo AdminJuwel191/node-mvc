@@ -24,12 +24,12 @@ RouteRule = RouteRuleInterface.inherit({
     routeParams: Type.ARRAY,
     paramRules: Type.ARRAY,
     api: Type.OBJECT,
-    template: Type.STIRNG,
-    routeRule: Type.STIRNG,
+    template: Type.STRING,
+    routeRule: Type.STRING,
     methods: Type.ARRAY,
     logger: Type.OBJECT,
     pattern: Type.OBJECT,
-    route: Type.STIRNG
+    route: Type.STRING
 }, {
     _construct: function RouteRule(api, config) {
         var matches, name, pattern, escapePattern = [], escapeRule = [], template;

@@ -14,7 +14,7 @@ Framework = Type.create({
     components: Type.OBJECT,
     initalized: Type.BOOLEAN,
     server: Type.OBJECT,
-    favicon: Type.STIRNG
+    favicon: Type.STRING
 }, {
     /**
      * @license Mit Licence 2014
