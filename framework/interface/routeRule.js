@@ -1,8 +1,8 @@
 "use strict";
 /* global loader: true, Type: true, error: true, RouteRuleInterface: true, require: true */
-var loader = require('../loader'),
-    Type = loader.load('static-type-js'),
-    error = loader.load('error'),
+var di = require('../di'),
+    Type = di.load('static-type-js'),
+    error = di.load('error'),
     RouteRuleInterface;
 /**
  * @license Mit Licence 2014

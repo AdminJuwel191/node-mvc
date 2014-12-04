@@ -1,13 +1,14 @@
 "use strict";
 /* global loader: true, Promise: true, Type: true, core: true, error: true, util: true, RouteRule: true, URLParser: true, Router: true */
-var loader = require('../loader'),
-    Type = loader.load('static-type-js'),
-    core = loader.load('core'),
-    error = loader.load('error'),
-    RouteRule = loader.load('core/routeRule'),
-    Promise = loader.load('promise'),
-    URLParser = loader.load('url'),
-    RouteRuleInterface = loader.load('interface/routeRule'),
+var di = require('../loader'),
+    Type = di.load('typejs'),
+    core = di.load('core'),
+    error = di.load('error'),
+    component = di.load('core/component'),
+    RouteRule = di.load('core/routeRule'),
+    Promise = di.load('promise'),
+    URLParser = di.load('url'),
+    RouteRuleInterface = di.load('interface/routeRule'),
     Router;
 /**
  * @license Mit Licence 2014
@@ -27,8 +28,7 @@ Router = Type.create({
 },{
     _construct: function Router(api, config) {
         this.routes = [];
-        this.api = api;
-        this.logger = api.getComponent('core/logger');
+        this.logger = component.get('core/logger');
         this.config = {
             defaultRoute: "home/index",
             errorRoute: "error/index"
@@ -73,16 +73,16 @@ Router = Type.create({
         }
         if (route.dynamic) {
             if (core.isFunction(route.constructor)) {
-                rule = new route.constructor(this.api);
+                rule = new route.constructor(component);
             } else {
-                throw new error.HttpError(404, route, 'Router.add: dynamic route is not constructor');
+                throw new error.HttpError(500, route, 'Router.add: dynamic route is not constructor');
             }
         } else {
-            rule = new RouteRule(this.api, route);
+            rule = new RouteRule(component, route);
         }
 
         if (!(rule instanceof RouteRuleInterface)) {
-            throw new error.HttpError(404, rule, 'Router.add: rule must be instance of RouteRuleInterface');
+            throw new error.HttpError(500, rule, 'Router.add: rule must be instance of RouteRuleInterface');
         }
 
         this.logger.print('Router.add: route', route);
@@ -99,9 +99,9 @@ Router = Type.create({
      */
     processFavicon: function Router_processFavicon(request, response) {
         var favicon, iconBuffer, key = 'APP_FAVICON',
-            logger = this.api.getComponent('core/logger'),
-            cache = this.api.getComponent('cache/memory'),
-            fs = loader.load('fs');
+            logger = component.get('core/logger'),
+            cache = component.get('cache/memory'),
+            fs = di.load('fs');
 
         if (request.url === '/favicon.ico') {
             iconBuffer = cache.get(key);
@@ -112,7 +112,7 @@ Router = Type.create({
                 fs.readFile(this.api.getFavicon(), function (err, buf) {
                     if (err) {
                         logger.error(err);
-                        throw new error.HttpError(404, err,  'Cannot load favicon');
+                        throw new error.HttpError(500, err,  'Cannot load favicon');
                     }
                     cache.set(key, buf);
                     response.writeHead(200, {
@@ -138,12 +138,12 @@ Router = Type.create({
         var i, len = this.routes.length, routeRule, url, anchor = '';
 
         if (!Type.isString(route)) {
-            throw new error.HttpError(404, route, 'RouteRule.createUrl: route must be string type');
+            throw new error.HttpError(500, route, 'RouteRule.createUrl: route must be string type');
         }
         if (!params) {
             params = {};
         } else if (!Type.isObject(params)) {
-            throw new error.HttpError(404, params, 'RouteRule.createUrl: params must be object type');
+            throw new error.HttpError(500, params, 'RouteRule.createUrl: params must be object type');
         }
 
         Object.keys(params).forEach(function (item) {
@@ -247,9 +247,10 @@ Router = Type.create({
             if (Type.isArray(routeRule) && routeRule.length === 2) {
                 return Promise.resolve(routeRule);
             }
+            // only on not found throw an error 500
             throw new error.HttpError(404, core.toObject(routeRule), 'Not found');
         }, function (error) {
-            throw new error.HttpError(404, error, 'Not found');
+            throw new error.HttpError(500, error, 'Not found');
         });
     }
 });

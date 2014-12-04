@@ -1,8 +1,9 @@
 "use strict";
 /* global Type: true, core: true, util: true, DataError: true, SilentError: true, Exception: true, HttpError: true */
-var Type = require('static-type-js'),
-    util = require('util'),
-    core = require('../core/index'),
+var di = require('../di'),
+    Type = di.load('typejs'),
+    util = di.load('util'),
+    core = di.load('core'),
     DataError,
     SilentError,
     Exception,
@@ -45,7 +46,12 @@ Exception = Type.create({
 
         nError = new Error();
         nError.name = 'Exception';
-        error = core.extend(nError, this.__dynamic__);
+        try {
+            error = core.extend(nError, this.__dynamic__);
+        } catch (e) {
+            console.log('Exception.extend', e);
+        }
+
 
         throw error;
     },

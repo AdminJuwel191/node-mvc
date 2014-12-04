@@ -1,8 +1,8 @@
 "use strict";
 /* global loader: true,  Type: true,, error: true, CacheInterface: true */
-var loader = require('../loader'),
-    Type = loader.load('static-type-js'),
-    error = loader.load('error'),
+var di = require('../di'),
+    Type = di.load('typejs'),
+    error = di.load('error'),
     ConfigInterface;
 /**
  * @license Mit Licence 2014

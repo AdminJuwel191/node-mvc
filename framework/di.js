@@ -1,7 +1,7 @@
 "use strict";
 /* global Type: true, error: true, path: true, util: true, fs: true, INVALID_ALIAS_VALUE: true */
 var Type = require('static-type-js');
-var error = require('./error/index');
+var core = require('./core');
 var path = require('path');
 var util = require('util');
 var fs = require('fs');
@@ -16,19 +16,31 @@ var INVALID_ALIAS_VALUE = /[\\?%*:|"<>.\s]/ig;
  * @description
  * Loader is main class which provide all paths to load part of application
  */
-var Loader = Type.create({
+var DI = Type.create({
     filePaths: Type.OBJECT,
     aliases: Type.OBJECT
 }, {
-    _construct: function Loader_construct() {
+    _construct: function DI_construct() {
         this.aliases = {};
         this.setAlias('framework', __dirname + '/');
         try {
             this.filePaths = JSON.parse(fs.readFileSync(this.normalizePath('@{framework}/files.json'), {encoding: 'utf8'}));
         } catch (e) {
-            throw new error.Exception('Problem with loading files.json', e);
+            e.message += ', DI._construct';
+            throw e;
         }
 
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Loader#hasAlias
+     *
+     * @description
+     * Has an alias
+     */
+    hasAlias: function DI_hasAlias(key) {
+        return this.aliases.hasOwnProperty(key);
     },
     /**
      * @since 0.0.1
@@ -38,11 +50,11 @@ var Loader = Type.create({
      * @description
      * Get an alias
      */
-    getAlias: function Loader_getAlias(key) {
+    getAlias: function DI_getAlias(key) {
         if (this.aliases.hasOwnProperty(key)) {
             return this.normalizePath(this.aliases[key]);
         } else {
-            throw new error.DataError(key, 'Alias is not valid');
+            throw new Error('DI.getAlias: Alias is not valid:' + key);
         }
     },
     /**
@@ -53,10 +65,10 @@ var Loader = Type.create({
      * @description
      * Set an path alias
      */
-    setAlias: function Loader_setAlias(key, value) {
+    setAlias: function DI_setAlias(key, value) {
         /* @todo check if this will be required */
         if (INVALID_ALIAS_VALUE.test(value)) {
-            throw new error.DataError(key, 'Invalid alias value, chars \'\\?%*:|"<>.\' and spaces are not allowed.');
+            throw new Error('DI.setAlias: Invalid alias value, chars \'\\?%*:|"<>.\' and spaces are not allowed. KEY: ' + key);
         } else {
             this.aliases[key] = this.normalizePath(value);
         }
@@ -69,7 +81,7 @@ var Loader = Type.create({
      * @description
      * Normalize path
      */
-    normalizePath: function Loader_normalizePath(value) {
+    normalizePath: function DI_normalizePath(value) {
         Object.keys(this.aliases).forEach(function (key) {
             value = value.replace('@{' + key + '}', this.aliases[key]);
         }.bind(this));
@@ -83,11 +95,12 @@ var Loader = Type.create({
      * @description
      * Read file sync
      */
-    readFileSync: function (name) {
+    readFileSync: function DI_readFileSync(name) {
         try {
             return fs.readFileSync(this.normalizePath(name), {encoding: 'utf8'});
         } catch (e) {
-            throw new error.Exception('Problem with loading sync file', e);
+            e.message += ', DI.readFileSync';
+            throw e;
         }
     },
     /**
@@ -98,17 +111,18 @@ var Loader = Type.create({
      * @description
      * Load an package
      */
-    load: function Loader_load(file) {
+    load: function DI_load(file) {
         try {
             if (file in this.filePaths) {
                 file = this.filePaths[file];
             }
             return require(this.normalizePath(file));
         } catch (e) {
-            throw new error.Exception('Problem with loading file', e);
+            e.message += ', DI.load';
+            throw e;
         }
     }
 });
 
 
-module.exports = new Loader;
+module.exports = new DI;

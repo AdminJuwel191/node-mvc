@@ -1,5 +1,5 @@
-var loader = require('../../../'),
-    Controller = loader.load('core/controller'),
+var di = require('../../../'), // mvcjs as node package
+    Controller = di.load('core/controller'),
     Core;
 
 

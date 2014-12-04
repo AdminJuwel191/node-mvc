@@ -1,12 +1,13 @@
 "use strict";
 /* global loader: true, Promise: true, Type: true, core: true, error: true, util: true, Request: true, Controller: true */
-var loader = require('../loader'),
-    ControllerInterface = loader.load('interface/controller'),
-    Type = loader.load('static-type-js'),
-    core = loader.load('core'),
-    error = loader.load('error'),
-    util = loader.load('util'),
-    Promise = loader.load('promise'),
+var di = require('../di'),
+    ControllerInterface = di.load('interface/controller'),
+    component = di.load('core/component'),
+    Type = di.load('typejs'),
+    core = di.load('core'),
+    error = di.load('error'),
+    util = di.load('util'),
+    Promise = di.load('promise'),
     Request;
 /**
  * @license Mit Licence 2014
@@ -26,21 +27,31 @@ Request = Type.create({
     route: Type.STRING,
     params: Type.OBJECT,
     controller: Type.STRING,
+    controllerInstance: Type.OBJECT,
     module: Type.STRING,
     action: Type.STRING,
     statusCode: Type.NUMBER,
-    headers: Type.OBJECT,
-    createUrl: Type.FUNCTION
+    headers: Type.OBJECT
 }, {
-    _construct: function Request(request, response, api) {
-        this.router = api.getComponent('core/router');
-        this.logger = api.getComponent('core/logger');
-        this.createUrl = api.createUrl.bind(api);
+    _construct: function Request(request, response) {
+        this.router = component.get('core/router');
+        this.logger = component.get('core/logger');
         this.request = request;
         this.response = response;
         this.statusCode = 200;
         this.headers = {};
         this._parse();
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Request#addHeader
+     *
+     * @description
+     * Write header
+     */
+    onEnd: function Request_onEnd(callback) {
+        this.request.on('end', callback);
     },
     /**
      * @since 0.0.1
@@ -64,9 +75,9 @@ Request = Type.create({
     getView: function (route) {
         var template;
         try {
-            template = loader.readFileSync('@{viewsPath}/' + route + '.html');
+            template = di.readFileSync('@{viewsPath}/' + route + '.html');
         } catch (e) {
-            throw new error.HttpError(404, {}, 'Cannot load template !', e);
+            throw new error.HttpError(500, {}, 'Cannot load template !', e);
         }
         return template;
     },
@@ -103,7 +114,11 @@ Request = Type.create({
     _render: function Request_render(response) {
 
         if (response instanceof Error) {
-            this.statusCode = 404;
+            if (response.code) {
+                this.statusCode = response.code;
+            } else {
+                this.statusCode = 500;
+            }
             this.response.writeHead(this.statusCode, this.headers);
             if (response.trace) {
                 this.response.end(response.trace);
@@ -112,12 +127,12 @@ Request = Type.create({
             }
 
         } else if (!response) {
-            throw new error.HttpError(404, {}, 'No data to render');
+            throw new error.HttpError(500, {}, 'No data to render');
         } else if (Type.isString(response)) {
             this.addHeader('Content-Length', response.length);
             this.response.end(response);
         } else {
-            throw new error.HttpError(404, {}, 'Invalid response type, it must be string!!');
+            throw new error.HttpError(500, {}, 'Invalid response type, it must be string!!');
         }
 
 
@@ -132,11 +147,19 @@ Request = Type.create({
      */
     _chain: function (promise, next) {
         if (!promise) {
-            return Promise.resolve(next());
+            return Promise.resolve(_handler());
         }
         return promise.then(function (data) {
-            return Promise.resolve(next(data));
+            return Promise.resolve(_handler(data));
         }, this._handleError.bind(this));
+
+        function _handler() {
+            try {
+                next.apply(next, arguments);
+            } catch (e) {
+                throw new error.HttpError(500, arguments, "Error on executing action", e);
+            }
+        }
     },
     /**
      * @since 0.0.1
@@ -161,15 +184,15 @@ Request = Type.create({
             promise;
 
         try {
-            LoadedController = loader.load(controllerToLoad);
+            LoadedController = di.load(controllerToLoad);
         } catch (e) {
-            throw new error.HttpError(404, {path: controllerToLoad}, 'Missing controller', e);
+            throw new error.HttpError(500, {path: controllerToLoad}, 'Missing controller', e);
         }
 
         controller = new LoadedController(api);
 
         if (!(controller instanceof  ControllerInterface)) {
-            throw new error.HttpError(404, controller, 'Controller must be instance of ControllerInterface "core/controller"');
+            throw new error.HttpError(500, controller, 'Controller must be instance of ControllerInterface "core/controller"');
         }
 
         this.logger.print('LoadRequest', {
@@ -194,7 +217,7 @@ Request = Type.create({
         if (controller.hasAction(this.action)) {
             promise = this._chain(promise, controller.getAction(this.action).bind(controller, this.params));
         } else {
-            throw new error.HttpError(404, {
+            throw new error.HttpError(500, {
                 controller: controller,
                 hasAction: controller.hasAction(this.action),
                 route: {
@@ -214,6 +237,8 @@ Request = Type.create({
         if (controller.hasAction("afterEach")) {
             promise = this._chain(promise, controller.afterEach.bind(controller, this.action, this.params));
         }
+
+        this.onEnd(controller.destroy.bind(controller));
 
         return promise;
     },
@@ -258,7 +283,7 @@ Request = Type.create({
      * Handle error
      */
     _handleError: function Request_handleError(message) {
-        this.statusCode = 404;
+        this.statusCode = 500;
         this.addHeader('Content-type', 'text/plain');
         return this._render(message);
     }

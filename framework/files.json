@@ -1,8 +1,11 @@
 {
-  "mvcjs": "@{framework}/mvcjs",
-  "core": "@{framework}/core/index",
+  "bootstrap": "@{framework}/bootstrap",
+  "core": "@{framework}/core",
   "error": "@{framework}/error/index",
   "db/mongo": "@{framework}/db/mongo",
+  "core/favicon": "@{framework}/core/favicon",
+  "core/http": "@{framework}/core/http",
+  "core/component": "@{framework}/core/component",
   "core/controller": "@{framework}/core/controller",
   "core/logger": "@{framework}/core/logger",
   "core/router": "@{framework}/core/router",
@@ -14,6 +17,8 @@
   "interface/controller": "@{framework}/interface/controller",
   "interface/routeRule": "@{framework}/interface/routeRule",
   "interface/view": "@{framework}/interface/view",
+  "interface/http": "@{framework}/interface/view",
+  "interface/component": "@{framework}/interface/component",
   "cache/memory": "@{framework}/cache/memory",
   "typejs": "static-type-js"
 }
