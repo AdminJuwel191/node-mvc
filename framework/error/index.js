@@ -27,7 +27,7 @@ Exception = Type.create({
     trace: Type.STRING
 }, {
     _construct: function Exception(msg, error) {
-        var message = '', errorTrace, nError;
+        var message = '', errorTrace, nError, toString;
 
         try {
             message = this.inspect(msg, error);
@@ -51,6 +51,15 @@ Exception = Type.create({
         } catch (e) {
             console.log('Exception.extend', e);
         }
+
+        toString = nError.toString;
+
+        nError.toString = function() {
+            if (this.trace) {
+                return this.name + ': ' + this.trace;
+            }
+            return toString();
+        };
 
 
         throw error;

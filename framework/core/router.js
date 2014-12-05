@@ -1,6 +1,6 @@
 "use strict";
 /* global loader: true, Promise: true, Type: true, core: true, error: true, util: true, RouteRule: true, URLParser: true, Router: true */
-var di = require('../loader'),
+var di = require('../di'),
     Type = di.load('typejs'),
     core = di.load('core'),
     error = di.load('error'),
@@ -8,6 +8,7 @@ var di = require('../loader'),
     RouteRule = di.load('core/routeRule'),
     Promise = di.load('promise'),
     URLParser = di.load('url'),
+    logger = component.get('core/logger'),
     RouteRuleInterface = di.load('interface/routeRule'),
     Router;
 /**
@@ -22,13 +23,10 @@ var di = require('../loader'),
  */
 Router = Type.create({
     routes: Type.ARRAY,
-    api: Type.OBJECT,
-    logger: Type.OBJECT,
     config: Type.OBJECT
 },{
-    _construct: function Router(api, config) {
+    _construct: function Router(config) {
         this.routes = [];
-        this.logger = component.get('core/logger');
         this.config = {
             defaultRoute: "home/index",
             errorRoute: "error/index"
@@ -85,47 +83,11 @@ Router = Type.create({
             throw new error.HttpError(500, rule, 'Router.add: rule must be instance of RouteRuleInterface');
         }
 
-        this.logger.print('Router.add: route', route);
+        logger.print('Router.add: route', route);
         this.routes.push(rule);
 
     },
-    /**
-     * @since 0.0.1
-     * @author Igor Ivanovic
-     * @method Router#processFavicon
-     *
-     * @description
-     * Process favicon
-     */
-    processFavicon: function Router_processFavicon(request, response) {
-        var favicon, iconBuffer, key = 'APP_FAVICON',
-            logger = component.get('core/logger'),
-            cache = component.get('cache/memory'),
-            fs = di.load('fs');
-
-        if (request.url === '/favicon.ico') {
-            iconBuffer = cache.get(key);
-            if (iconBuffer) {
-                response.writeHead(304);
-                response.end();
-            } else {
-                fs.readFile(this.api.getFavicon(), function (err, buf) {
-                    if (err) {
-                        logger.error(err);
-                        throw new error.HttpError(500, err,  'Cannot load favicon');
-                    }
-                    cache.set(key, buf);
-                    response.writeHead(200, {
-                        'Content-Length': buf.length,
-                        'Content-Type': 'image/x-icon'
-                    });
-                    response.end(buf);
-                });
-            }
-            return true;
-        }
-        return false;
-    },
+   
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
@@ -194,7 +156,7 @@ Router = Type.create({
             route = [];
         }
 
-        this.logger.print('Router.parseRequest', route);
+        logger.print('Router.parseRequest', route);
         return route;
     },
     /**

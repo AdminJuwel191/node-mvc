@@ -6,6 +6,7 @@ var path = require('path');
 var util = require('util');
 var fs = require('fs');
 var INVALID_ALIAS_VALUE = /[\\?%*:|"<>.\s]/ig;
+var error;
 /**
  * @license Mit Licence 2014
  * @since 0.0.1
@@ -26,8 +27,8 @@ var DI = Type.create({
         try {
             this.filePaths = JSON.parse(fs.readFileSync(this.normalizePath('@{framework}/files.json'), {encoding: 'utf8'}));
         } catch (e) {
-            e.message += ', DI._construct';
-            throw e;
+            error = this.load('error');
+            throw new error.Exception('DI._construct', e);
         }
 
     },
@@ -54,7 +55,8 @@ var DI = Type.create({
         if (this.aliases.hasOwnProperty(key)) {
             return this.normalizePath(this.aliases[key]);
         } else {
-            throw new Error('DI.getAlias: Alias is not valid:' + key);
+            error = this.load('error');
+            throw new error.Exception('DI.getAlias: Alias is not valid');
         }
     },
     /**
@@ -68,7 +70,8 @@ var DI = Type.create({
     setAlias: function DI_setAlias(key, value) {
         /* @todo check if this will be required */
         if (INVALID_ALIAS_VALUE.test(value)) {
-            throw new Error('DI.setAlias: Invalid alias value, chars \'\\?%*:|"<>.\' and spaces are not allowed. KEY: ' + key);
+            error = this.load('error');
+            throw new error.Exception('DI.setAlias: Invalid alias value, chars \'\\?%*:|"<>.\' and spaces are not allowed. KEY: ' + key);
         } else {
             this.aliases[key] = this.normalizePath(value);
         }
@@ -99,8 +102,8 @@ var DI = Type.create({
         try {
             return fs.readFileSync(this.normalizePath(name), {encoding: 'utf8'});
         } catch (e) {
-            e.message += ', DI.readFileSync';
-            throw e;
+            error = this.load('error');
+            throw new error.Exception('DI.readFileSync', e);
         }
     },
     /**
@@ -118,8 +121,8 @@ var DI = Type.create({
             }
             return require(this.normalizePath(file));
         } catch (e) {
-            e.message += ', DI.load';
-            throw e;
+            error = this.load('error');
+            throw new error.Exception('DI.load', e);
         }
     }
 });
