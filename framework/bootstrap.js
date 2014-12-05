@@ -6,7 +6,6 @@ var di = require('./di'),
     error = di.load('error'),
     fs = di.load('fs'),
     component = di.load('core/component'),
-    Request = di.load('core/request'),
     DEFAULT_SERVER_PORT = 8080,
     Bootstrap;
 
@@ -42,6 +41,7 @@ Bootstrap = Type.create({
             logger,
             server,
             envPath,
+            Request,
             filePath;
 
         if (this.initalized) {
@@ -141,6 +141,7 @@ Bootstrap = Type.create({
         // server listen:
         // add response to api
         // create server
+        Request = di.load('core/request');
         server.on('request', function (request, response) {
             var nRequest = new Request(request, response);
             request.on('end', function () {

@@ -3,6 +3,8 @@
 var di = require('../di'),
     ControllerInterface = di.load('interface/controller'),
     component = di.load('core/component'),
+    router = component.get('core/router'),
+    logger = component.get('core/logger'),
     Type = di.load('typejs'),
     core = di.load('core'),
     error = di.load('error'),
@@ -20,22 +22,17 @@ var di = require('../di'),
  * Handle request
  */
 Request = Type.create({
-    router: Type.OBJECT,
-    logger: Type.OBJECT,
     request: Type.OBJECT,
     response: Type.OBJECT,
     route: Type.STRING,
     params: Type.OBJECT,
     controller: Type.STRING,
-    controllerInstance: Type.OBJECT,
     module: Type.STRING,
     action: Type.STRING,
     statusCode: Type.NUMBER,
     headers: Type.OBJECT
 }, {
     _construct: function Request(request, response) {
-        this.router = component.get('core/router');
-        this.logger = component.get('core/logger');
         this.request = request;
         this.response = response;
         this.statusCode = 200;
@@ -68,7 +65,7 @@ Request = Type.create({
      * @since 0.0.1
      * @author Igor Ivanovic
      * @method Request#getView
-     *
+
      * @description
      * This is an temp get view, to load view
      */
@@ -135,7 +132,6 @@ Request = Type.create({
             throw new error.HttpError(500, {}, 'Invalid response type, it must be string!!');
         }
 
-
     },
     /**
      * @since 0.0.1
@@ -173,7 +169,6 @@ Request = Type.create({
         var api = {
                 forward: this.forward.bind(this),
                 redirect: this.redirect.bind(this),
-                createUrl: this.createUrl.bind(this),
                 addHeader: this.addHeader.bind(this),
                 getView: this.getView.bind(this)
             },
@@ -195,7 +190,7 @@ Request = Type.create({
             throw new error.HttpError(500, controller, 'Controller must be instance of ControllerInterface "core/controller"');
         }
 
-        this.logger.print('LoadRequest', {
+        logger.print('LoadRequest', {
             controller: controller,
             controllerToLoad: controllerToLoad,
             route: {
@@ -251,28 +246,32 @@ Request = Type.create({
      * Parse request
      */
     _parse: function Request_parse() {
-        this.router
-            .process(this.request, this.response)
-            .then(resolveRoute.bind(this), this._handleError.bind(this)) // resolve route chain
+        router.process(this.request, this.response)
+            .then(this._resolveRoute.bind(this), this._handleError.bind(this)) // resolve route chain
             .then(this._render.bind(this), this._handleError.bind(this)); // render chain
-        /**
-         * Resolve route
-         * @param routeRule
-         */
-        function resolveRoute(routeRule) {
-            var route;
-            this.statusCode = 200;
-            this.route = routeRule.shift();
-            this.params = routeRule.shift();
-            route = this.route.split('/'); // copy
-            if (route.length === 3) {
-                this.module = route.shift();
-            }
-            this.controller = route.shift();
-            this.action = route.shift();
-            this.addHeader('Content-type', 'text/html');
-            return this._handleRoute();
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Request#_resolveRoute
+     *
+     * @description
+     * Resolve valid route
+     * @return {object} Promise
+     */
+    _resolveRoute: function (routeRule) {
+        var route;
+        this.statusCode = 200;
+        this.route = routeRule.shift();
+        this.params = routeRule.shift();
+        route = this.route.split('/');
+        if (route.length === 3) {
+            this.module = route.shift();
         }
+        this.controller = route.shift();
+        this.action = route.shift();
+        this.addHeader('Content-type', 'text/html');
+        return this._handleRoute();
     },
     /**
      * @since 0.0.1

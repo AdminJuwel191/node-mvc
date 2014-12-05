@@ -201,15 +201,12 @@ Router = Type.create({
      * @description
      * Process request
      */
-    process: function Router_process(request, response) {
-        if (this.processFavicon(request, response)) {
-            return Promise.reject('favicon');
-        }
+    process: function Router_process(request) {
         return Promise.resolve(this.parseRequest(request)).then(function(routeRule) {
             if (Type.isArray(routeRule) && routeRule.length === 2) {
                 return Promise.resolve(routeRule);
             }
-            // only on not found throw an error 500
+            // only on not found throw an error 404
             throw new error.HttpError(404, core.toObject(routeRule), 'Not found');
         }, function (error) {
             throw new error.HttpError(500, error, 'Not found');
