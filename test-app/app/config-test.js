@@ -2,9 +2,9 @@
  * Created by igi on 06/11/14.
  */
 
-module.exports = function(app) {
-
-    var router = app.getComponent('core/router');
+module.exports = function(componet) {
+    "use strict";
+    var router = componet.get('core/router');
 
 
     router.add({

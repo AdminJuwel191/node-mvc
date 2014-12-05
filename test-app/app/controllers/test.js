@@ -1,9 +1,9 @@
-var loader = require('../../../'),
-    Type = loader.load('core/controller'),
-    Posts;
+var di = require('../../../'), // mvcjs as node package
+    Controller = di.load('core/controller'),
+    Test;
 
 
-Posts = Type.inherit({}, {
+Test = Controller.inherit({}, {
 
     index: function () {
         
@@ -11,4 +11,4 @@ Posts = Type.inherit({}, {
 });
 
 
-module.exports = Posts;
+module.exports = Test;

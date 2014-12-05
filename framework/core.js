@@ -1,7 +1,6 @@
 "use strict";
 /* global Type: true, error: true, Object: true */
 var Type = require('static-type-js');
-var error = require('../error/index');
 /**
  * @since 0.0.1
  * @author Igor Ivanovic
@@ -38,7 +37,7 @@ function copy(source) {
             });
             return destination;
         } catch (e) {
-            throw new error.Exception('To many recursions on copy', e);
+            throw new Error('Core.copy: To many recursions on copy', e);
         }
     }
     return source;
@@ -66,7 +65,7 @@ function extend(destination, source, keys) {
             }
         });
     } else {
-        throw new error.DataError({source: source, destination: destination}, 'Extend: invalid source or destination type:');
+        throw new Error('Core.extend:  invalid source or destination type:');
     }
     return destination;
 }
@@ -98,7 +97,7 @@ function match(re, str) {
             }));
         });
     } else {
-        throw new error.DataError({str: str, re: re}, 'String is not valid type');
+        throw new Error('Core.match: String is not valid type');
     }
     return matches;
 }
@@ -114,7 +113,7 @@ function createRegex(value, modifier) {
     if (Type.isString(value)) {
         return new RegExp(value, modifier ? modifier : 'g');
     }
-    throw new Error('Value is not string');
+    throw new Error('Core.createRegex: Value is not string');
 }
 
 /**
@@ -134,7 +133,7 @@ function toObject(arr) {
         });
         return obj;
     }
-    throw new Error('Value is not array');
+    throw new Error('Core.toObject: Value is not array');
 }
 /**
  * Export functions

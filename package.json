@@ -1,8 +1,8 @@
 {
   "name" : "mvcjs",
-  "main" : "./framework/loader.js",
+  "main" : "./framework/di.js",
   "description": "Powerful lightweight mvc framework for nodejs",
-  "version": "0.1.4",
+  "version": "0.1.0-alpha",
   "dependencies" : {
       "mongoose": "3.8.x",
       "swig": "1.4.x",

@@ -1,14 +1,14 @@
 "use strict";
 /* global loader: true, Promise: true, Type: true, core: true, error: true, RouteRule: true, PATTERN_MATCH: true, ROUTE_MATCH: true, PATTERN_CAPTURE_REGEX: true, IS_NAMED: true */
-var loader = require('../loader'),
-    Type = loader.load('static-type-js'),
-    core = loader.load('core'),
-    error = loader.load('error'),
+var di = require('../di'),
+    Type = di.load('typejs'),
+    core = di.load('core'),
+    error = di.load('error'),
+    RouteRuleInterface = di.load('interface/routeRule'),
     PATTERN_MATCH = /<(\w+):?([^>]+)?>/ig,
     ROUTE_MATCH = /<(\w+)>/ig,
     PATTERN_CAPTURE_REGEX = /\(((\?P?<(\w+)>)((\:?(\((.*)\)))?|([^\)]+))|([^\)]+))\)/g,
     IS_NAMED = /\(\?P?<(\w+)>([^\)]+)\)/,
-    RouteRuleInterface = loader.load('interface/routeRule'),
     RouteRule;
 /**
  * @license Mit Licence 2014
@@ -23,7 +23,6 @@ var loader = require('../loader'),
 RouteRule = RouteRuleInterface.inherit({
     routeParams: Type.ARRAY,
     paramRules: Type.ARRAY,
-    api: Type.OBJECT,
     template: Type.STRING,
     routeRule: Type.STRING,
     methods: Type.ARRAY,
@@ -31,22 +30,21 @@ RouteRule = RouteRuleInterface.inherit({
     pattern: Type.OBJECT,
     route: Type.STRING
 }, {
-    _construct: function RouteRule(api, config) {
+    _construct: function RouteRule(component, config) {
         var matches, name, pattern, escapePattern = [], escapeRule = [], template;
         this.routeParams = [];
         this.paramRules = [];
-        this.api = api;
         this.template = null;
         this.routeRule = null;
-        this.logger = this.api.getComponent('core/logger');
+        this.logger = component.get('core/logger');
 
         if (!config.pattern) {
-            throw new error.HttpError(404, config, 'RouteRule: rule object must have an pattern property');
+            throw new error.HttpError(500, config, 'RouteRule: rule object must have an pattern property');
         } else if (!Type.isString(config.pattern)) {
-            throw new error.HttpError(404, config, 'RouteRule: rule.pattern must be string type');
+            throw new error.HttpError(500, config, 'RouteRule: rule.pattern must be string type');
         }
         if (!config.route) {
-            throw new error.HttpError(404, config, 'RouteRule: rule object must have an route property');
+            throw new error.HttpError(500, config, 'RouteRule: rule object must have an route property');
         }
 
         pattern = this.trim(config.pattern, '/');

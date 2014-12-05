@@ -1,13 +1,15 @@
 "use strict";
 /* global loader: true, Promise: true, Type: true, core: true, error: true, util: true, RouteRule: true, URLParser: true, Router: true */
-var loader = require('../loader'),
-    Type = loader.load('static-type-js'),
-    core = loader.load('core'),
-    error = loader.load('error'),
-    RouteRule = loader.load('core/routeRule'),
-    Promise = loader.load('promise'),
-    URLParser = loader.load('url'),
-    RouteRuleInterface = loader.load('interface/routeRule'),
+var di = require('../di'),
+    Type = di.load('typejs'),
+    core = di.load('core'),
+    error = di.load('error'),
+    component = di.load('core/component'),
+    RouteRule = di.load('core/routeRule'),
+    Promise = di.load('promise'),
+    URLParser = di.load('url'),
+    logger = component.get('core/logger'),
+    RouteRuleInterface = di.load('interface/routeRule'),
     Router;
 /**
  * @license Mit Licence 2014
@@ -21,14 +23,10 @@ var loader = require('../loader'),
  */
 Router = Type.create({
     routes: Type.ARRAY,
-    api: Type.OBJECT,
-    logger: Type.OBJECT,
     config: Type.OBJECT
 },{
-    _construct: function Router(api, config) {
+    _construct: function Router(config) {
         this.routes = [];
-        this.api = api;
-        this.logger = api.getComponent('core/logger');
         this.config = {
             defaultRoute: "home/index",
             errorRoute: "error/index"
@@ -73,59 +71,23 @@ Router = Type.create({
         }
         if (route.dynamic) {
             if (core.isFunction(route.constructor)) {
-                rule = new route.constructor(this.api);
+                rule = new route.constructor(component);
             } else {
-                throw new error.HttpError(404, route, 'Router.add: dynamic route is not constructor');
+                throw new error.HttpError(500, route, 'Router.add: dynamic route is not constructor');
             }
         } else {
-            rule = new RouteRule(this.api, route);
+            rule = new RouteRule(component, route);
         }
 
         if (!(rule instanceof RouteRuleInterface)) {
-            throw new error.HttpError(404, rule, 'Router.add: rule must be instance of RouteRuleInterface');
+            throw new error.HttpError(500, rule, 'Router.add: rule must be instance of RouteRuleInterface');
         }
 
-        this.logger.print('Router.add: route', route);
+        logger.print('Router.add: route', route);
         this.routes.push(rule);
 
     },
-    /**
-     * @since 0.0.1
-     * @author Igor Ivanovic
-     * @method Router#processFavicon
-     *
-     * @description
-     * Process favicon
-     */
-    processFavicon: function Router_processFavicon(request, response) {
-        var favicon, iconBuffer, key = 'APP_FAVICON',
-            logger = this.api.getComponent('core/logger'),
-            cache = this.api.getComponent('cache/memory'),
-            fs = loader.load('fs');
-
-        if (request.url === '/favicon.ico') {
-            iconBuffer = cache.get(key);
-            if (iconBuffer) {
-                response.writeHead(304);
-                response.end();
-            } else {
-                fs.readFile(this.api.getFavicon(), function (err, buf) {
-                    if (err) {
-                        logger.error(err);
-                        throw new error.HttpError(404, err,  'Cannot load favicon');
-                    }
-                    cache.set(key, buf);
-                    response.writeHead(200, {
-                        'Content-Length': buf.length,
-                        'Content-Type': 'image/x-icon'
-                    });
-                    response.end(buf);
-                });
-            }
-            return true;
-        }
-        return false;
-    },
+   
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
@@ -138,12 +100,12 @@ Router = Type.create({
         var i, len = this.routes.length, routeRule, url, anchor = '';
 
         if (!Type.isString(route)) {
-            throw new error.HttpError(404, route, 'RouteRule.createUrl: route must be string type');
+            throw new error.HttpError(500, route, 'RouteRule.createUrl: route must be string type');
         }
         if (!params) {
             params = {};
         } else if (!Type.isObject(params)) {
-            throw new error.HttpError(404, params, 'RouteRule.createUrl: params must be object type');
+            throw new error.HttpError(500, params, 'RouteRule.createUrl: params must be object type');
         }
 
         Object.keys(params).forEach(function (item) {
@@ -194,7 +156,7 @@ Router = Type.create({
             route = [];
         }
 
-        this.logger.print('Router.parseRequest', route);
+        logger.print('Router.parseRequest', route);
         return route;
     },
     /**
@@ -239,17 +201,15 @@ Router = Type.create({
      * @description
      * Process request
      */
-    process: function Router_process(request, response) {
-        if (this.processFavicon(request, response)) {
-            return Promise.reject('favicon');
-        }
+    process: function Router_process(request) {
         return Promise.resolve(this.parseRequest(request)).then(function(routeRule) {
             if (Type.isArray(routeRule) && routeRule.length === 2) {
                 return Promise.resolve(routeRule);
             }
+            // only on not found throw an error 404
             throw new error.HttpError(404, core.toObject(routeRule), 'Not found');
         }, function (error) {
-            throw new error.HttpError(404, error, 'Not found');
+            throw new error.HttpError(500, error, 'Not found');
         });
     }
 });

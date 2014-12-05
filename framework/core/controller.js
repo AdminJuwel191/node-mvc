@@ -1,8 +1,8 @@
 "use strict";
 /* global loader: true, Type: true, Controller: true */
-var loader = require('../loader'),
-    Type = loader.load('static-type-js'),
-    ControllerInterface = loader.load('interface/controller'),
+var di = require('../di'),
+    Type = di.load('typejs'),
+    ControllerInterface = di.load('interface/controller'),
     Controller;
 /**
  * @license Mit Licence 2014

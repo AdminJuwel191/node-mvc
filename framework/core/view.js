@@ -1,6 +1,6 @@
 "use strict";
-var  loader = require('../loader'),
-     ViewInterface = loader.load('interface/view'),
+var  di = require('../di'),
+     ViewInterface = di.load('interface/view'),
      View;
 
 

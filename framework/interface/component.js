@@ -4,7 +4,7 @@ var di = require('../di'),
     Type = di.load('typejs'),
     core = di.load('core'),
     error = di.load('error'),
-    ControllerInterface;
+    ComponentInterface;
 /**
  * @license Mit Licence 2014
  * @since 0.0.1
@@ -15,14 +15,17 @@ var di = require('../di'),
  * @description
  * Controller interface
  */
-ControllerInterface = Type.create({}, {
-    _invoke: function ControllerInterface() {
-        ["hasAction", "getAction"].forEach(function (method) {
+ComponentInterface = Type.create({
+    components: Type.OBJECT
+}, {
+    _invoke: function ComponentInterface() {
+        this.components = {};
+        ["set", "get", "has"].forEach(function (method) {
             if (!(method in this)) {
-                throw new error.DataError({method: method}, 'ControllerInterface: missing method in Controller class');
+                throw new error.DataError({method: method}, 'ComponentInterface: missing method in Component class');
             }
         }.bind(this));
     }
 });
 
-module.exports = ControllerInterface;
+module.exports = ComponentInterface;

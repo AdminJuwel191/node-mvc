@@ -4,7 +4,7 @@ var di = require('../di'),
     Type = di.load('typejs'),
     core = di.load('core'),
     error = di.load('error'),
-    ControllerInterface;
+    HttpServiceInterface;
 /**
  * @license Mit Licence 2014
  * @since 0.0.1
@@ -15,14 +15,16 @@ var di = require('../di'),
  * @description
  * Controller interface
  */
-ControllerInterface = Type.create({}, {
-    _invoke: function ControllerInterface() {
-        ["hasAction", "getAction"].forEach(function (method) {
+HttpServiceInterface = Type.create({
+    server: Type.Object
+}, {
+    _invoke: function HttpServiceInterface() {
+        ["on", "listen", "close", "setTimeout"].forEach(function (method) {
             if (!(method in this)) {
-                throw new error.DataError({method: method}, 'ControllerInterface: missing method in Controller class');
+                throw new error.DataError({method: method}, 'HttpServiceInterface: missing method in HttpService class');
             }
         }.bind(this));
     }
 });
 
-module.exports = ControllerInterface;
+module.exports = HttpServiceInterface;

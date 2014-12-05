@@ -1,6 +1,6 @@
-var loader = require('../../../'),
-    Core = loader.load('@{controllersPath}/core'),
-    Promise = loader.load('promise'),
+var di = require('../../../'), // mvcjs as node package
+    Core = di.load('@{controllersPath}/core'),
+    Promise = di.load('promise'),
     Posts;
 
 

@@ -1,12 +1,12 @@
 "use strict";
 /* global loader: true, Type: true, util: true, fs: true, http: true, core: true, error: true, replace: true, Logger: true */
-var loader = require('../loader'),
-    Type = loader.load('static-type-js'),
-    util = loader.load('util'),
-    fs = loader.load('fs'),
-    http = loader.load('http'),
-    core = loader.load('core'),
-    error = loader.load('error'),
+var di = require('../di'),
+    Type = di.load('typejs'),
+    util = di.load('util'),
+    fs = di.load('fs'),
+    http = di.load('http'),
+    core = di.load('core'),
+    error = di.load('error'),
     replace = [],
     Logger;
 // remove colors from inspect
@@ -30,7 +30,7 @@ Logger = Type.create({
         config: Type.OBJECT
     },
     {
-        _construct: function Logger(api, config) {
+        _construct: function Logger(config) {
             var file;
             this.stream = null;
             this.server = null;
@@ -45,7 +45,7 @@ Logger = Type.create({
             core.extend(this.config, config);
             if (this.config.debug) {
                 try {
-                    file = loader.normalizePath('@{basePath}/' + this.config.file);
+                    file = di.normalizePath('@{basePath}/' + this.config.file);
                     this.stream = fs.createWriteStream(file, {encoding: 'utf8'});
                 } catch (e) {
                     throw new error.Exception('Invalid write stream', e);
@@ -168,7 +168,8 @@ Logger = Type.create({
             }.bind(this));
             return this.log(log);
         }
-    });
+    }
+);
 
 
 module.exports = Logger;
