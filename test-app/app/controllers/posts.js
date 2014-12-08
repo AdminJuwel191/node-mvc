@@ -14,7 +14,7 @@ Posts = Core.inherit({}, {
              }, 0);
         });
     },
-    create: function Core_create(params, data) {
+    action_create: function Core_create(params, data) {
         // currently
         var template = this.getView('posts/index');
 

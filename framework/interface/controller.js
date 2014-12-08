@@ -15,9 +15,12 @@ var di = require('../di'),
  * @description
  * Controller interface
  */
-ControllerInterface = Type.create({}, {
-    _invoke: function ControllerInterface() {
-        ["hasAction", "getAction"].forEach(function (method) {
+ControllerInterface = Type.create({
+    _request: Type.OBJECT
+}, {
+    _invoke: function ControllerInterface(request) {
+        this._request = request;
+        ["hasAction", "getAction", "redirect", "forward", "addHeader", "onEnd", "createUrl"].forEach(function (method) {
             if (!(method in this)) {
                 throw new error.DataError({method: method}, 'ControllerInterface: missing method in Controller class');
             }

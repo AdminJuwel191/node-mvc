@@ -50,19 +50,13 @@ function copy(source) {
  * @description
  * Extend object
  */
-function extend(destination, source, keys) {
+function extend(destination, source, deepCopy) {
     if (Type.isUndefined(source)) {
-        return extend({}, destination, keys);
+        return extend({}, destination, false);
     }
     if (Type.isObject(destination) && Type.isObject(source) && !Type.isArray(source) && !Type.isArray(destination)) {
         Object.keys(source).forEach(function (key) {
-            if (Type.isArray(keys)) {
-                if (keys.indexOf(key) > -1) {
-                    destination[key] = copy(source[key]);
-                }
-            } else {
-                destination[key] = copy(source[key]);
-            }
+            destination[key] = Type.assert(Type.BOOLEAN, deepCopy) && !!deepCopy ? copy(source[key]) : source[key];
         });
     } else {
         throw new Error('Core.extend:  invalid source or destination type:');

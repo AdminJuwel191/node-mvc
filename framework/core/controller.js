@@ -18,7 +18,62 @@ Controller = ControllerInterface.inherit({}, {
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
-     * @method ControllerInterface#hasAction
+     * @method Controller#onEnd
+     *
+     * @description
+     * On end
+     */
+    createUrl: function Controller_createUrl(route, params) {
+        return this._request.createUrl(route, params);
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Controller#onEnd
+     *
+     * @description
+     * On end
+     */
+    onEnd: function Controller_onEnd(callback) {
+        return this._request.onEnd(callback);
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Controller#addHeader
+     *
+     * @description
+     * Add header to request
+     */
+    addHeader: function Controller_addHeader(key, value) {
+        return this._request.addHeader(key, value);
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Controller#forward
+     *
+     * @description
+     * Redirect to some url
+     */
+    forward: function Controller_forward(route, params) {
+        return this._request.forward(route, params);
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Controller#redirect
+     *
+     * @description
+     * Redirect to some url
+     */
+    redirect: function Controller_redirect(url, isTemp) {
+        return this._request.redirect(url, isTemp);
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Controller#hasAction
      *
      * @description
      * Check if controller have action
@@ -29,10 +84,10 @@ Controller = ControllerInterface.inherit({}, {
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
-     * @method ControllerInterface#getAction
+     * @method Controller#getAction
      *
      * @description
-     * Get controlelr action
+     * Get controller action
      */
     getAction: function Controller_getAction(name) {
         if (Type.isFunction(this[name])) {

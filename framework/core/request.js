@@ -30,13 +30,14 @@ Request = Type.create({
     module: Type.STRING,
     action: Type.STRING,
     statusCode: Type.NUMBER,
+    forwardUrl: Type.STRING,
     headers: Type.OBJECT
 }, {
-    _construct: function Request(request, response) {
-        this.request = request;
-        this.response = response;
+    _construct: function Request(config) {
+        core.extend(this, config);
         this.statusCode = 200;
         this.headers = {};
+
         this._parse();
     },
     /**
@@ -64,29 +65,17 @@ Request = Type.create({
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
-     * @method Request#getView
-
-     * @description
-     * This is an temp get view, to load view
-     */
-    getView: function (route) {
-        var template;
-        try {
-            template = di.readFileSync('@{viewsPath}/' + route + '.html');
-        } catch (e) {
-            throw new error.HttpError(500, {}, 'Cannot load template !', e);
-        }
-        return template;
-    },
-    /**
-     * @since 0.0.1
-     * @author Igor Ivanovic
      * @method Request#forward
      *
      * @description
      * Forward to route
      */
-    forward: function () {
+    forward: function Request_forward(route, params) {
+
+    },
+
+
+    _handleForward: function () {
 
     },
     /**
@@ -97,8 +86,16 @@ Request = Type.create({
      * @description
      * Redirect request
      */
-    redirect: function () {
+    redirect: function Request_redirect(url, isTemp) {
 
+        logger.print('Request.redirect', url, isTemp);
+        this.addHeader('Location', url);
+        if (Type.isBoolean(isTemp) && !!isTemp) {
+            this.response.writeHead(302, this.headers);
+        } else {
+            this.response.writeHead(301, this.headers);
+        }
+        this.response.end('Redirect to:' + url);
     },
     /**
      * @since 0.0.1
@@ -108,7 +105,9 @@ Request = Type.create({
      * @description
      * End request
      */
-    _render: function Request_render(response) {
+    _render: function Request__render(response) {
+
+        logger.print('Request.render', response);
 
         if (response instanceof Error) {
             if (response.code) {
@@ -141,7 +140,7 @@ Request = Type.create({
      * @description
      * Chain promises
      */
-    _chain: function (promise, next) {
+    _chain: function Request__chain(promise, next) {
         if (!promise) {
             return Promise.resolve(_handler());
         }
@@ -151,7 +150,7 @@ Request = Type.create({
 
         function _handler() {
             try {
-                next.apply(next, arguments);
+                return next.apply(next, arguments);
             } catch (e) {
                 throw new error.HttpError(500, arguments, "Error on executing action", e);
             }
@@ -166,13 +165,7 @@ Request = Type.create({
      * Load response
      */
     _handleRoute: function Request_handleRoute() {
-        var api = {
-                forward: this.forward.bind(this),
-                redirect: this.redirect.bind(this),
-                addHeader: this.addHeader.bind(this),
-                getView: this.getView.bind(this)
-            },
-            controllerToLoad = '@{controllersPath}/' + this.controller,
+        var controllerToLoad = '@{controllersPath}/' + this.controller,
             LoadedController,
             controller,
             action,
@@ -184,7 +177,13 @@ Request = Type.create({
             throw new error.HttpError(500, {path: controllerToLoad}, 'Missing controller', e);
         }
 
-        controller = new LoadedController(api);
+        controller = new LoadedController({
+            redirect: this.redirect.bind(this),
+            forward: this.forward.bind(this),
+            addHeader: this.addHeader.bind(this),
+            onEnd: this.onEnd.bind(this),
+            createUrl: router.createUrl.bind(router)
+        });
 
         if (!(controller instanceof  ControllerInterface)) {
             throw new error.HttpError(500, controller, 'Controller must be instance of ControllerInterface "core/controller"');
@@ -209,8 +208,8 @@ Request = Type.create({
             promise = this._chain(promise, controller.getAction('before_' + this.action).bind(controller, this.params));
         }
 
-        if (controller.hasAction(this.action)) {
-            promise = this._chain(promise, controller.getAction(this.action).bind(controller, this.params));
+        if (controller.hasAction('action_' + this.action)) {
+            promise = this._chain(promise, controller.getAction('action_' + this.action).bind(controller, this.params));
         } else {
             throw new error.HttpError(500, {
                 controller: controller,
@@ -248,6 +247,7 @@ Request = Type.create({
     _parse: function Request_parse() {
         router.process(this.request, this.response)
             .then(this._resolveRoute.bind(this), this._handleError.bind(this)) // resolve route chain
+            .then(this._render.bind(this), this._handleError.bind(this))  // render chain
             .then(this._render.bind(this), this._handleError.bind(this)); // render chain
     },
     /**
@@ -259,7 +259,7 @@ Request = Type.create({
      * Resolve valid route
      * @return {object} Promise
      */
-    _resolveRoute: function (routeRule) {
+    _resolveRoute: function Request__resolveRoute(routeRule) {
         var route;
         this.statusCode = 200;
         this.route = routeRule.shift();
@@ -281,10 +281,10 @@ Request = Type.create({
      * @description
      * Handle error
      */
-    _handleError: function Request_handleError(message) {
+    _handleError: function Request_handleError(data) {
         this.statusCode = 500;
         this.addHeader('Content-type', 'text/plain');
-        return this._render(message);
+        return this._render(data);
     }
 });
 
