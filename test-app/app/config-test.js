@@ -24,6 +24,13 @@ module.exports = function(componet) {
     });
 
     router.add({
+        pattern: 'test/forward',
+        route: 'test/forward',
+        method: ['GET']
+    });
+
+
+    router.add({
         pattern: 'test',
         route: 'test/index',
         method: ['GET']
@@ -35,11 +42,7 @@ module.exports = function(componet) {
         method: ['GET']
     });
 
-    router.add({
-        pattern: '<controller>/<action>',
-        route: '<controller>/<action>',
-        method: ['GET']
-    });
+
     router.add({
         pattern: '/',
         route: 'home/index',

@@ -143,10 +143,14 @@ Bootstrap = Type.create({
         // create server
         Request = di.load('core/request');
         server.on('request', function (request, response) {
+            // new request
             var nRequest = new Request({
                 request: request,
                 response: response
-            });
+            }, request.url);
+            /// parse request
+            nRequest.parse();
+            // on end destory
             request.on('end', function () {
                 nRequest.destroy();
             });

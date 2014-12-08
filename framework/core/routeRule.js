@@ -128,7 +128,7 @@ RouteRule = RouteRuleInterface.inherit({
      * @description
      * Parse request
      */
-    parseRequest: function RouteRule_parseRequest(request, url) {
+    parseRequest: function RouteRule_parseRequest(method, url) {
 
         var matches,
             route,
@@ -141,7 +141,7 @@ RouteRule = RouteRuleInterface.inherit({
         matches = this.match(this.pattern, this.trim(url.pathname, '/'));
 
 
-        if (!matches.length || !this.checkMethod(request.method)) {
+        if (!matches.length || !this.checkMethod(method)) {
             return false;
         }
         params = url.query;

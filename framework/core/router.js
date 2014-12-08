@@ -7,7 +7,6 @@ var di = require('../di'),
     component = di.load('core/component'),
     RouteRule = di.load('core/routeRule'),
     Promise = di.load('promise'),
-    URLParser = di.load('url'),
     logger = component.get('core/logger'),
     RouteRuleInterface = di.load('interface/routeRule'),
     Router;
@@ -140,14 +139,12 @@ Router = Type.create({
      * @description
      * Parse request
      */
-    parseRequest: function Router_parseRequest(request) {
-        var i, len = this.routes.length, routeRule, route = [], url;
-
-        url = URLParser.parse(request.url, true);
+    parseRequest: function Router_parseRequest(method, parsedUrl) {
+        var i, len = this.routes.length, routeRule, route = [];
 
         for (i = len - 1; i > -1; --i) {
             routeRule = this.routes[i];
-            route = routeRule.parseRequest(request, url);
+            route = routeRule.parseRequest(method, parsedUrl);
             if (Type.isArray(route) && route.length) {
                 break;
             }
@@ -201,8 +198,8 @@ Router = Type.create({
      * @description
      * Process request
      */
-    process: function Router_process(request) {
-        return Promise.resolve(this.parseRequest(request)).then(function(routeRule) {
+    process: function Router_process(method, parsedUrl) {
+        return Promise.resolve(this.parseRequest(method, parsedUrl)).then(function(routeRule) {
             if (Type.isArray(routeRule) && routeRule.length === 2) {
                 return Promise.resolve(routeRule);
             }

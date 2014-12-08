@@ -5,6 +5,7 @@ var di = require('../di'),
     component = di.load('core/component'),
     router = component.get('core/router'),
     logger = component.get('core/logger'),
+    URLParser = di.load('url'),
     Type = di.load('typejs'),
     core = di.load('core'),
     error = di.load('error'),
@@ -24,6 +25,7 @@ var di = require('../di'),
 Request = Type.create({
     request: Type.OBJECT,
     response: Type.OBJECT,
+    parsedUrl: Type.OBJECT,
     route: Type.STRING,
     params: Type.OBJECT,
     controller: Type.STRING,
@@ -33,12 +35,11 @@ Request = Type.create({
     forwardUrl: Type.STRING,
     headers: Type.OBJECT
 }, {
-    _construct: function Request(config) {
+    _construct: function Request(config, url) {
         core.extend(this, config);
         this.statusCode = 200;
         this.headers = {};
-
-        this._parse();
+        this.parsedUrl = URLParser.parse(url, true);
     },
     /**
      * @since 0.0.1
@@ -71,12 +72,20 @@ Request = Type.create({
      * Forward to route
      */
     forward: function Request_forward(route, params) {
+        var request;
+        if (router.trim(this.route, "/") === router.trim(route, '/')) {
+            throw new error.HttpError(500, {route: route, params: params}, 'Cannot forward to same route');
+        } else {
 
-    },
+            request = new Request({
+                request: this.request,
+                response: this.response
+            }, router.createUrl(route, params));
 
+            logger.print('Request.forward', route, params, request);
 
-    _handleForward: function () {
-
+            return request.parse();
+        }
     },
     /**
      * @since 0.0.1
@@ -87,7 +96,6 @@ Request = Type.create({
      * Redirect request
      */
     redirect: function Request_redirect(url, isTemp) {
-
         logger.print('Request.redirect', url, isTemp);
         this.addHeader('Location', url);
         if (Type.isBoolean(isTemp) && !!isTemp) {
@@ -244,11 +252,12 @@ Request = Type.create({
      * @description
      * Parse request
      */
-    _parse: function Request_parse() {
-        router.process(this.request, this.response)
+    parse: function Request_parse() {
+        return router
+            .process(this.request.method, this.parsedUrl) // find route
             .then(this._resolveRoute.bind(this), this._handleError.bind(this)) // resolve route chain
             .then(this._render.bind(this), this._handleError.bind(this))  // render chain
-            .then(this._render.bind(this), this._handleError.bind(this)); // render chain
+            .then(this._render.bind(this), this._handleError.bind(this)); // render error thrown in render function
     },
     /**
      * @since 0.0.1
