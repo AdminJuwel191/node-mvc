@@ -17,7 +17,7 @@ Posts = Core.inherit({}, {
     action_create: function Core_create(params, data) {
         // currently
 
-        return 'WORKS' + params.id + params.test;
+        return 'WORKS ' + params.id + ' ' + params.test + ' ' + this.createUrl('posts/create', params);
     },
     after_create: function (params, data) {
 

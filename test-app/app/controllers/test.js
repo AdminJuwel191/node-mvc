@@ -7,10 +7,10 @@ var di = require('../../../'), // mvcjs as node package
 Test = Controller.inherit({}, {
 
     action_redirect: function () {
-        this.redirect(this.createUrl('posts/create', {id: 1, test: 'two'}));
+        this.redirect(this.createUrl('posts/create', {id: 1, test: 'redirect'}));
     },
     action_forward: function () {
-        return this.forward('posts/create', {id: 1, test: "two"});
+        return this.forward('posts/create', {id: 1, test: "forward"});
     }
 });
 
