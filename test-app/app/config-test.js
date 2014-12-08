@@ -31,8 +31,8 @@ module.exports = function(componet) {
 
 
     router.add({
-        pattern: 'test',
-        route: 'test/index',
+        pattern: 'test/redirect',
+        route: 'test/redirect',
         method: ['GET']
     });
 

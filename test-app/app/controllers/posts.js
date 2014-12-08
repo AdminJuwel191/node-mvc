@@ -16,15 +16,11 @@ Posts = Core.inherit({}, {
     },
     action_create: function Core_create(params, data) {
         // currently
-        var template = this.getView('posts/index');
 
-        var url = this.createUrl("user/view", {id: 1});
-
-        return template.replace('{{id}}', data.id).replace('{{title}}', url);
+        return 'WORKS' + params.id + params.test;
     },
     after_create: function (params, data) {
 
-        console.log('data', data);
 
         return data;
     }

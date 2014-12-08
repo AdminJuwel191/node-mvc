@@ -82,7 +82,7 @@ Request = Type.create({
                 response: this.response
             }, router.createUrl(route, params));
 
-            logger.print('Request.forward', route, params, request);
+            logger.print('Request.forward', route, params);
 
             return request.parse();
         }
