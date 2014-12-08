@@ -27,8 +27,7 @@ var DI = Type.create({
         try {
             this.filePaths = JSON.parse(fs.readFileSync(this.normalizePath('@{framework}/files.json'), {encoding: 'utf8'}));
         } catch (e) {
-            error = this.load('error');
-            throw new error.Exception('DI._construct', e);
+            throw new Error("Cannot load @{framework}/files.json path");
         }
 
     },
@@ -56,7 +55,7 @@ var DI = Type.create({
             return this.normalizePath(this.aliases[key]);
         } else {
             error = this.load('error');
-            throw new error.Exception('DI.getAlias: Alias is not valid');
+            throw new error.Exception('DI.getAlias: "' + key + '" is not valid');
         }
     },
     /**

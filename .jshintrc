@@ -1,5 +1,4 @@
 {
   "node": true,
-  "strict": true,
-  "jasmine": true
+  "strict": true
 }

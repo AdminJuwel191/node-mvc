@@ -1,0 +1,21 @@
+{
+  "indent": 4,
+  "node": true,
+  "strict": true,
+  "predef": [
+    "define",
+    "require",
+    "describe",
+    "xdescribe",
+    "before",
+    "beforeEach",
+    "after",
+    "afterEach",
+    "it",
+    "xit",
+    "it",
+    "inject",
+    "expect",
+    "spyOn"
+  ]
+}

@@ -9,6 +9,11 @@
       "promise": "6.0.x",
       "static-type-js": "0.3.x"
   },
+  "devDependencies": {
+      "gulp": "3.8.x",
+      "gulp-istanbul": "0.5.x",
+      "gulp-jasmine": "1.0.x"
+  },
   "repository": {
     "type": "git",
     "url": "git:/github.com/igorzg/node-mvc.git"

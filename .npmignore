@@ -1,2 +1,4 @@
-test-app/
 .jshintrc
+.idea
+test-app/
+tests/
