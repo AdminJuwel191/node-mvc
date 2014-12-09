@@ -2,6 +2,7 @@
 var di = require('../di'),
     Type = di.load('typejs'),
     error = di.load('error'),
+    core = di.load('core'),
     etag = di.load('etag'),
     component = di.load('core/component'),
     logger = component.get('core/logger'),
@@ -24,7 +25,9 @@ Favicon = Type.create({
     isShown: Type.BOOLEAN
 }, {
     _construct: function Favicon_construct(config) {
-        this.config = config;
+        this.config = core.extend({
+            path: '@{basePath}/favicon.ico'
+        }, config);
         this.isShown = false;
         this.readFile();
         logger.print('Favicon.construct', config);

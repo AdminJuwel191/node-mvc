@@ -14,14 +14,23 @@ var di = require('../di'),
  * @description
  * View interface
  */
-ViewInterface = Type.create({},
+ViewInterface = Type.create({
+        config: Type.OBJECT,
+        suffix: Type.REGEX
+    },
     {
         _invoke: function ViewInterface() {
-            ["setLoader", "setFilter", "setTag", "setExtension", "render", "renderFile"].forEach(function (method) {
-                if (!(method in this)) {
-                    throw new error.DataError({method: method}, 'ViewInterface: missing method in view class');
-                }
-            }.bind(this));
+            [
+                "setLoader", "setFilter", "setTag", "setExtension",
+                "render", "renderFile", "setTheme", "getPath",
+                "normalizeResolveValue", "resolve", "load"
+            ].forEach(
+                function (method) {
+                    if (!(method in this)) {
+                        throw new error.DataError({method: method}, 'ViewInterface: missing method in view class');
+                    }
+                }.bind(this)
+            );
         }
     }
 );

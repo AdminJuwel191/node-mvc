@@ -16,7 +16,7 @@ var di = require('../di'),
  * Controller interface
  */
 HttpServiceInterface = Type.create({
-    server: Type.Object
+    server: Type.OBJECT
 }, {
     _invoke: function HttpServiceInterface() {
         ["on", "listen", "close", "setTimeout"].forEach(function (method) {

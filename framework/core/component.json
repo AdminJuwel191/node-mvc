@@ -1,0 +1,20 @@
+{
+  "core/router": [
+    "core/logger"
+  ],
+  "core/request": [
+    "core/router",
+    "hooks/request",
+    "core/logger"
+  ],
+  "core/favicon": [
+    "core/logger",
+    "cache/memory"
+  ],
+  "core/view": [
+    "core/logger"
+  ],
+  "hooks/request": [
+    "core/logger"
+  ]
+}

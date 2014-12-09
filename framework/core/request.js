@@ -382,7 +382,7 @@ Request = Type.create({
         }
 
         logger.print('LoadRequest', {
-            controller: controller,
+            controller: controller.__dynamic__,
             controllerToLoad: controllerToLoad,
             route: {
                 controller: this.controller,

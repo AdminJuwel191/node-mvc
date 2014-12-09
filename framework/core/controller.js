@@ -3,8 +3,8 @@
 var di = require('../di'),
     Type = di.load('typejs'),
     component = di.load('core/component'),
-    view = di.load('core/view'),
     ControllerInterface = di.load('interface/controller'),
+    view = component.get('core/view'),
     Controller;
 /**
  * @license Mit Licence 2014

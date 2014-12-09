@@ -16,11 +16,13 @@ var di = require('../di'),
  * Controller interface
  */
 ComponentInterface = Type.create({
-    components: Type.OBJECT
+    components: Type.OBJECT,
+    dependency: Type.OBJECT
 }, {
     _invoke: function ComponentInterface() {
         this.components = {};
-        ["set", "get", "has"].forEach(function (method) {
+        this.dependency = {};
+        ["set", "get", "has", "init", "getDependency", "find"].forEach(function (method) {
             if (!(method in this)) {
                 throw new error.DataError({method: method}, 'ComponentInterface: missing method in Component class');
             }

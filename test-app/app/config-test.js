@@ -2,9 +2,13 @@
  * Created by igi on 06/11/14.
  */
 
-module.exports = function(componet) {
+module.exports = function (componet) {
     "use strict";
-    var router = componet.get('core/router');
+    var viewLoader, router;
+
+    viewLoader = componet.get('core/view');
+    viewLoader.setTheme('home');
+    router = componet.get('core/router');
 
 
     router.add({
@@ -54,9 +58,9 @@ module.exports = function(componet) {
         method: ['GET']
     });
     /*
-    router.add({
-        dynamic: true,
-        constructor: app.load('@{appPath}/routes')
-    });*/
+     router.add({
+     dynamic: true,
+     constructor: app.load('@{appPath}/routes')
+     });*/
 
 };

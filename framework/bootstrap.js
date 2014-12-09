@@ -83,23 +83,15 @@ Bootstrap = Type.create({
         if (!di.hasAlias('modelsPath')) {
             di.setAlias('modelsPath', '@{appPath}/models/');
         }
-        // if there is no provided views alias
-        if (!di.hasAlias('viewsPath')) {
-            di.setAlias('viewsPath', '@{appPath}/views/');
-        }
         // assets path
         if (Type.isString(env.assetsPath)) {
             this.setAssetsPath(env.assetsPath);
         }
         // initialize list of components over env
         if (Type.isArray(env.components)) {
-            env.components.forEach(function setComponent(item) {
-                if (Type.isObject(item) && Type.isString(item.name)) {
-                    component.set(item.name, item);
-                }
-            });
+            component.init(env.components);
         }
-
+        // if there is no logger init logger
         if (!component.has('core/logger')) {
             logger = component.set('core/logger', {});
         } else {
@@ -122,13 +114,7 @@ Bootstrap = Type.create({
         }
         // set favicon path
         if (!component.has('core/favicon')) {
-            component.set('core/favicon', {
-                path: '@{basePath}/favicon.ico'
-            });
-        }
-        // set view loader
-        if (!component.has('core/viewLoader')) {
-            component.set('core/viewLoader', {});
+            component.set('core/favicon', {});
         }
         // set view component
         if (!component.has('core/view')) {
