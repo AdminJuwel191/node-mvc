@@ -2,6 +2,8 @@
 /* global loader: true, Type: true, Controller: true */
 var di = require('../di'),
     Type = di.load('typejs'),
+    component = di.load('core/component'),
+    view = di.load('core/view'),
     ControllerInterface = di.load('interface/controller'),
     Controller;
 /**
@@ -80,6 +82,28 @@ Controller = ControllerInterface.inherit({}, {
      */
     hasAction: function Controller_hasAction(name) {
         return (name in this);
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Controller#renderFile
+     *
+     * @description
+     * Render file
+     */
+    renderFile: function Controller_renderFile(pathName, locals) {
+        return view.renderFile(pathName, locals);
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Controller#render
+     *
+     * @description
+     * Render view
+     */
+    render: function Controller_render(source, locals, escape) {
+        return view.render(source, locals, escape);
     },
     /**
      * @since 0.0.1

@@ -105,11 +105,9 @@ Bootstrap = Type.create({
         } else {
             logger = component.get('core/logger');
         }
-
         // logger
         logger.print(env);
         logger.print(this.__dynamic__);
-
         // add memory cache
         if (!component.has('cache/memory')) {
             component.set('cache/memory', {});
@@ -128,6 +126,14 @@ Bootstrap = Type.create({
                 path: '@{basePath}/favicon.ico'
             });
         }
+        // set view loader
+        if (!component.has('core/viewLoader')) {
+            component.set('core/viewLoader', {});
+        }
+        // set view component
+        if (!component.has('core/view')) {
+            component.set('core/view', {});
+        }
         // get favicon handler
         faviconHandler = component.get('core/favicon');
         // hook favicon
@@ -142,7 +148,7 @@ Bootstrap = Type.create({
         } else {
             throw new error.DataError(env.config, 'Config file is not defined');
         }
-
+        // http
         if (!component.has('core/http')) {
             component.set('core/http', {});
         }

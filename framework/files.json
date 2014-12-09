@@ -12,6 +12,8 @@
   "core/request": "@{framework}/core/request",
   "core/controller": "@{framework}/core/controller",
   "core/routeRule": "@{framework}/core/routeRule",
+  "core/view": "@{framework}/core/view",
+  "core/viewLoader": "@{framework}/core/viewLoader",
   "hooks/request": "@{framework}/hooks/request",
   "interface/requestHooks": "@{framework}/interface/requestHooks",
   "interface/config": "@{framework}/interface/config",
@@ -21,6 +23,7 @@
   "interface/view": "@{framework}/interface/view",
   "interface/http": "@{framework}/interface/view",
   "interface/component": "@{framework}/interface/component",
+  "interface/viewLoader": "@{framework}/interface/viewLoader",
   "cache/memory": "@{framework}/cache/memory",
   "typejs": "static-type-js"
 }

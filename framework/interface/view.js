@@ -14,12 +14,16 @@ var di = require('../di'),
  * @description
  * View interface
  */
-ViewInterface = Type.create({
-
-}, {
-    _invoke: function ViewInterface() {
-
+ViewInterface = Type.create({},
+    {
+        _invoke: function ViewInterface() {
+            ["setLoader", "setFilter", "setTag", "setExtension", "render", "renderFile"].forEach(function (method) {
+                if (!(method in this)) {
+                    throw new error.DataError({method: method}, 'ViewInterface: missing method in view class');
+                }
+            }.bind(this));
+        }
     }
-});
+);
 
 module.exports = ViewInterface;

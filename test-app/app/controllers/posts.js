@@ -3,9 +3,7 @@ var di = require('../../../'), // mvcjs as node package
     Promise = di.load('promise'),
     Posts;
 
-function getFakeHtml(html) {
-    return '<!DOCTYPE html><html><head lang="en"> <meta charset="UTF-8"> <link href="/favicon.ico" rel="shortcut icon" /><title></title> </head> <body><div>HELLO WORLD:<p>' + html + '</p> </div> </body> </html>';
-}
+
 
 Posts = Core.inherit({}, {
     before_create: function Posts_beforecreate(params) {
@@ -20,8 +18,7 @@ Posts = Core.inherit({}, {
     action_create: function Core_create(params, data) {
         // currently
 
-
-        return getFakeHtml('WORKS ' + params.id + ' ' + params.test + ' ' + this.createUrl('posts/create', params));
+        return this.renderFile('posts/index', params);
     },
     after_create: function (params, data) {
 
