@@ -4,6 +4,7 @@ var di = require('../di'),
     ControllerInterface = di.load('interface/controller'),
     component = di.load('core/component'),
     router = component.get('core/router'),
+    hooks = component.get('hooks/request'),
     logger = component.get('core/logger'),
     URLParser = di.load('url'),
     Type = di.load('typejs'),
@@ -33,7 +34,8 @@ Request = Type.create({
     action: Type.STRING,
     statusCode: Type.NUMBER,
     forwardUrl: Type.STRING,
-    headers: Type.OBJECT
+    headers: Type.OBJECT,
+    isRendered: Type.BOOLEAN
 }, {
     _construct: function Request(config, url) {
         core.extend(this, config);
@@ -55,13 +57,131 @@ Request = Type.create({
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
+     * @method Request#isHeaderModified
+     *
+     * @description
+     * Check if header is modified
+     * @return {boolean}
+     */
+    isHeaderCacheUnModified: function Request_isHeaderCacheUnModified() {
+
+        var etagMatches = true,
+            notModified = true,
+            modifiedSince = this.getRequestHeader('if-modified-since'),
+            noneMatch = this.getRequestHeader('if-none-match'),
+            cc = this.getRequestHeader('cache-control'),
+            lastModified = this.getHeader('last-modified'),
+            etag = this.getHeader('etag');
+
+
+        // unconditional request
+        if (!modifiedSince && !noneMatch) {
+            return false;
+            // check for no-cache cache request directive
+        } else if (cc && cc.indexOf('no-cache') !== -1) {
+            return false;
+        }
+
+        // parse if-none-match
+        if (noneMatch) {
+            noneMatch = noneMatch.split(/ *, */);
+        }
+        // if-none-match
+        if (noneMatch) {
+            etagMatches = ~noneMatch.indexOf(etag) || '*' == noneMatch[0];
+        }
+        // if-modified-since
+        if (modifiedSince) {
+            modifiedSince = Date.parse(modifiedSince);
+            lastModified = Date.parse(lastModified);
+            notModified = lastModified <= modifiedSince;
+        }
+
+        return !!(etagMatches && notModified);
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Request#getHeaders
+     *
+     * @description
+     * Return headers
+     */
+    getHeaders: function Request_getHeaders() {
+        return core.copy(this.headers);
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Request#getRequestHeaders
+     *
+     * @description
+     * Return request headers
+     */
+    getRequestHeaders: function Request_getRequestHeaders() {
+        return core.copy(this.request.headers);
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Request#getRequestHeader
+     *
+     * @description
+     * Get request header
+     */
+    getRequestHeader: function Request_getRequestHeader(key) {
+        if (Type.isString(key)) {
+            return this.request.headers[key.toLowerCase()];
+        } else {
+            throw new error.HttpError(500, {key: key}, "Request.hasHeader: Header key must be string type");
+        }
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Request#getHeader
+     *
+     * @description
+     * Return header
+     */
+    getHeader: function Request_getHeader(key) {
+        if (this.hasHeader(key)) {
+            return this.headers[key.toLowerCase()];
+        }
+        return false;
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Request#hasHeader
+     *
+     * @description
+     * Has header
+     */
+    hasHeader: function Request_hasHeader(key) {
+        if (Type.isString(key)) {
+            return this.headers.hasOwnProperty(key.toLowerCase());
+        } else {
+            throw new error.HttpError(500, {key: key}, "Request.hasHeader: Header key must be string type");
+        }
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
      * @method Request#addHeader
      *
      * @description
      * Write header
      */
     addHeader: function Request_addHeader(key, value) {
-        this.headers[key] = value;
+        if (Type.isString(key)) {
+            this.headers[key.toLowerCase()] = value;
+        } else {
+            throw new error.HttpError(500, {
+                key: key,
+                value: value
+            }, "Request.addHeader: Header key and value must be string type");
+        }
     },
     /**
      * @since 0.0.1
@@ -108,6 +228,31 @@ Request = Type.create({
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
+     * @method Request#noChange
+     *
+     * @description
+     * No change header
+     */
+    sendNoChange: function () {
+        this.response.writeHead(304);
+        this.response.end();
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Request#_checkContentType
+     *
+     * @description
+     * Checks content type header and if no present set default one to text/html
+     */
+    _checkContentType: function (type) {
+        if (!this.hasHeader('Content-Type')) {
+            this.addHeader('Content-Type', Type.isString(type) ? type : 'text/plain');
+        }
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
      * @method Request#end
      *
      * @description
@@ -115,30 +260,75 @@ Request = Type.create({
      */
     _render: function Request__render(response) {
 
-        logger.print('Request.render', response);
+        if (!this.isRendered) {
 
-        if (response instanceof Error) {
-            if (response.code) {
-                this.statusCode = response.code;
-            } else {
-                this.statusCode = 500;
-            }
-            this.response.writeHead(this.statusCode, this.headers);
-            if (response.trace) {
-                this.response.end(response.trace);
-            } else {
-                this.response.end(util.inspect(response));
-            }
+            logger.print('Request.render', response);
 
-        } else if (!response) {
-            throw new error.HttpError(500, {}, 'No data to render');
-        } else if (Type.isString(response)) {
-            this.addHeader('Content-Length', response.length);
-            this.response.end(response);
-        } else {
-            throw new error.HttpError(500, {}, 'Invalid response type, it must be string!!');
+            this._checkContentType('text/html');
+
+            if (response instanceof Error) {
+                if (response.code) {
+                    this.statusCode = response.code;
+                } else {
+                    this.statusCode = 500;
+                }
+                this.response.writeHead(this.statusCode, this.headers);
+                if (response.trace) {
+                    this.response.end(response.trace);
+                } else {
+                    this.response.end(util.inspect(response));
+                }
+
+            } else if (Type.isString(response)) {
+                this.addHeader('Content-Length', response.length);
+                this.response.end(response);
+            } else if (response instanceof Buffer) {
+                this.addHeader('Content-Length', response.length);
+                this.response.end(response);
+            } else if (!response) {
+                throw new error.HttpError(500, {}, 'No data to render');
+            } else {
+                throw new error.HttpError(500, {}, 'Invalid response type, it must be string!!');
+            }
         }
 
+        this.isRendered = true;
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Request#getMethod
+     *
+     * @description
+     * Return current request method
+     */
+    getMethod: function Request_getMethod() {
+        return this.request.method;
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Request#getApi
+     *
+     * @description
+     * Return api for controller/hooks
+     */
+    _getApi: function Request_getApi() {
+        return {
+            redirect: this.redirect.bind(this),
+            forward: this.forward.bind(this),
+            hasHeader: this.hasHeader.bind(this),
+            addHeader: this.addHeader.bind(this),
+            getHeaders: this.getHeaders.bind(this),
+            getMethod: this.getMethod.bind(this),
+            getRequestHeaders: this.getRequestHeaders.bind(this),
+            getRequestHeader: this.getRequestHeader.bind(this),
+            isHeaderCacheUnModified: this.isHeaderCacheUnModified.bind(this),
+            onEnd: this.onEnd.bind(this),
+            sendNoChange: this.sendNoChange.bind(this),
+            createUrl: router.createUrl.bind(router),
+            parsedUrl: core.copy(this.parsedUrl)
+        };
     },
     /**
      * @since 0.0.1
@@ -185,13 +375,7 @@ Request = Type.create({
             throw new error.HttpError(500, {path: controllerToLoad}, 'Missing controller', e);
         }
 
-        controller = new LoadedController({
-            redirect: this.redirect.bind(this),
-            forward: this.forward.bind(this),
-            addHeader: this.addHeader.bind(this),
-            onEnd: this.onEnd.bind(this),
-            createUrl: router.createUrl.bind(router)
-        });
+        controller = new LoadedController(this._getApi());
 
         if (!(controller instanceof  ControllerInterface)) {
             throw new error.HttpError(500, controller, 'Controller must be instance of ControllerInterface "core/controller"');
@@ -253,9 +437,17 @@ Request = Type.create({
      * Parse request
      */
     parse: function Request_parse() {
-        return router
-            .process(this.request.method, this.parsedUrl) // find route
-            .then(this._resolveRoute.bind(this), this._handleError.bind(this)) // resolve route chain
+
+        return hooks.process(this._getApi())
+            .then(function handleHooks(data) {
+                if (Type.isInitialized(data) && !!data) {
+                    return data;
+                }
+                return router
+                    .process(this.request.method, this.parsedUrl) // find route
+                    .then(this._resolveRoute.bind(this), this._handleError.bind(this)); // resolve route chain
+
+            }.bind(this), this._handleError.bind(this))
             .then(this._render.bind(this), this._handleError.bind(this))  // render chain
             .then(this._render.bind(this), this._handleError.bind(this)); // render error thrown in render function
     },
@@ -279,7 +471,7 @@ Request = Type.create({
         }
         this.controller = route.shift();
         this.action = route.shift();
-        this.addHeader('Content-type', 'text/html');
+
         return this._handleRoute();
     },
     /**
@@ -292,7 +484,7 @@ Request = Type.create({
      */
     _handleError: function Request_handleError(data) {
         this.statusCode = 500;
-        this.addHeader('Content-type', 'text/plain');
+        this._checkContentType('text/plain');
         return this._render(data);
     }
 });

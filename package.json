@@ -7,7 +7,8 @@
       "mongoose": "3.8.x",
       "swig": "1.4.x",
       "promise": "6.0.x",
-      "static-type-js": "0.3.x"
+      "static-type-js": "0.3.x",
+      "etag": "1.5.x"
   },
   "devDependencies": {
       "gulp": "3.8.x",

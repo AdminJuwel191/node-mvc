@@ -35,6 +35,11 @@ module.exports = function(componet) {
         route: 'test/redirect',
         method: ['GET']
     });
+    router.add({
+        pattern: 'test/nodata',
+        route: 'test/nodata',
+        method: ['GET']
+    });
 
     router.add({
         pattern: 'home',

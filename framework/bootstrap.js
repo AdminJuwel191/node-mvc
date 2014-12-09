@@ -41,6 +41,8 @@ Bootstrap = Type.create({
             logger,
             server,
             envPath,
+            requestHooks,
+            faviconHandler,
             Request,
             filePath;
 
@@ -116,12 +118,20 @@ Bootstrap = Type.create({
         if (!component.has('core/router')) {
             component.set('core/router', {});
         }
+        // register hooks
+        if (!component.has('hooks/request')) {
+            requestHooks = component.set('hooks/request', {});
+        }
         // set favicon path
         if (!component.has('core/favicon')) {
             component.set('core/favicon', {
                 path: '@{basePath}/favicon.ico'
             });
         }
+        // get favicon handler
+        faviconHandler = component.get('core/favicon');
+        // hook favicon
+        requestHooks.set('/favicon.ico', faviconHandler.onRequest.bind(faviconHandler));
         // load config
         if (Type.isString(env.config)) {
             try {
@@ -143,6 +153,7 @@ Bootstrap = Type.create({
         // create server
         Request = di.load('core/request');
         server.on('request', function (request, response) {
+            logger.print('Create new request', request.url);
             // new request
             var nRequest = new Request({
                 request: request,

@@ -2,6 +2,7 @@
 var di = require('../di'),
     Type = di.load('typejs'),
     error = di.load('error'),
+    etag = di.load('etag'),
     component = di.load('core/component'),
     logger = component.get('core/logger'),
     fs = di.load('fs'),
@@ -26,6 +27,7 @@ Favicon = Type.create({
         this.config = config;
         this.isShown = false;
         this.readFile();
+        logger.print('Favicon.construct', config);
     },
     /**
      * @since 0.0.1
@@ -35,18 +37,21 @@ Favicon = Type.create({
      * @description
      * On request handle favicon
      */
-    onRequest: function Favicon_onRequest(response) {
-        if (this.isShown) {
-            response.writeHead(304);
-            response.end();
-        } else {
-            this.isShown = true;
-            response.writeHead(200, {
-                'Content-Length': this.buffer.length,
-                'Content-Type': 'image/x-icon'
-            });
-            response.end(this.buffer);
+    onRequest: function Favicon_onRequest(api) {
+
+        var maxAge = 60 * 60 * 24 * 30 * 12; // one year
+
+        api.addHeader('Content-Type', 'image/x-icon');
+        api.addHeader('Cache-Control',  'public, max-age=' + ~~(maxAge));
+        api.addHeader('ETag', etag(this.buffer));
+
+        if (api.getMethod() !== 'GET') {
+            return false;
+        } else if (api.isHeaderCacheUnModified()) {
+            api.sendNoChange();
         }
+
+        return this.buffer;
     },
     /**
      * @since 0.0.1
@@ -57,14 +62,15 @@ Favicon = Type.create({
      * Get default error route
      */
     readFile: function Favicon_readFile() {
-
-        fs.readFile(di.normalizePath(this.config.path), function (err, buf) {
+        var path = di.normalizePath(this.config.path), that = this;
+        logger.print('Favicon.readFile', path);
+        fs.readFile(path, function (err, buf) {
             if (err) {
                 logger.error(err);
                 throw new error.HttpError(500, err, 'Cannot load favicon');
             }
-            this.buffer = buf;
-        }.bind(this));
+            that.buffer = buf;
+        });
     }
 });
 
