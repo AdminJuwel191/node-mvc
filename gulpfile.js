@@ -6,7 +6,7 @@ var jasmine = require("gulp-jasmine");
 // coverage task
 gulp.task('coverage', function (cb) {
     gulp.src(['./framework/**/*.js'])
-        .pipe(istanbul())
+        .pipe(istanbul({ includeUntested: true }))
         .pipe(istanbul.hookRequire())
         .on('finish', cb);
 });
