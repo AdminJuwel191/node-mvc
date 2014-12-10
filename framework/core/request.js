@@ -145,6 +145,7 @@ Request = Type.create({
      *
      * @description
      * Return header
+     * @return {object}
      */
     getHeader: function Request_getHeader(key) {
         if (this.hasHeader(key)) {
