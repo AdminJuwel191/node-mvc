@@ -26,11 +26,12 @@ Favicon = Type.create({
 }, {
     _construct: function Favicon_construct(config) {
         this.config = core.extend({
-            path: '@{basePath}/favicon.ico'
+            path: '@{basePath}/favicon.ico',
+            hook: '\\/favicon\\.ico$'
         }, config);
         this.readFile();
         logger.print('Favicon.construct', config);
-        hook.set(/\/favicon\.ico$/, this.onRequest.bind(this));
+        hook.set(new RegExp(this.config.hook), this.onRequest.bind(this));
     },
     /**
      * @since 0.0.1

@@ -28,19 +28,11 @@ Assets = Type.create({
     _construct: function Favicon_construct(config) {
         this.config = core.extend({
             path: '@{basePath}/storage/',
-            cacheComponent: false,
-            cache: false
+            hook: '^\\/assets'
         }, config);
 
-        // set cache component
-        if (Type.isString(this.config.cacheComponent)) {
-            this.cache = component.get(this.config.cacheComponent);
-        } else {
-            this.cache = component.get('cache/memory');
-        }
-
         logger.print('Assets.construct', config);
-        hook.set(/^\/assets/, this.onRequest.bind(this));
+        hook.set(new RegExp(this.config.hook), this.onRequest.bind(this));
     },
     /**
      * @since 0.0.1
@@ -54,26 +46,15 @@ Assets = Type.create({
 
         var maxAge = 60 * 60 * 24 * 30 * 12,  // one year
             filePath = this.config.path + api.parsedUrl.pathname,
-            key = 'ASSETS_CACHE_KEY_' + filePath,
             mimeType,
             file;
 
-        if (this.config.cache) {
-            if (this.cache.get(key)) {
-                file = this.cache.get(key);
-            } else {
-                file = this.readFile(filePath);
-            }
-        } else {
-            file = this.readFile(filePath);
-        }
-
+        file = this.readFile(filePath);
         mimeType = this.mimeType(filePath);
 
         api.addHeader('Content-Type', mimeType);
         api.addHeader('Cache-Control', 'public, max-age=' + ~~(maxAge));
         api.addHeader('ETag', etag(file));
-
 
 
         if (api.getMethod() !== 'GET') {
@@ -82,9 +63,6 @@ Assets = Type.create({
             api.sendNoChange();
         }
 
-        if (this.config.cache) {
-            this.cache.set(key, file);
-        }
 
         logger.print('MimeType', mimeType, filePath);
 
