@@ -26,7 +26,6 @@ for (var i = 0; i < 100; ++i) {
 Logger = Type.create({
         stream: Type.OBJECT,
         server: Type.OBJECT,
-        logs: Type.ARRAY,
         config: Type.OBJECT
     },
     {
@@ -34,7 +33,6 @@ Logger = Type.create({
             var file;
             this.stream = null;
             this.server = null;
-            this.logs = [];
             this.config = {
                 publish: false,
                 port: 9001,
@@ -114,7 +112,6 @@ Logger = Type.create({
                 }.bind(this));
                 logs += '\n';
                 logs += '\n';
-                this.logs.push(logs);
                 try {
                     replace.forEach(function (value) {
                         logs = logs.replace(value, '');

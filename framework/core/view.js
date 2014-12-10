@@ -5,6 +5,7 @@ var di = require('../di'),
     ViewInterface = di.load('interface/view'),
     swig = di.load('swig'),
     error = di.load('error'),
+    fs = di.load('fs'),
     component = di.load('core/component'),
     logger = component.get('core/logger'),
     View;
@@ -21,12 +22,14 @@ var di = require('../di'),
  */
 View = ViewInterface.inherit(
     {
-        swig: Type.OBJECT
+        swig: Type.OBJECT,
+        preloaded: Type.OBJECT
     },
     {
         _construct: function View_construct(config) {
-            var cache;
+            var defaults;
             // extend
+            this.preloaded = {};
             this.config = core.extend({
                 cache: false,
                 autoescape: true,
@@ -38,25 +41,10 @@ View = ViewInterface.inherit(
                 themes: '@{appPath}/themes/',
                 views: '@{appPath}/views/',
                 suffix: '.twig',
-                theme: false
+                theme: false,
+                prelaod: false
             }, config);
-            // set cache component
-            if (Type.isString(this.config.cacheComponent)) {
-                cache = component.get(this.config.cacheComponent);
-            } else {
-                cache = component.get('cache/memory');
-            }
 
-            if (this.config.cache) {
-                this.config.cache = {
-                    set: function (key, value) {
-                        cache.set('SWIG_TEMPLATE_' + key, value);
-                    },
-                    get: function (key) {
-                        return cache.get('SWIG_TEMPLATE_' + key);
-                    }
-                };
-            }
 
             di.setAlias('viewsPath', this.config.views);
             di.setAlias('themesPath', this.config.themes);
@@ -67,27 +55,110 @@ View = ViewInterface.inherit(
                 this.suffix = new RegExp(this.config.suffix + '$');
             }
 
-
             // create new swig env
             this.config.loader = {
                 resolve: this.resolve.bind(this),
                 load: this.load.bind(this)
             };
 
-            this.swig = new swig.Swig(this.config);
+            if (this.config.cache) {
+                this.preloadTemplates(di.getAlias('viewsPath'));
+                this.preloadTemplates(di.getAlias('themesPath'));
+            }
 
+            defaults = core.extend({}, this.config);
+            // don't use swig cache!
+            defaults.cache = false;
+            this.swig = new swig.Swig(defaults);
 
             logger.print("View.construct", this.config);
         },
         /**
          * @since 0.0.1
          * @author Igor Ivanovic
-         * @method ViewLoader#setThemesPath
+         * @method View#setPreloaded
+         *
+         * @description
+         * Set preloaded template
+         */
+        setPreloaded: function (key, value) {
+            logger.log('View.setPreloaded: ', key + '\n' + value);
+            this.preloaded[key] = value;
+        },
+        /**
+         * @since 0.0.1
+         * @author Igor Ivanovic
+         * @method View#getPreloaded
+         *
+         * @description
+         * Get preloaded template
+         */
+        getPreloaded: function (key) {
+            if (this.hasPreloaded(key)) {
+                return this.preloaded[key];
+            }
+            return false;
+        },
+        /**
+         * @since 0.0.1
+         * @author Igor Ivanovic
+         * @method View#hasPreloaded
+         *
+         * @description
+         * Check if have preloaded
+         */
+        hasPreloaded: function (key) {
+            var isPreloaded = this.preloaded.hasOwnProperty(key);
+            if (!!this.config.cache && !isPreloaded) {
+                throw new error.DataError({key: key}, "ENOENT, no such file or directory ");
+            }
+            return isPreloaded;
+        },
+        /**
+         * @since 0.0.1
+         * @author Igor Ivanovic
+         * @method View#preloadTemplates
+         *
+         * @description
+         * Preload all templates at bootstrap
+         */
+        preloadTemplates: function View_preloadTemplates(dir) {
+            var list, name;
+            if (isDir(dir)) {
+                list = readDir(dir);
+                while (true) {
+                    name = list.shift();
+                    if (!name) {
+                        break;
+                    }
+                    this.preloadTemplates(di.normalizePath(dir + '/' + name));
+                }
+
+            } else if (isFile(dir) && this.suffix.test(dir)) {
+                this.setPreloaded(dir, di.readFileSync(dir));
+            }
+
+            function readDir(path) {
+                return fs.readdirSync(path);
+            }
+
+            function isDir(path) {
+                return fs.statSync(path).isDirectory();
+            }
+
+            function isFile(path) {
+                return fs.statSync(path).isFile();
+            }
+        },
+        /**
+         * @since 0.0.1
+         * @author Igor Ivanovic
+         * @method View#setThemesPath
          *
          * @description
          * Set theme path
          */
-        setTheme: function ViewLoader_setTheme(name) {
+        setTheme: function View_setTheme(name) {
             if (Type.assert(Type.STRING, name)) {
                 this.config.theme = name;
             } else {
@@ -97,14 +168,14 @@ View = ViewInterface.inherit(
         /**
          * @since 0.0.1
          * @author Igor Ivanovic
-         * @method ViewLoader#getPath
+         * @method View#getPath
          *
          * @description
          * Get path
          */
-        getPath: function ViewLoader_getPath() {
+        getPath: function View_getPath(skipTheme) {
             var path = '@{viewsPath}/';
-            if (Type.isString(this.config.theme)) {
+            if (Type.isString(this.config.theme) && !skipTheme) {
                 path = '@{themesPath}/' + this.config.theme + '/';
             }
             return di.normalizePath(path);
@@ -112,13 +183,13 @@ View = ViewInterface.inherit(
         /**
          * @since 0.0.1
          * @author Igor Ivanovic
-         * @method ViewLoader#normalizeResolveValue
+         * @method View#normalizeResolveValue
          *
          * @description
          * Normalize resolve value
          * @return {string}
          */
-        normalizeResolveValue: function ViewLoader_normalizeResolveValue(value) {
+        normalizeResolveValue: function View_normalizeResolveValue(value) {
             if (Type.isString(value)) {
                 return value.replace(this.getPath(), "").replace(this.suffix, "");
             }
@@ -127,30 +198,55 @@ View = ViewInterface.inherit(
         /**
          * @since 0.0.1
          * @author Igor Ivanovic
-         * @method ViewLoader#resolve
+         * @method View#resolve
          *
          * @description
          * Resolve view
          * @return {string}
          */
-        resolve: function ViewLoader_resolve(to, from) {
+        resolve: function View_resolve(to, from) {
             return this.getPath() + this.normalizeResolveValue(to) + this.config.suffix;
         },
         /**
          * @since 0.0.1
          * @author Igor Ivanovic
-         * @method ViewLoader#load
+         * @method View#readTemplate
+         *
+         * @description
+         * Read template
+         * @return {string};
+         */
+        readTemplate: function View_readTemplate(path) {
+            if (this.hasPreloaded(path)) {
+                return this.getPreloaded(path);
+            } else {
+                return di.readFileSync(path);
+            }
+        },
+        /**
+         * @since 0.0.1
+         * @author Igor Ivanovic
+         * @method View#load
          *
          * @description
          * Set load view
+         * @return {string};
          */
-        load: function ViewLoader_load(identifier, cb) {
-            var template = di.readFileSync(identifier);
-            logger.print('ViewLoader.load', {
-                identifier: identifier,
-                template: template,
-                cb: cb
-            });
+        load: function View_load(identifier, cb) {
+            var template = '';
+            try {
+                template = this.readTemplate(identifier);
+            } catch (e) {
+                identifier = this.normalizeResolveValue(identifier);
+                identifier = this.getPath(true) + identifier + this.config.suffix;
+                template = this.readTemplate(identifier);
+            } finally {
+                logger.print('ViewLoader.load', {
+                    identifier: identifier,
+                    template: template,
+                    cb: cb
+                });
+            }
             return template;
         },
         /**

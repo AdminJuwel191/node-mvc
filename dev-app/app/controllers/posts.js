@@ -17,6 +17,11 @@ Posts = Core.inherit({}, {
     },
     action_create: function Core_create(params, data) {
         // currently
+        params.arr = new Array(40);
+        if (params.id) {
+            params.arr = new Array(parseInt(params.id));
+        }
+
 
         return this.renderFile('posts/index', params);
     },

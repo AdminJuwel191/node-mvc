@@ -3,6 +3,11 @@
 <div>
     HELLO WORLD:
     <p>{{title}} {{id}} </p>
+    <ul>
+        {% for key, val in arr %}
+            <li>{{ key }} -- {{ val }}</li>
+        {% endfor %}
+    </ul>
 </div>
 {% parent %}
 {% endblock %}
