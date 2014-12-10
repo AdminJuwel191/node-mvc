@@ -6,6 +6,7 @@ var di = require('../di'),
     etag = di.load('etag'),
     component = di.load('core/component'),
     logger = component.get('core/logger'),
+    hook = component.get('hooks/request'),
     fs = di.load('fs'),
     Favicon;
 /**
@@ -21,16 +22,15 @@ var di = require('../di'),
 
 Favicon = Type.create({
     buffer: Type.OBJECT,
-    config: Type.OBJECT,
-    isShown: Type.BOOLEAN
+    config: Type.OBJECT
 }, {
     _construct: function Favicon_construct(config) {
         this.config = core.extend({
             path: '@{basePath}/favicon.ico'
         }, config);
-        this.isShown = false;
         this.readFile();
         logger.print('Favicon.construct', config);
+        hook.add(/\/favicon\.ico$/, this.onRequest.bind(this));
     },
     /**
      * @since 0.0.1

@@ -16,11 +16,11 @@ var di = require('../di'),
  * Request hooks interface
  */
 RequestHooksInterface = Type.create({
-    hooks: Type.OBJECT
+    hooks: Type.ARRAY
 }, {
     _invoke: function RequestHooksInterface() {
-        this.hooks = {};
-        ["set", "get", "has", "remove", "process"].forEach(function (method) {
+        this.hooks = [];
+        ["set", "get", "has", "match", "process"].forEach(function (method) {
             if (!(method in this)) {
                 throw new error.DataError({method: method}, 'RequestHooksInterface: missing method in Hook class');
             }

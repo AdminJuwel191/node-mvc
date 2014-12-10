@@ -42,7 +42,6 @@ Bootstrap = Type.create({
             server,
             envPath,
             requestHooks,
-            faviconHandler,
             Request,
             filePath;
 
@@ -110,7 +109,7 @@ Bootstrap = Type.create({
         }
         // register hooks
         if (!component.has('hooks/request')) {
-            requestHooks = component.set('hooks/request', {});
+            component.set('hooks/request', {});
         }
         // set favicon path
         if (!component.has('core/favicon')) {
@@ -120,10 +119,6 @@ Bootstrap = Type.create({
         if (!component.has('core/view')) {
             component.set('core/view', {});
         }
-        // get favicon handler
-        faviconHandler = component.get('core/favicon');
-        // hook favicon
-        requestHooks.set('/favicon.ico', faviconHandler.onRequest.bind(faviconHandler));
         // load config
         if (Type.isString(env.config)) {
             try {

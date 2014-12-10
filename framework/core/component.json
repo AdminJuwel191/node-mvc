@@ -9,7 +9,13 @@
   ],
   "core/favicon": [
     "core/logger",
-    "cache/memory"
+    "cache/memory",
+    "hooks/request"
+  ],
+  "core/assets": [
+    "core/logger",
+    "cache/memory",
+    "hooks/request"
   ],
   "core/view": [
     "core/logger"
