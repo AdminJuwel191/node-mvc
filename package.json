@@ -2,7 +2,7 @@
   "name" : "mvcjs",
   "main" : "./framework/di.js",
   "description": "Powerful lightweight mvc framework for nodejs",
-  "version": "0.1.0-alpha-2",
+  "version": "0.1.0-alpha-3",
   "dependencies" : {
       "mongoose": "3.8.x",
       "swig": "1.4.x",
@@ -18,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git:/github.com/igorzg/node-mvc.git"
+    "url": "git://github.com/igorzg/node-mvc.git"
   },
   "bugs": {
     "url": "https://github.com/igorzg/node-mvc/issues",
