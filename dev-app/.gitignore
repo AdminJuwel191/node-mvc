@@ -1,0 +1,6 @@
+
+node_modules
+.idea
+server.log
+npm-debug.log
+coverage

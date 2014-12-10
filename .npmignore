@@ -1,4 +1,9 @@
-.jshintrc
-.idea
-test-app/
+node_modules/
+.idea/
+coverage/
+dev-app/
 tests/
+server.log
+npm-debug.log
+.travis.yml
+gulpfile.js
