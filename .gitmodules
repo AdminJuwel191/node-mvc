@@ -1,0 +1,3 @@
+[submodule "mvcjs-testapp"]
+	path = mvcjs-testapp
+	url = https://github.com/igorzg/mvcjs-testapp
