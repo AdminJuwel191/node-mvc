@@ -41,6 +41,7 @@ Assets = Type.create({
      *
      * @description
      * On request handle favicon
+     * @return {object}
      */
     onRequest: function Favicon_onRequest(api) {
 
@@ -49,8 +50,16 @@ Assets = Type.create({
             mimeType,
             file;
 
-        file = this.readFile(filePath);
+
         mimeType = this.mimeType(filePath);
+
+        if (!mimeType) {
+            logger.print('MimeType', mimeType, filePath);
+            return false;
+        }
+
+        file = this.readFile(filePath);
+
 
         api.addHeader('Content-Type', mimeType);
         api.addHeader('Cache-Control', 'public, max-age=' + ~~(maxAge));
