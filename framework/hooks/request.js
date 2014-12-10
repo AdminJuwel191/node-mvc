@@ -52,22 +52,6 @@ RequestHooks = RequestHooksInterface.inherit({}, {
      * @return {object}
      */
     get: function RequestHooks_get(value) {
-        var hook = this.match(value);
-        if (!!hook) {
-            return hook;
-        }
-        throw new error.HttpError(500, {value: value}, "RequestHooks.get hook not found");
-    },
-    /**
-     * @since 0.0.1
-     * @author Igor Ivanovic
-     * @method RequestHooks#match
-     *
-     * @description
-     * Match
-     * @return {boolean}
-     */
-    match: function RequestHooks_match(value) {
         return this.hooks.filter(function (item) {
             return item.key.test(value);
         }).shift();
@@ -106,7 +90,7 @@ RequestHooks = RequestHooksInterface.inherit({}, {
                 hook = that.get(route);
                 logger.print('RequestHooks.hook', hook);
                 if (!!hook) {
-                    resolve(hook(api));
+                    resolve(hook.func(api));
                 } else {
                     resolve(false);
                 }

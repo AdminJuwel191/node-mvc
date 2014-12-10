@@ -27,7 +27,7 @@ Assets = Type.create({
 }, {
     _construct: function Favicon_construct(config) {
         this.config = core.extend({
-            path: '@{basePath}/assets/',
+            path: '@{basePath}/storage/',
             cacheComponent: false,
             cache: false
         }, config);
@@ -40,7 +40,7 @@ Assets = Type.create({
         }
 
         logger.print('Assets.construct', config);
-        hook.add(/^\/assets/, this.onRequest.bind(this));
+        hook.set(/^\/assets/, this.onRequest.bind(this));
     },
     /**
      * @since 0.0.1
@@ -55,18 +55,26 @@ Assets = Type.create({
         var maxAge = 60 * 60 * 24 * 30 * 12,  // one year
             filePath = this.config.path + api.parsedUrl.pathname,
             key = 'ASSETS_CACHE_KEY_' + filePath,
+            mimeType,
             file;
 
         if (this.config.cache) {
             if (this.cache.get(key)) {
-                return this.cache.get(key);
+                file = this.cache.get(key);
+            } else {
+                file = this.readFile(filePath);
             }
+        } else {
+            file = this.readFile(filePath);
         }
 
+        mimeType = this.mimeType(filePath);
 
-        api.addHeader('Content-Type', this.mimeType(filePath));
+        api.addHeader('Content-Type', mimeType);
         api.addHeader('Cache-Control', 'public, max-age=' + ~~(maxAge));
-        api.addHeader('ETag', etag(this.buffer));
+        api.addHeader('ETag', etag(file));
+
+
 
         if (api.getMethod() !== 'GET') {
             throw new error.HttpError(500, {path: filePath}, 'Assets are accessible only via GET request');
@@ -74,12 +82,11 @@ Assets = Type.create({
             api.sendNoChange();
         }
 
-
-        file = this.readFile(filePath);
-
         if (this.config.cache) {
             this.cache.set(key, file);
         }
+
+        logger.print('MimeType', mimeType, filePath);
 
         return file;
     },
@@ -92,7 +99,7 @@ Assets = Type.create({
      * Get mime type
      */
     mimeType: function Assets_mimeType(filePath) {
-        return mime.lookup(di.normalizePath(filePath));
+        return mime.lookup(filePath);
     },
     /**
      * @since 0.0.1

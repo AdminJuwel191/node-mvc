@@ -30,7 +30,7 @@ Favicon = Type.create({
         }, config);
         this.readFile();
         logger.print('Favicon.construct', config);
-        hook.add(/\/favicon\.ico$/, this.onRequest.bind(this));
+        hook.set(/\/favicon\.ico$/, this.onRequest.bind(this));
     },
     /**
      * @since 0.0.1
