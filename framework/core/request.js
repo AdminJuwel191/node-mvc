@@ -26,6 +26,7 @@ var di = require('../di'),
 Request = Type.create({
     request: Type.OBJECT,
     response: Type.OBJECT,
+    url: Type.STRING,
     parsedUrl: Type.OBJECT,
     route: Type.STRING,
     params: Type.OBJECT,
@@ -33,15 +34,16 @@ Request = Type.create({
     module: Type.STRING,
     action: Type.STRING,
     statusCode: Type.NUMBER,
-    forwardUrl: Type.STRING,
     headers: Type.OBJECT,
-    isRendered: Type.BOOLEAN
+    isRendered: Type.BOOLEAN,
+    isERROR: Type.BOOLEAN
 }, {
     _construct: function Request(config, url) {
         core.extend(this, config);
         this.statusCode = 200;
         this.headers = {};
-        this.parsedUrl = URLParser.parse(url, true);
+        this.url = url;
+        this.parsedUrl = URLParser.parse(this.url, true);
     },
     /**
      * @since 0.0.1
@@ -192,9 +194,14 @@ Request = Type.create({
      * Forward to route
      */
     forward: function Request_forward(route, params) {
+
         var request;
+
         if (router.trim(this.route, "/") === router.trim(route, '/')) {
-            throw new error.HttpError(500, {route: route, params: params}, 'Cannot forward to same route');
+            throw new error.HttpError(500, {
+                route: route,
+                params: params
+            }, 'Cannot forward to same route');
         } else {
 
             request = new Request({
@@ -240,6 +247,40 @@ Request = Type.create({
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
+     * @method Request#getMethod
+     *
+     * @description
+     * Return current request method
+     */
+    getMethod: function Request_getMethod() {
+        return this.request.method;
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Request#parseRequest
+     *
+     * @description
+     * Parse request
+     */
+    parse: function Request_parse() {
+
+        return hooks.process(this._getApi())
+            .then(function handleHooks(data) {
+                if (Type.isInitialized(data) && !!data) {
+                    return data;
+                }
+                return router
+                    .process(this.request.method, this.parsedUrl) // find route
+                    .then(this._resolveRoute.bind(this), this._handleError.bind(this)); // resolve route chain
+
+            }.bind(this), this._handleError.bind(this))
+            .then(this._render.bind(this), this._handleError.bind(this))  // render chain
+            .then(this._render.bind(this), this._handleError.bind(this)); // render error thrown in render function
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
      * @method Request#_checkContentType
      *
      * @description
@@ -248,6 +289,65 @@ Request = Type.create({
     _checkContentType: function (type) {
         if (!this.hasHeader('Content-Type')) {
             this.addHeader('Content-Type', Type.isString(type) ? type : 'text/plain');
+        }
+    },
+
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Request#_handleError
+     *
+     * @description
+     * Handle error
+     */
+    _handleError: function Request_handleError(response) {
+        var Controller,
+            errorRoute = router.getErrorRoute(),
+            errorController = '@{controllersPath}/' + errorRoute.shift(),
+            errorAction = errorRoute.shift();
+
+
+
+        if (response instanceof Error && !this.isERROR && di.exists(errorController, '.js')) {
+
+            if (response.code) {
+                this.statusCode = response.code;
+            } else {
+                this.statusCode = 500;
+            }
+
+            try {
+                Controller = di.load(errorController);
+                errorController = new Controller();
+                if (errorController.hasAction('action_' + errorAction)) {
+
+                    response = errorController.getAction('action_' + errorAction)(response);
+                    if (response.trace) {
+                        this._render(response.trace);
+                    } else if (response.stack) {
+                        this._render(response.stack);
+                    } else  {
+                        this._render(util.inspect(response));
+                    }
+                } else {
+                    logger.print('Request.render: no error controller provided', errorController);
+                }
+            } catch (e) {
+                this.isERROR = true;
+                throw new error.HttpError(500, {}, "Error on executing error action", e);
+            }
+
+        } else if (response.trace) {
+            this.addHeader('Content-Type', 'text/plain');
+            this._render(response.trace);
+        } else if (response.stack) {
+            this.addHeader('Content-Type', 'text/plain');
+            this._render(response.stack);
+        } else if (this.isERROR) {
+            this.addHeader('Content-Type', 'text/plain');
+            this._render(util.inspect(response));
+        } else {
+            return this._render(response);
         }
     },
     /**
@@ -266,20 +366,9 @@ Request = Type.create({
 
             this._checkContentType('text/html');
 
-            if (response instanceof Error) {
-                if (response.code) {
-                    this.statusCode = response.code;
-                } else {
-                    this.statusCode = 500;
-                }
-                this.response.writeHead(this.statusCode, this.headers);
-                if (response.trace) {
-                    this.response.end(response.trace);
-                } else {
-                    this.response.end(util.inspect(response));
-                }
+            this.response.writeHead(this.statusCode, this.headers);
 
-            } else if (Type.isString(response)) {
+            if (Type.isString(response)) {
                 this.addHeader('Content-Length', response.length);
                 this.response.end(response);
             } else if (response instanceof Buffer) {
@@ -288,23 +377,12 @@ Request = Type.create({
             } else if (!response) {
                 throw new error.HttpError(500, {}, 'No data to render');
             } else {
-                throw new error.HttpError(500, {}, 'Invalid response type, it must be string!!');
+                throw new error.HttpError(500, {}, 'Invalid response type, string or buffer is required!');
             }
         }
-
         this.isRendered = true;
     },
-    /**
-     * @since 0.0.1
-     * @author Igor Ivanovic
-     * @method Request#getMethod
-     *
-     * @description
-     * Return current request method
-     */
-    getMethod: function Request_getMethod() {
-        return this.request.method;
-    },
+
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
@@ -428,29 +506,7 @@ Request = Type.create({
 
         return promise;
     },
-    /**
-     * @since 0.0.1
-     * @author Igor Ivanovic
-     * @method Request#parseRequest
-     *
-     * @description
-     * Parse request
-     */
-    parse: function Request_parse() {
 
-        return hooks.process(this._getApi())
-            .then(function handleHooks(data) {
-                if (Type.isInitialized(data) && !!data) {
-                    return data;
-                }
-                return router
-                    .process(this.request.method, this.parsedUrl) // find route
-                    .then(this._resolveRoute.bind(this), this._handleError.bind(this)); // resolve route chain
-
-            }.bind(this), this._handleError.bind(this))
-            .then(this._render.bind(this), this._handleError.bind(this))  // render chain
-            .then(this._render.bind(this), this._handleError.bind(this)); // render error thrown in render function
-    },
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
@@ -473,20 +529,8 @@ Request = Type.create({
         this.action = route.shift();
 
         return this._handleRoute();
-    },
-    /**
-     * @since 0.0.1
-     * @author Igor Ivanovic
-     * @method Request#handleError
-     *
-     * @description
-     * Handle error
-     */
-    _handleError: function Request_handleError(data) {
-        this.statusCode = 500;
-        this._checkContentType('text/plain');
-        return this._render(data);
     }
+
 });
 
 

@@ -11,11 +11,11 @@ var error;
  * @license Mit Licence 2014
  * @since 0.0.1
  * @author Igor Ivanovic
- * @name Loader
+ * @name DI
  *
  * @constructor
  * @description
- * Loader is main class which provide all paths to load part of application
+ * DI is main class for handling dependency injection
  */
 var DI = Type.create({
     filePaths: Type.OBJECT,
@@ -34,7 +34,7 @@ var DI = Type.create({
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
-     * @method Loader#hasAlias
+     * @method DI#hasAlias
      *
      * @description
      * Has an alias
@@ -45,7 +45,7 @@ var DI = Type.create({
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
-     * @method Loader#getAlias
+     * @method DI#getAlias
      *
      * @description
      * Get an alias
@@ -61,7 +61,7 @@ var DI = Type.create({
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
-     * @method Loader#setAlias
+     * @method DI#setAlias
      *
      * @description
      * Set an path alias
@@ -78,7 +78,7 @@ var DI = Type.create({
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
-     * @method Loader#normalizePath
+     * @method DI#normalizePath
      *
      * @description
      * Normalize path
@@ -92,7 +92,7 @@ var DI = Type.create({
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
-     * @method Loader#readFileSync
+     * @method DI#readFileSync
      *
      * @description
      * Read file sync
@@ -108,7 +108,21 @@ var DI = Type.create({
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
-     * @method Loader#load
+     * @method DI#exists
+     *
+     * @description
+     * Check if file exists
+     */
+    exists: function DI_exists(file, fileType) {
+        if (!Type.isString(fileType) && !Type.isString(file)) {
+            throw new error.DataError({file: file, fileType: fileType}, 'DI.exists:  file or fileType must bi string');
+        }
+        return fs.existsSync(this.normalizePath(file) + fileType);
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method DI#load
      *
      * @description
      * Load an package

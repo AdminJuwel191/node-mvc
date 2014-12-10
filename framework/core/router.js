@@ -26,11 +26,13 @@ Router = Type.create({
 },{
     _construct: function Router(config) {
         this.routes = [];
-        this.config = {
-            defaultRoute: "home/index",
+        this.config = core.extend({
             errorRoute: "error/index"
-        };
-        core.extend(this.config, config);
+        }, config);
+
+        if (!Type.assert(Type.STRING, this.config.errorRoute)) {
+            throw new error.DataError(this.config, 'Router.construct: errorRoute must be string type');
+        }
     },
     /**
      * @since 0.0.1
@@ -39,20 +41,10 @@ Router = Type.create({
      *
      * @description
      * Get default error route
+     * @return {object}
      */
     getErrorRoute: function Router_getErrorRoute() {
-        return this.config.errorRoute;
-    },
-    /**
-     * @since 0.0.1
-     * @author Igor Ivanovic
-     * @method Router#getDefaultRoute
-     *
-     * @description
-     * Returns default route
-     */
-    getDefaultRoute: function Router_getDefaultRoute() {
-        return this.config.defaultRoute;
+        return this.config.errorRoute.split('/').splice(0, 2);
     },
     /**
      * @since 0.0.1
@@ -94,6 +86,7 @@ Router = Type.create({
      *
      * @description
      * Create url
+     * @return {string}
      */
     createUrl: function Router_createUrl(route, params) {
         var i, len = this.routes.length, routeRule, url, anchor = '';
@@ -163,6 +156,7 @@ Router = Type.create({
      *
      * @description
      * Build query string
+     * @return {string}
      */
     buildQuery: function Router_buildQuery(params) {
         var data = [];
