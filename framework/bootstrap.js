@@ -42,7 +42,6 @@ Bootstrap = Type.create({
             logger,
             server,
             envPath,
-            requestHooks,
             Request,
             filePath;
 

@@ -122,17 +122,50 @@ var DI = Type.create({
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
+     * @method DI#mockLoad
+     *
+     * @description
+     * Mock load for testing purposes
+     */
+    mockLoad: function DI_mockLoad(file, mocks) {
+        // save original
+        var load = this.load, module;
+        // mock load
+        this.load = function (file) {
+            return mocks[file];
+        };
+        // load module
+        module = require(this.getFilePath(file));
+        // restore load
+        this.load = load;
+        // return loaded module
+        return module;
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method DI#getPath
+     *
+     * @description
+     * Get module path so we can load it
+     */
+    getFilePath: function DI_getFilePath(moduleName) {
+        if (moduleName in this.filePaths) {
+            moduleName = this.filePaths[moduleName];
+        }
+        return this.normalizePath(moduleName);
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
      * @method DI#load
      *
      * @description
      * Load an package
      */
-    load: function DI_load(file) {
+    load: function DI_load(name) {
         try {
-            if (file in this.filePaths) {
-                file = this.filePaths[file];
-            }
-            return require(this.normalizePath(file));
+            return require(this.getFilePath(name));
         } catch (e) {
             error = this.load('error');
             throw new error.Exception('DI.load', e);
