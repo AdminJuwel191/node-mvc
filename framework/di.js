@@ -129,15 +129,16 @@ var DI = Type.create({
      */
     mockLoad: function DI_mockLoad(file, mocks) {
         // save original
-        var load = this.load, module;
+        var load =  DI.prototype.load, module;
+
         // mock load
-        this.load = function (file) {
+        DI.prototype.load = function (file) {
             return mocks[file];
         };
         // load module
         module = require(this.getFilePath(file));
         // restore load
-        this.load = load;
+        DI.prototype.load = load;
         // return loaded module
         return module;
     },
