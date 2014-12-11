@@ -6,6 +6,7 @@ var di = require('./di'),
     error = di.load('error'),
     fs = di.load('fs'),
     component = di.load('core/component'),
+    ENV_END_PATTERN = new RegExp('.*\\.json$'),
     DEFAULT_SERVER_PORT = 8080,
     Bootstrap;
 
@@ -34,7 +35,7 @@ Bootstrap = Type.create({
      * @description
      * Bootstrap application
      */
-    init: function Bootstrap_init(appPath) {
+    init: function Bootstrap_init(appPath, envFileName) {
 
         var file,
             env,
@@ -54,7 +55,14 @@ Bootstrap = Type.create({
         di.setAlias('appPath', di.getAlias('basePath') + '/' + appPath + '/');
         // set paths
         envPath = di.getAlias('appPath');
-        filePath = envPath + "env.json";
+
+        if (Type.isString(envFileName) && ENV_END_PATTERN.test(envFileName)) {
+            filePath = envPath + envFileName;
+        } else {
+            filePath = envPath + "env.json";
+        }
+
+
         // load config
         try {
             file = fs.readFileSync(filePath, {encoding: 'utf8'});
