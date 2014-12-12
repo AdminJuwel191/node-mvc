@@ -19,7 +19,6 @@
   "hooks/request": "@{framework}/hooks/request",
 
   "interface/requestHooks": "@{framework}/interface/requestHooks",
-  "interface/config": "@{framework}/interface/config",
   "interface/cache": "@{framework}/interface/cache",
   "interface/controller": "@{framework}/interface/controller",
   "interface/routeRule": "@{framework}/interface/routeRule",

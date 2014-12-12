@@ -27,7 +27,7 @@ describe("di", function () {
 
 
     it("exists", function () {
-        var fPAth = di.normalizePath(__dirname + "/di-test-load"), message;
+        var fPAth = di.normalizePath(__dirname + "/tf/di-test-load"), message;
         expect(di.exists(fPAth,  ".js")).toBe(true);
         expect(di.exists(fPAth,  ".php")).toBe(false);
 
@@ -40,7 +40,7 @@ describe("di", function () {
     });
 
     it("mock", function () {
-        var mockedMssage, path = di.normalizePath(__dirname + '/di-test-mock');
+        var mockedMssage, path = di.normalizePath(__dirname + '/tf/di-test-mock');
         var load = di.mock(path, {
             'http': function (data) {
                 mockedMssage = data;
@@ -103,12 +103,12 @@ describe("di", function () {
 
     it("load", function () {
         di.setAlias("test", __dirname + "/");
-        expect(di.load("@{test}/di-test-load")).toBe("CORRECT");
+        expect(di.load("@{test}/tf/di-test-load")).toBe("CORRECT");
     });
 
     it("readFileSync", function () {
         di.setAlias("test", __dirname + "/");
-        file = di.readFileSync("@{test}/di-test-load.js");
+        file = di.readFileSync("@{test}/tf/di-test-load.js");
         expect(file).toBe('module.exports = "CORRECT";');
     });
 

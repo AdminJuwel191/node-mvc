@@ -13,7 +13,7 @@ var di = require('../di'),
  *
  * @constructor
  * @description
- * Cache class
+ * Cache object
  */
 CacheInterface = Type.create({
     cache: Type.OBJECT,
@@ -28,7 +28,7 @@ CacheInterface = Type.create({
         this.ttl = 1000 * 60 * 60; // one hour
         ["set", "get", "remove"].forEach(function (method) {
             if (!(method in this)) {
-                throw new error.DataError({method: method}, 'CacheInterface: missing method in cache class');
+                throw new error.DataError({method: method}, 'CacheInterface: missing method in cache object');
             }
         }.bind(this));
     }

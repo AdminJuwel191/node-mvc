@@ -1,7 +1,7 @@
 "use strict";
 /* global loader: true, Type: true, error: true, RouteRuleInterface: true, require: true */
 var di = require('../di'),
-    Type = di.load('static-type-js'),
+    Type = di.load('typejs'),
     error = di.load('error'),
     RouteRuleInterface;
 /**
@@ -18,7 +18,7 @@ RouteRuleInterface = Type.create({}, {
     _invoke: function RouteRuleInterface() {
         ["parseRequest", "createUrl"].forEach(function (method) {
             if (!(method in this)) {
-                throw new error.DataError({method: method}, 'RouteRuleInterface: missing method in routerRule class');
+                throw new error.DataError({method: method}, 'RouteRuleInterface: missing method in routerRule object');
             }
         }.bind(this));
     }

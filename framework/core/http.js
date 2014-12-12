@@ -13,7 +13,7 @@ var di = require('../di'),
  *
  * @constructor
  * @description
- * HttpService class
+ * HttpService object
  */
 HttpService = HttpServiceInterface.inherit({
     server: Type.OBJECT

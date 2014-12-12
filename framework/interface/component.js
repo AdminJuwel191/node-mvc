@@ -24,7 +24,7 @@ ComponentInterface = Type.create({
         this.dependency = {};
         ["set", "get", "has", "init", "getDependency", "find"].forEach(function (method) {
             if (!(method in this)) {
-                throw new error.DataError({method: method}, 'ComponentInterface: missing method in Component class');
+                throw new error.DataError({method: method}, 'ComponentInterface: missing method in Component object');
             }
         }.bind(this));
     }

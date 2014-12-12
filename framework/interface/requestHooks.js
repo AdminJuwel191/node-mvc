@@ -22,7 +22,7 @@ RequestHooksInterface = Type.create({
         this.hooks = [];
         ["set", "get", "has", "process"].forEach(function (method) {
             if (!(method in this)) {
-                throw new error.DataError({method: method}, 'RequestHooksInterface: missing method in Hook class');
+                throw new error.DataError({method: method}, 'RequestHooksInterface: missing method in Hook object');
             }
         }.bind(this));
     }

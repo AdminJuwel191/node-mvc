@@ -75,7 +75,7 @@ describe('bootstrap', function () {
     });
 
     it('should init', function () {
-        var basePath = di.normalizePath(__dirname + '/'), logs = [], result, isDestroyed = false, isListened = false, events = [], config, url, isparsed = false;
+        var basePath = di.normalizePath(__dirname + '/tf/'), logs = [], result, isDestroyed = false, isListened = false, events = [], config, url, isparsed = false;
 
         bootstrap.setBasePath(basePath);
 

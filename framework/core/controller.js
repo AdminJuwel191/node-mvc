@@ -122,5 +122,5 @@ Controller = ControllerInterface.inherit({}, {
 });
 
 
-// export Controller class
+// export Controller object
 module.exports = Controller;

@@ -21,7 +21,7 @@ HttpServiceInterface = Type.create({
     _invoke: function HttpServiceInterface() {
         ["on", "listen", "close", "setTimeout"].forEach(function (method) {
             if (!(method in this)) {
-                throw new error.DataError({method: method}, 'HttpServiceInterface: missing method in HttpService class');
+                throw new error.DataError({method: method}, 'HttpServiceInterface: missing method in HttpService object');
             }
         }.bind(this));
     }

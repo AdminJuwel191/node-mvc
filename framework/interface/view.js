@@ -1,7 +1,7 @@
 "use strict";
 /* global loader: true, Type: true, error: true, RouteRuleInterface: true, require: true */
 var di = require('../di'),
-    Type = di.load('static-type-js'),
+    Type = di.load('typejs'),
     error = di.load('error'),
     ViewInterface;
 /**
@@ -27,7 +27,7 @@ ViewInterface = Type.create({
             ].forEach(
                 function (method) {
                     if (!(method in this)) {
-                        throw new error.DataError({method: method}, 'ViewInterface: missing method in view class');
+                        throw new error.DataError({method: method}, 'ViewInterface: missing method in view object');
                     }
                 }.bind(this)
             );

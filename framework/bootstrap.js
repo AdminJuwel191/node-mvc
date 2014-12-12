@@ -22,7 +22,7 @@ Bootstrap = Type.create({
      *
      * @constructor
      * @description
-     * Bootstrap is base class for setup Framework behavior
+     * Bootstrap is base object for setup Framework behavior
      */
     _construct: function Bootstrap() {
         this.initalized = false;

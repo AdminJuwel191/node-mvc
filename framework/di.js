@@ -15,7 +15,7 @@ var error;
  *
  * @constructor
  * @description
- * DI is main class for handling dependency injection
+ * DI is main object for handling dependency injection
  */
 var DI = Type.create({
     filePaths: Type.OBJECT,
