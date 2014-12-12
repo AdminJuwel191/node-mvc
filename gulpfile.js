@@ -19,7 +19,7 @@ gulp.task('test-with-coverage', ['coverage'], function (cb) {
             includeStackTrace: true
         }))
         .pipe(istanbul.writeReports({
-            reporters: [ 'lcov', 'clover' ]
+            reporters: [ 'json', 'clover', 'html' ]
         }))
         .on('end', cb);
 });
