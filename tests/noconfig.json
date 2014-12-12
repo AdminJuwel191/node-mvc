@@ -1,0 +1,16 @@
+{
+  "aliases": [
+    {
+      "key": "assetsPath",
+      "value": "@{basePath}/assets"
+    },
+    {
+      "key": "my",
+      "value": "/this-is-an-alias-test"
+    }
+  ],
+  "components": [],
+  "assetsPath": "asset",
+
+  "port": 1000
+}

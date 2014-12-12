@@ -66,12 +66,12 @@ Bootstrap = Type.create({
         try {
             file = fs.readFileSync(filePath, {encoding: 'utf8'});
         } catch (e) {
-            throw new error.Exception(filePath, 'Problem with loading file, do you have "env.json" in path: "' + envPath + '" ?', e);
+            throw new error.DataError({filePath: filePath}, 'Problem with loading file, do you have your environment file json in path: "' + envPath + '" ?', e);
         }
         try {
             env = JSON.parse(file);
         } catch (e) {
-            throw new error.Exception(file, 'Problem with parsing file', e);
+            throw new error.DataError({file: file}, 'Problem with parsing environment json file', e);
         }
         // set aliases
         if (Type.isArray(env.aliases)) {
