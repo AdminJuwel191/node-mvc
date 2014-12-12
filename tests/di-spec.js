@@ -25,6 +25,31 @@ describe("di", function () {
         fs.renameSync(nFile, oFile);
     });
 
+
+    it("exists", function () {
+        var fPAth = di.normalizePath(__dirname + "/di-test-load"), message;
+        expect(di.exists(fPAth,  ".js")).toBe(true);
+        expect(di.exists(fPAth,  ".php")).toBe(false);
+
+        try {
+            di.exists(1, 1);
+        } catch (e) {
+            message = e.customMessage;
+        }
+        expect(message).toBe("DI.exists:  file or fileType must bi string");
+    });
+
+    it("mock", function () {
+        var mockedMssage, path = di.normalizePath(__dirname + '/di-test-mock');
+        var load = di.mock(path, {
+            'http': function (data) {
+                mockedMssage = data;
+            }
+        });
+        expect(mockedMssage).toBe('WORKS');
+    });
+
+
     it("hasAlias", function () {
         expect(di.hasAlias("framework")).toBe(true);
     });
@@ -56,7 +81,7 @@ describe("di", function () {
     });
 
     it("setAliasError", function () {
-
+        var message;
         try {
             di.setAlias("test", __dirname + "/newtest/%*:<>");
         } catch (e) {
@@ -66,7 +91,7 @@ describe("di", function () {
     });
 
     it("loadError", function () {
-
+        var message;
         di.setAlias("test", __dirname + "/");
         try {
             di.load("@{test}/one");

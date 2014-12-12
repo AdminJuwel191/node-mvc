@@ -115,6 +115,7 @@ var DI = Type.create({
      */
     exists: function DI_exists(file, fileType) {
         if (!Type.isString(fileType) && !Type.isString(file)) {
+            error = this.load('error');
             throw new error.DataError({file: file, fileType: fileType}, 'DI.exists:  file or fileType must bi string');
         }
         return fs.existsSync(this.normalizePath(file) + fileType);
@@ -127,20 +128,26 @@ var DI = Type.create({
      * @description
      * Mock load for testing purposes
      */
-    mockLoad: function DI_mockLoad(file, mocks) {
+    mock: function DI_mock(file, mocks, throwError) {
         // save original
-        var load =  DI.prototype.load, module;
-
+        var load =  DI.prototype.load;
         // mock load
         DI.prototype.load = function (file) {
             return mocks[file];
         };
-        // load module
-        module = require(this.getFilePath(file));
-        // restore load
-        DI.prototype.load = load;
-        // return loaded module
-        return module;
+        try {
+            // load module or exec if its function
+            if (Type.isString(file)) {
+                return require(this.getFilePath(file));
+            } else if (Type.isFunction(file)) {
+                return file();
+            }
+        } catch (e) {
+            return e;
+        } finally {
+            // restore load
+            DI.prototype.load = load;
+        }
     },
     /**
      * @since 0.0.1

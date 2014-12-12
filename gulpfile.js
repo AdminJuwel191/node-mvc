@@ -13,16 +13,24 @@ gulp.task('coverage', function (cb) {
 
 // test with coverage
 gulp.task('test-with-coverage', ['coverage'], function (cb) {
-    gulp.src(['./tests/**/*.js'])
-        .pipe(jasmine())
-        .pipe(istanbul.writeReports())
+    gulp.src(['./tests/**/*-spec.js'])
+        .pipe(jasmine({
+            verbose: true,
+            includeStackTrace: true
+        }))
+        .pipe(istanbul.writeReports({
+            reporters: [ 'lcov', 'clover' ]
+        }))
         .on('end', cb);
 });
 
 // test task
 gulp.task('test', function (cb) {
-    gulp.src(['./tests/**/*.js'])
-        .pipe(jasmine())
+    gulp.src(['./tests/**/*-spec.js'])
+        .pipe(jasmine({
+            verbose: true,
+            includeStackTrace: true
+        }))
         .on('end', cb);
 });
 
