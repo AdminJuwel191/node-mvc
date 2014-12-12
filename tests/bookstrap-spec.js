@@ -52,7 +52,7 @@ describe('bootstrap', function () {
                         return request;
                     }
                 },
-                init: function (){
+                init: function () {
                     isComponentInitialized = true;
                 }
             }
@@ -86,8 +86,10 @@ describe('bootstrap', function () {
             print: function (log) {
                 logs.push(log);
             },
-            close: function() {},
-            destroy: function(){}
+            close: function () {
+            },
+            destroy: function () {
+            }
         };
 
         spyOn(logger, 'close').and.callThrough();
@@ -179,7 +181,7 @@ describe('bootstrap', function () {
             return bootstrap.init('/abc', 'ccas.json');
         }, mock, true);
 
-        expect(result.customMessage).toBe('Problem with loading file, do you have your environment file json in path: "/Users/igi/Github/node/mvc/tests/abc/" ?');
+        expect(result.customMessage).toBe('Problem with loading file, do you have your environment file json in path: "' + di.getAlias('appPath') + '" ?');
 
         bootstrap.initalized = false;
 
@@ -213,7 +215,6 @@ describe('bootstrap', function () {
         }, mock, true);
 
         expect(result.customMessage).toBe('Config file is not defined');
-
 
 
         bootstrap.initalized = false;
