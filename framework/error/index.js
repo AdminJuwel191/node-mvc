@@ -5,7 +5,6 @@ var di = require('../di'),
     util = di.load('util'),
     core = di.load('core'),
     DataError,
-    SilentError,
     Exception,
     HttpError;
 // Take care, you cannot load framework loader here!!

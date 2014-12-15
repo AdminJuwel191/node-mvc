@@ -7,7 +7,6 @@ var di = require('../di'),
     component = di.load('core/component'),
     logger = component.get('core/logger'),
     hook = component.get('hooks/request'),
-    fs = di.load('fs'),
     Favicon;
 /**
  * @license Mit Licence 2014
@@ -21,7 +20,7 @@ var di = require('../di'),
  */
 
 Favicon = Type.create({
-    buffer: Type.OBJECT,
+    file: Type.STRING,
     config: Type.OBJECT
 }, {
     _construct: function Favicon_construct(config) {
@@ -47,15 +46,15 @@ Favicon = Type.create({
 
         api.addHeader('Content-Type', 'image/x-icon');
         api.addHeader('Cache-Control',  'public, max-age=' + ~~(maxAge));
-        api.addHeader('ETag', etag(this.buffer));
+        api.addHeader('ETag', etag(this.file));
 
         if (api.getMethod() !== 'GET') {
-            return false;
+            throw new error.HttpError(500, {}, 'Favicon is accessible only via GET request');
         } else if (api.isHeaderCacheUnModified()) {
             api.sendNoChange();
         }
 
-        return this.buffer;
+        return this.file;
     },
     /**
      * @since 0.0.1
@@ -66,15 +65,14 @@ Favicon = Type.create({
      * Get default error route
      */
     readFile: function Favicon_readFile() {
-        var path = di.normalizePath(this.config.path), that = this;
+        var path = di.normalizePath(this.config.path);
         logger.print('Favicon.readFile', path);
-        fs.readFile(path, function (err, buf) {
-            if (err) {
-                logger.error(err);
-                throw new error.HttpError(500, err, 'Cannot load favicon');
-            }
-            that.buffer = buf;
-        });
+        try {
+            this.file = di.readFileSync(path);
+        } catch (e) {
+            throw new error.HttpError(500, {}, 'Cannot load favicon', e);
+        }
+
     }
 });
 
