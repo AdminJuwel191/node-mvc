@@ -29,7 +29,6 @@ MemoryCache = CacheInterface.inherit({}, {
         if (!this.cache.hasOwnProperty(key) || this.cache[key] === null) {
             this.cache[key] = value;
         } else {
-            new error.SilentError('Cache.add: "' + key + '" is already in cache');
             return false;
         }
 

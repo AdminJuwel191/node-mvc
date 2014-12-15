@@ -111,26 +111,6 @@ Exception = Type.create({
  * @license Mit Licence 2014
  * @since 0.0.1
  * @author Igor Ivanovic
- * @name SilentError
- *
- * @constructor
- * @description
- * Exception is used to throw http error
- */
-SilentError = Exception.inherit({}, {
-    _construct: function SilentError(msg, error) {
-        try {
-            this._super(msg, error);
-        } catch (e) {
-            e.name = 'SilentError';
-            console.log(e);
-        }
-    }
-});
-/**
- * @license Mit Licence 2014
- * @since 0.0.1
- * @author Igor Ivanovic
  * @name DataError
  *
  * @constructor
@@ -179,6 +159,5 @@ HttpError = DataError.inherit({
 module.exports = {
     Exception: Exception,
     HttpError: HttpError,
-    DataError: DataError,
-    SilentError: SilentError
+    DataError: DataError
 };
