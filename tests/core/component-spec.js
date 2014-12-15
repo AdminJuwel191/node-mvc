@@ -143,7 +143,7 @@ describe('core/component', function () {
 
         component.components = {};
 
-
+        components.dependency = deps;
         message = tryCatch(function() {
             return  component.init([{
                 "name": "custom"

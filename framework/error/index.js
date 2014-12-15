@@ -45,21 +45,16 @@ Exception = Type.create({
 
         nError = new Error();
         nError.name = 'Exception';
-        try {
-            error = core.extend(nError, this.__dynamic__);
-        } catch (e) {
-            console.log('Exception.extend', e);
-        }
 
-        toString = nError.toString;
 
         nError.toString = function() {
             if (this.trace) {
                 return this.name + ': ' + this.trace;
             }
-            return toString();
+            return this.name + ': ' + this.stack;
         };
-
+        // extend
+        error = core.extend(nError, this.__dynamic__);
 
         throw error;
     },
@@ -89,10 +84,8 @@ Exception = Type.create({
         args.sort(function (a, b) {
             if (a.key > b.key) {
                 return 1;
-            } else if (a.key < b.key) {
-                return -1;
             }
-            return 0;
+            return -1;
         });
 
         args.forEach(function (item) {

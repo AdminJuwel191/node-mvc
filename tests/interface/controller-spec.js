@@ -19,8 +19,8 @@ describe('interface/controller', function () {
     it('should be inherited', function () {
         var config = {};
         var IFace = Interface.inherit({}, {
-            hasAction: n,
-            getAction: n,
+            has: n,
+            get: n,
             redirect: n,
             forward: n,
             addHeader: n,
@@ -37,37 +37,37 @@ describe('interface/controller', function () {
     });
 
 
-    createMethodTest('hasAction', {});
-    createMethodTest('getAction', {
-        hasAction: n
+    createMethodTest('has', {});
+    createMethodTest('get', {
+        has: n
     });
     createMethodTest('redirect', {
-        hasAction: n,
-        getAction: n
+        has: n,
+        get: n
     });
     createMethodTest('forward', {
-        hasAction: n,
-        getAction: n,
+        has: n,
+        get: n,
         redirect: n
     });
     createMethodTest('addHeader', {
-        hasAction: n,
-        getAction: n,
+        has: n,
+        get: n,
         redirect: n,
         forward: n
     });
 
     createMethodTest('onEnd', {
-        hasAction: n,
-        getAction: n,
+        has: n,
+        get: n,
         redirect: n,
         forward: n,
         addHeader: n
     });
 
     createMethodTest('createUrl', {
-        hasAction: n,
-        getAction: n,
+        has: n,
+        get: n,
         redirect: n,
         forward: n,
         addHeader: n,

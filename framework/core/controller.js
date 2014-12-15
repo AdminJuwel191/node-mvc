@@ -72,17 +72,7 @@ Controller = ControllerInterface.inherit({}, {
     redirect: function Controller_redirect(url, isTemp) {
         return this._request.redirect(url, isTemp);
     },
-    /**
-     * @since 0.0.1
-     * @author Igor Ivanovic
-     * @method Controller#hasAction
-     *
-     * @description
-     * Check if controller have action
-     */
-    hasAction: function Controller_hasAction(name) {
-        return (name in this);
-    },
+
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
@@ -108,12 +98,25 @@ Controller = ControllerInterface.inherit({}, {
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
+     * @method Controller#hasAction
+     *
+     * @description
+     * Check if controller have action
+     * @return {boolean}
+     */
+    has: function Controller_has(name) {
+        return (name in this);
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
      * @method Controller#getAction
      *
      * @description
      * Get controller action
+     * @return {object}
      */
-    getAction: function Controller_getAction(name) {
+    get: function Controller_get(name) {
         if (Type.isFunction(this[name])) {
             return this[name];
         }

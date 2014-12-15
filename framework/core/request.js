@@ -320,9 +320,9 @@ Request = Type.create({
             try {
                 Controller = di.load(errorController);
                 errorController = new Controller();
-                if (errorController.hasAction('action_' + errorAction)) {
+                if (errorController.has('action_' + errorAction)) {
 
-                    response = errorController.getAction('action_' + errorAction)(response);
+                    response = errorController.get('action_' + errorAction)(response);
                     if (response.trace) {
                         this._render(response.trace);
                     } else if (response.stack) {
@@ -471,20 +471,20 @@ Request = Type.create({
             }
         });
 
-        if (controller.hasAction("beforeEach")) {
+        if (controller.has("beforeEach")) {
             promise = this._chain(null, controller.beforeEach.bind(controller, this.action, this.params));
         }
 
-        if (controller.hasAction('before_' + this.action)) {
-            promise = this._chain(promise, controller.getAction('before_' + this.action).bind(controller, this.params));
+        if (controller.has('before_' + this.action)) {
+            promise = this._chain(promise, controller.get('before_' + this.action).bind(controller, this.params));
         }
 
-        if (controller.hasAction('action_' + this.action)) {
-            promise = this._chain(promise, controller.getAction('action_' + this.action).bind(controller, this.params));
+        if (controller.has('action_' + this.action)) {
+            promise = this._chain(promise, controller.get('action_' + this.action).bind(controller, this.params));
         } else {
             throw new error.HttpError(500, {
                 controller: controller,
-                hasAction: controller.hasAction(this.action),
+                hasAction: controller.has(this.action),
                 route: {
                     controller: this.controller,
                     action: this.action,
@@ -495,11 +495,11 @@ Request = Type.create({
         }
 
 
-        if (controller.hasAction('after_' + this.action)) {
-            promise = this._chain(promise, controller.getAction('after_' + this.action).bind(controller, this.params));
+        if (controller.has('after_' + this.action)) {
+            promise = this._chain(promise, controller.get('after_' + this.action).bind(controller, this.params));
         }
 
-        if (controller.hasAction("afterEach")) {
+        if (controller.has("afterEach")) {
             promise = this._chain(promise, controller.afterEach.bind(controller, this.action, this.params));
         }
 
