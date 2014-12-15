@@ -98,7 +98,9 @@ Component = ComponentInterface.inherit({}, {
                         }
                     }
                 }
-                this.set(component.name, component);
+                if (!this.has(component.name)) {
+                    this.set(component.name, component);
+                }
             }
         }
     },
