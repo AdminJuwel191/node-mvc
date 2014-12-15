@@ -128,7 +128,7 @@ var DI = Type.create({
      * @description
      * Mock load for testing purposes
      */
-    mock: function DI_mock(file, mocks, throwError) {
+    mock: function DI_mock(file, mocks) {
         // save original
         var load =  DI.prototype.load;
         // mock load

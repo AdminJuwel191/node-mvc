@@ -52,14 +52,12 @@ describe('core/component', function () {
                 "hooks/request"
             ],
             "core/view": [
-                "core/logger"
+                "custom"
             ],
             "hooks/request": [
                 "core/logger"
             ],
-            "custom": [
-                "test"
-            ]
+            "custom": []
         },
         core = di.load('core'),
         Type = di.load('typejs');
@@ -79,7 +77,7 @@ describe('core/component', function () {
         var nFile = di.normalizePath(di.getAlias("framework") + "/core/component.template.json");
         fs.renameSync(oFile, nFile);
 
-        message = tryCatch(function() {
+        message = tryCatch(function () {
             return component._construct();
         });
         expect(message.customMessage).toBe("Component.construct: problem with loading dependency file");
@@ -108,7 +106,11 @@ describe('core/component', function () {
 
     it('init|has|get', function () {
         component.components = {};
+        component.dependency = deps;
+
         var comps = [{
+            "name": "core/view"
+        }, {
             "name": "core/router",
             "errorRoute": "error/route"
         }, {
@@ -118,24 +120,38 @@ describe('core/component', function () {
             "port": 9001,
             "file": "servers-debug.log"
         }];
-        component.init(comps);
+        di.mock(function () {
+            component.init(comps);
+        }, {
+            'custom': function () {
+
+            },
+            'core/logger': function () {
+
+            },
+            'core/router': function () {
+
+            },
+            'core/view': function () {
+
+            }
+        });
         expect(component.has("core/router")).toBe(true);
         expect(component.has("core/logger")).toBe(true);
         var logger = component.get("core/logger");
-        expect(logger.config.file).toBe("servers-debug.log");
-        expect(Object.keys(component.components).length).toBe(2);
+
+        expect(Object.keys(component.components).length).toBe(4);
 
         var router = component.get("core/router");
-        expect(router.config.errorRoute).toBe("error/route");
-        expect(router.config.name).toBe("core/router");
 
-        var message = tryCatch(function() {
+
+        var message = tryCatch(function () {
             return component.get('test/1123');
         });
 
         expect(message.customMessage).toBe('Component "test/1123" is not registered in system');
 
-        message = tryCatch(function() {
+        message = tryCatch(function () {
             return component.init('test/1123');
         });
 
@@ -144,8 +160,8 @@ describe('core/component', function () {
         component.components = {};
 
         components.dependency = deps;
-        message = tryCatch(function() {
-            return  component.init([{
+        message = tryCatch(function () {
+            return component.init([{
                 "name": "custom"
             }]);
         });
@@ -154,25 +170,35 @@ describe('core/component', function () {
 
 
     it('set', function () {
-
+        var message;
         component.components = {};
+        component.set("core/logger", {
+            "name": "core/logger"
+        }, function() {
+
+        });
         component.set("core/router", {
             "name": "core/router",
             "errorRoute": "error/route"
+        }, function() {
+
         });
+
         expect(component.has("core/router")).toBe(true);
 
-        var message = tryCatch(function() {
+        message = tryCatch(function () {
             component.set("core/router", {
                 "name": "core/router",
                 "errorRoute": "error/route"
             });
         });
-
         expect(message.customMessage).toBe('Component "core/router" already exist in system');
-
         component.components = {};
+        component.set("core/logger", {
+            "name": "core/logger"
+        }, function() {
 
+        });
         component.set("core/router", {
             "name": "core/router",
             "errorRoute": "error/route"
@@ -194,7 +220,7 @@ describe('core/component', function () {
         component.components = {};
         component.set("custom", {
             "p1": 2
-        }, function(config) {
+        }, function (config) {
             return config;
         });
 
@@ -202,16 +228,16 @@ describe('core/component', function () {
         expect(c.p1).toBe(2);
 
         component.components = {};
-        var message = tryCatch(function() {
+        message = tryCatch(function () {
             component.set("custom", {
                 "p1": 2
-            }, function(config) {
+            }, function (config) {
                 return config.a.b;
             });
         });
         expect(message.customMessage).toBe('Component "custom" is not initialized');
 
-        message = tryCatch(function() {
+        message = tryCatch(function () {
             component.get("custom")
         });
         expect(message.customMessage).toBe('Component "custom" is not registered in system');
