@@ -5,12 +5,7 @@ describe('interface/cache', function () {
         Interface = di.mock('interface/cache', {
             typejs: Type,
             core: di.load('core'),
-            error: di.load('error'),
-            "core/component": {
-                get: function (name) {
-                    loadedNames.push(name);
-                }
-            }
+            error: di.load('error')
         });
         loadedNames = [];
     });
@@ -31,10 +26,6 @@ describe('interface/cache', function () {
 
         expect(message.config).toBe(config);
         expect(Type.isObject(message.cache)).toBe(true);
-        expect(loadedNames.length).toBe(2);
-
-        expect(loadedNames.shift()).toBe('core/logger');
-        expect(loadedNames.shift()).toBe('core/logger');
     });
 
 

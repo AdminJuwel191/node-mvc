@@ -3,6 +3,7 @@
 var di = require('../di'),
     Type = di.load('typejs'),
     CacheInterface = di.load('interface/cache'),
+    error = di.load('error'),
     MemoryCache;
 /**
  * @license Mit Licence 2014
@@ -14,7 +15,7 @@ var di = require('../di'),
  * @description
  * Memory cache
  */
-MemoryCache = CacheInterface.inherit({},{
+MemoryCache = CacheInterface.inherit({}, {
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
@@ -22,21 +23,27 @@ MemoryCache = CacheInterface.inherit({},{
      *
      * @description
      * Add value to cache
+     * @return {object}
      */
     set: function MemoryCache_setValue(key, value, ttl) {
         if (!this.cache.hasOwnProperty(key) || this.cache[key] === null) {
             this.cache[key] = value;
         } else {
-            this.logger.error('Cache.add: key is already in cache', key);
+            new error.SilentError('Cache.add: "' + key + '" is already in cache');
+            return false;
         }
+
         if (Type.isNumber(ttl) && !isNaN(ttl) && ttl > 0) {
             setTimeout(clearCache.bind(this), ttl);
         } else {
             setTimeout(clearCache.bind(this), this.ttl);
         }
+
         function clearCache() {
             this.remove(key);
         }
+
+        return true;
     },
     /**
      * @since 0.0.1

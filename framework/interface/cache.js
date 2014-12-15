@@ -1,7 +1,6 @@
 "use strict";
 /* global loader: true,  Type: true,, error: true, CacheInterface: true */
 var di = require('../di'),
-    component = di.load('core/component'),
     Type = di.load('typejs'),
     error = di.load('error'),
     CacheInterface;
@@ -17,13 +16,11 @@ var di = require('../di'),
  */
 CacheInterface = Type.create({
     cache: Type.OBJECT,
-    logger: Type.OBJECT,
     config: Type.OBJECT,
     ttl: Type.NUMBER
 }, {
     _invoke: function CacheInterface(config) {
         this.cache = {};
-        this.logger = component.get('core/logger');
         this.config = config;
         this.ttl = 1000 * 60 * 60; // one hour
         ["set", "get", "remove"].forEach(function (method) {

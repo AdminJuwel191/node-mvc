@@ -33,8 +33,6 @@ RequestHooks = RequestHooksInterface.inherit({}, {
             throw new error.DataError({key: key, value: value}, "RequestHooks.add hook already exists");
         } else if (!Type.isFunction(value)) {
             throw new error.DataError({key: key, value: value}, "RequestHooks.add hook value must be function type");
-        } else if (!Type.isRegExp(key)) {
-            throw new error.DataError({key: key, value: value}, "RequestHooks.add hook key must be regex type");
         }
         this.hooks.push({
             key: key,
@@ -52,6 +50,9 @@ RequestHooks = RequestHooksInterface.inherit({}, {
      * @return {object}
      */
     get: function RequestHooks_get(value) {
+        if (!Type.isString(value)) {
+            throw new error.DataError({value: value}, "RequestHooks.get value must be string type");
+        }
         return this.hooks.filter(function (item) {
             return item.key.test(value);
         }).shift();
