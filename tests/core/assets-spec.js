@@ -125,6 +125,17 @@ describe('core/assets', function () {
         });
 
         expect(message.customMessage).toBe('Assets are accessible only via GET request');
+
+        mime.lookup = function () {
+            return false;
+        };
+
+        method = 'GET';
+        message = tryCatch(function () {
+            return instance.onRequest(api);
+        });
+
+        expect(message).toBe(false);
     });
 
 
@@ -145,7 +156,6 @@ describe('core/assets', function () {
 
 
     it('readFile', function () {
-
         var obj = {
             path: '@{basePath}/assetFiles/',
             hook: '^\\/files'
