@@ -1,5 +1,7 @@
-var di = require('../../');
+var di = require('../../framework/di');
+
 describe('cache/memory', function () {
+
     var Instance,
         MemoryCache,
         Type = di.load('typejs');
@@ -10,7 +12,7 @@ describe('cache/memory', function () {
             "interface/cache": di.load('interface/cache'),
             error: di.load('error')
         });
-        jasmine.DEFAULT_TIMEOUT_INTERVAL = 2000;
+
         Instance = new MemoryCache;
     });
 
@@ -22,6 +24,7 @@ describe('cache/memory', function () {
     it('set', function () {
         expect(Instance.set('KEY', 'CACHED')).toBe(true);
         expect(Instance.set('KEY', 'CACHED')).toBe(false);
+
     });
 
 
@@ -43,8 +46,11 @@ describe('cache/memory', function () {
         setTimeout(function() {
             expect(Instance.get('KEY6')).toBe(null);
             done();
-        }, 100);
+        }, 50);
     });
+
+
+
 
     function tryCatch(callback) {
         try {

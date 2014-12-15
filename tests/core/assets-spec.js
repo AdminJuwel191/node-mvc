@@ -1,4 +1,4 @@
-var di = require('../../'), path = require('path');
+var di = require('../../framework/di'), path = require('path');
 describe('core/assets', function () {
     var Assets,
         etag =  function() { return 'ETAG'; },
@@ -36,7 +36,6 @@ describe('core/assets', function () {
                 }
             }
         });
-        jasmine.DEFAULT_TIMEOUT_INTERVAL = 2000;
     });
 
     it('Create instance', function () {

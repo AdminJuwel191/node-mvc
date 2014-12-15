@@ -1,4 +1,4 @@
-var di = require('../../');
+var di = require('../../framework/di');
 describe('hooks/request', function () {
     var reqInstance,
         RequestHooks,

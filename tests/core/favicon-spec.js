@@ -1,4 +1,4 @@
-var di = require('../../'), path = require('path');
+var di = require('../../framework/di'), path = require('path');
 describe('core/favicon', function () {
     var Favicon,
         etag = function () {
@@ -34,10 +34,9 @@ describe('core/favicon', function () {
                 }
             }
         });
-        jasmine.DEFAULT_TIMEOUT_INTERVAL = 2000;
     });
 
-    it('Create instance| readFile', function (done) {
+    it('Create instance| readFile', function () {
 
         hook = function (key, val) {
             source = key.source;
@@ -54,10 +53,7 @@ describe('core/favicon', function () {
         expect(source).toBe('^\\/favicon\\.ico');
         expect(Type.isFunction(instance.onRequest)).toBe(true);
         expect(Type.isFunction(instance.readFile)).toBe(true);
-        setTimeout(function () {
-            expect(instance.file.length).toBe(1150);
-            done();
-        }, 100);
+        expect(instance.file.length).toBe(1150);
     });
 
 
@@ -133,6 +129,7 @@ describe('core/favicon', function () {
         });
 
         expect(message.customMessage).toBe('Favicon is accessible only via GET request');
+
     });
 
 
