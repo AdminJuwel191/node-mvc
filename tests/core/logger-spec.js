@@ -76,7 +76,7 @@ describe('core/logger', function () {
 
         function errorHandler(error) {
             expect(error.errno).toBe(34);
-            expect(error.path).toBe('/Users/igi/Github/node/mvc/tests/tf/ab/cd/server.log');
+            expect(error.path).toBe(nPath + 'server.log');
             done();
         }
 
