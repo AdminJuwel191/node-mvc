@@ -95,17 +95,17 @@ describe('core/view', function () {
         expect(message.customMessage).toBe('View.construct: view suffix must be string type');
 
 
-        expect(view.getPreloaded('/Users/igi/Github/node/mvc/tests/tf/templates/view/view.twig')).toBe('view');
-        expect(view.getPreloaded('/Users/igi/Github/node/mvc/tests/tf/templates/theme/index/theme.twig')).toBe('theme');
+        expect(view.getPreloaded(nPath + 'templates/view/view.twig')).toBe('view');
+        expect(view.getPreloaded(nPath + 'templates/theme/index/theme.twig')).toBe('theme');
 
         message = tryCatch(function () {
-            view.getPreloaded('/Users/igi/Github/node/mvc/tests/tf/templates/theme/theme.twig1');
+            view.getPreloaded(nPath + 'templates/theme/theme.twig1');
         });
-        expect(message.data.key).toBe('/Users/igi/Github/node/mvc/tests/tf/templates/theme/theme.twig1');
+        expect(message.data.key).toBe(nPath + 'templates/theme/theme.twig1');
         expect(message.customMessage).toBe('ENOENT, no such file or directory');
 
         view.config.cache = false;
-        expect(view.getPreloaded('/Users/igi/Github/node/mvc/tests/tf/templates/theme/theme.twig1')).toBe(false);
+        expect(view.getPreloaded(nPath + 'templates/theme/theme.twig1')).toBe(false);
 
     });
 
@@ -155,8 +155,8 @@ describe('core/view', function () {
 
         view.setTheme('index');
 
-        expect(view.getPath()).toBe('/Users/igi/Github/node/mvc/tests/tf/templates/theme/index/');
-        expect(view.getPath(true)).toBe('/Users/igi/Github/node/mvc/tests/tf/templates/view/');
+        expect(view.getPath()).toBe(nPath + 'templates/theme/index/');
+        expect(view.getPath(true)).toBe(nPath + 'templates/view/');
      });
 
     it('normalizeResolveValue', function () {
@@ -175,11 +175,11 @@ describe('core/view', function () {
         view.setTheme('index');
 
         //fail
-        expect(view.normalizeResolveValue('/Users/igi/Github/node/mvc/tests/tf/templates/theme/test/user/index.twig')).toBe('/Users/igi/Github/node/mvc/tests/tf/templates/theme/test/user/index.twig');
+        expect(view.normalizeResolveValue(nPath + 'templates/theme/test/user/index.twig')).toBe(nPath + 'templates/theme/test/user/index.twig');
         //success
-        expect(view.normalizeResolveValue('/Users/igi/Github/node/mvc/tests/tf/templates/theme/index/user/index.twig')).toBe('user/index');
+        expect(view.normalizeResolveValue(nPath + 'templates/theme/index/user/index.twig')).toBe('user/index');
         //success
-        expect(view.normalizeResolveValue('/Users/igi/Github/node/mvc/tests/tf/templates/view/user/index.twig')).toBe('user/index');
+        expect(view.normalizeResolveValue(nPath + 'templates/view/user/index.twig')).toBe('user/index');
     });
 
 
@@ -199,11 +199,11 @@ describe('core/view', function () {
         view.setTheme('index');
 
         //success
-        expect(view.resolve('/Users/igi/Github/node/mvc/tests/tf/templates/theme/index/user/index.twig')).toBe('/Users/igi/Github/node/mvc/tests/tf/templates/theme/index/user/index.twig');
+        expect(view.resolve(nPath + 'templates/theme/index/user/index.twig')).toBe(nPath + 'templates/theme/index/user/index.twig');
         //success
-        expect(view.resolve('/Users/igi/Github/node/mvc/tests/tf/templates/view/user/index.twig')).toBe('/Users/igi/Github/node/mvc/tests/tf/templates/theme/index/user/index.twig');
+        expect(view.resolve(nPath + 'templates/view/user/index.twig')).toBe(nPath + 'templates/theme/index/user/index.twig');
 
-        expect(view.resolve('user/index')).toBe('/Users/igi/Github/node/mvc/tests/tf/templates/theme/index/user/index.twig');
+        expect(view.resolve('user/index')).toBe(nPath + 'templates/theme/index/user/index.twig');
 
     });
 
