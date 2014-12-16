@@ -4,6 +4,7 @@ var di = require('../di'),
     error = di.load('error'),
     core = di.load('core'),
     etag = di.load('etag'),
+    fs = di.load('fs'),
     component = di.load('core/component'),
     logger = component.get('core/logger'),
     hook = component.get('hooks/request'),
@@ -20,7 +21,7 @@ var di = require('../di'),
  */
 
 Favicon = Type.create({
-    file: Type.STRING,
+    file: Type.OBJECT,
     config: Type.OBJECT
 }, {
     _construct: function Favicon_construct(config) {
@@ -68,7 +69,7 @@ Favicon = Type.create({
         var path = di.normalizePath(this.config.path);
         logger.print('Favicon.readFile', path);
         try {
-            this.file = di.readFileSync(path);
+            this.file = fs.readFileSync(path, {encoding: null});
         } catch (e) {
             throw new error.HttpError(500, {}, 'Cannot load favicon', e);
         }

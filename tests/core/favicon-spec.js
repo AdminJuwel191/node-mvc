@@ -54,6 +54,7 @@ describe('core/favicon', function () {
         expect(Type.isFunction(instance.onRequest)).toBe(true);
         expect(Type.isFunction(instance.readFile)).toBe(true);
         expect(instance.file.length).toBe(1150);
+        expect(instance.file instanceof Buffer).toBe(true);
     });
 
 
