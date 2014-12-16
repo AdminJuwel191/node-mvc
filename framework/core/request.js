@@ -309,7 +309,7 @@ Request = Type.create({
 
 
 
-        if (response instanceof Error && !this.isERROR && di.exists(errorController, '.js')) {
+        if (response instanceof Error && !this.isERROR && di.exists(di.normalizePath(errorController) + '.js')) {
 
             if (response.code) {
                 this.statusCode = response.code;

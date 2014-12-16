@@ -28,8 +28,8 @@ describe("di", function () {
 
     it("exists", function () {
         var fPAth = di.normalizePath(__dirname + "/tf/di-test-load"), message;
-        expect(di.exists(fPAth,  ".js")).toBe(true);
-        expect(di.exists(fPAth,  ".php")).toBe(false);
+        expect(di.exists(fPAth + ".js")).toBe(true);
+        expect(di.exists(fPAth + ".php")).toBe(false);
 
         try {
             di.exists(1, 1);

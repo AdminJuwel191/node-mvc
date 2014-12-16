@@ -41,8 +41,7 @@ View = ViewInterface.inherit(
                 themes: '@{appPath}/themes/',
                 views: '@{appPath}/views/',
                 suffix: '.twig',
-                theme: false,
-                prelaod: false
+                theme: false
             }, config);
 
 
@@ -52,7 +51,7 @@ View = ViewInterface.inherit(
             if (Type.assert(Type.STRING, this.config.suffix)) {
                 this.suffix = new RegExp(this.config.suffix + '$');
             } else {
-                this.suffix = new RegExp(this.config.suffix + '$');
+                throw new error.HttpError(500, this.config, 'View.construct: view suffix must be string type');
             }
 
             // create new swig env
@@ -110,7 +109,7 @@ View = ViewInterface.inherit(
         hasPreloaded: function (key) {
             var isPreloaded = this.preloaded.hasOwnProperty(key);
             if (!!this.config.cache && !isPreloaded) {
-                throw new error.DataError({key: key}, "ENOENT, no such file or directory ");
+                throw new error.DataError({key: key}, "ENOENT, no such file or directory");
             }
             return isPreloaded;
         },
@@ -161,6 +160,8 @@ View = ViewInterface.inherit(
         setTheme: function View_setTheme(name) {
             if (Type.assert(Type.STRING, name)) {
                 this.config.theme = name;
+            } else if(Type.isNull(name)) {
+                this.config.theme = null;
             } else {
                 throw new error.HttpError(500, {name: name}, "ViewLoader.setTheme: name must be string type");
             }
@@ -190,8 +191,11 @@ View = ViewInterface.inherit(
          * @return {string}
          */
         normalizeResolveValue: function View_normalizeResolveValue(value) {
-            if (Type.isString(value)) {
-                return value.replace(this.getPath(), "").replace(this.suffix, "");
+            var theme = this.getPath(), view = this.getPath(true);
+            if (Type.isString(value) && value.match(theme)) {
+                return value.replace(theme, "").replace(this.suffix, "");
+            } else if (Type.isString(value) && value.match(view)) {
+                return value.replace(view, "").replace(this.suffix, "");
             }
             return value;
         },

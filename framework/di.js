@@ -113,12 +113,12 @@ var DI = Type.create({
      * @description
      * Check if file exists
      */
-    exists: function DI_exists(file, fileType) {
-        if (!Type.isString(fileType) && !Type.isString(file)) {
+    exists: function DI_exists(file) {
+        if (!Type.isString(file)) {
             error = this.load('error');
-            throw new error.DataError({file: file, fileType: fileType}, 'DI.exists:  file or fileType must bi string');
+            throw new error.DataError({file: file}, 'DI.exists:  file or fileType must bi string');
         }
-        return fs.existsSync(this.normalizePath(file) + fileType);
+        return fs.existsSync(file);
     },
     /**
      * @since 0.0.1

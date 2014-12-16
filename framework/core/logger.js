@@ -42,24 +42,16 @@ Logger = Type.create({
             };
             core.extend(this.config, config);
             if (this.config.debug) {
-                try {
-                    file = di.normalizePath('@{basePath}/' + this.config.file);
-                    this.stream = fs.createWriteStream(file, {encoding: 'utf8'});
-                } catch (e) {
-                    throw new error.Exception('Invalid write stream', e);
-                }
+
+                file = di.normalizePath('@{basePath}/' + this.config.file);
+                this.stream = fs.createWriteStream(file, {encoding: 'utf8'});
+
                 if (this.config.publish) {
                     this.server = http.createServer();
                     this.server.on('request', function (request, response) {
-                        var read;
-                        try {
-                            read = fs.readFileSync(file);
-                            response.writeHead(200, {'Content-type': 'text/plain', 'Content-Length': read.length});
-                            response.end(read);
-                        } catch (e) {
-                            response.writeHead(200, {'Content-type': 'text/plain'});
-                            response.end(e.stack);
-                        }
+                        var read = fs.readFileSync(file);
+                        response.writeHead(200, {'Content-type': 'text/plain', 'Content-Length': read.length});
+                        response.end(read);
                     });
                     this.server.listen(this.config.port);
                     this.print('Publishing log write stream on port: ' + this.config.port);
@@ -132,22 +124,6 @@ Logger = Type.create({
                 }
             }
             return logs;
-        },
-        /**
-         * @since 0.0.1
-         * @author Igor Ivanovic
-         * @method Logger#inspect
-         *
-         * @description
-         * Inspect
-         */
-        error: function Logger_error() {
-            var log = "", args = Array.prototype.slice.call(arguments);
-            util.inspect.styles.string = 'red';
-            args.forEach(function (item) {
-                log += " " + util.inspect(item, {colors: true, depth: this.config.level});
-            }.bind(this));
-            return this.log(log);
         },
         /**
          * @since 0.0.1
