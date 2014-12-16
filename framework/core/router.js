@@ -67,7 +67,7 @@ Router = Type.create({
                 throw new error.HttpError(500, route, 'Router.add: dynamic route is not constructor');
             }
         } else {
-            rule = new RouteRule(component, route);
+            rule = new RouteRule(route);
         }
 
         if (!(rule instanceof RouteRuleInterface)) {

@@ -5,6 +5,8 @@ var di = require('../di'),
     core = di.load('core'),
     error = di.load('error'),
     RouteRuleInterface = di.load('interface/routeRule'),
+    component = di.load('core/component'),
+    logger = component.get('core/logger'),
     PATTERN_MATCH = /<(\w+):?([^>]+)?>/ig,
     ROUTE_MATCH = /<(\w+)>/ig,
     PATTERN_CAPTURE_REGEX = /\(((\?P?<(\w+)>)((\:?(\((.*)\)))?|([^\)]+))|([^\)]+))\)/g,
@@ -30,13 +32,13 @@ RouteRule = RouteRuleInterface.inherit({
     pattern: Type.OBJECT,
     route: Type.STRING
 }, {
-    _construct: function RouteRule(component, config) {
+    _construct: function RouteRule(config) {
         var matches, name, pattern, escapePattern = [], escapeRule = [], template;
         this.routeParams = [];
         this.paramRules = [];
         this.template = null;
         this.routeRule = null;
-        this.logger = component.get('core/logger');
+       
 
         if (!config.pattern) {
             throw new error.HttpError(500, config, 'RouteRule: rule object must have an pattern property');
@@ -50,7 +52,7 @@ RouteRule = RouteRuleInterface.inherit({
         pattern = this.trim(config.pattern, '/');
         this.route = this.trim(config.route, '/');
 
-        this.logger.print('route', this.route);
+        logger.print('route', this.route);
 
         if (this.route.indexOf('<') > -1) {
             matches = core.match(ROUTE_MATCH, this.route);
@@ -107,7 +109,7 @@ RouteRule = RouteRuleInterface.inherit({
             this.methods = ['GET'];
         }
 
-        this.logger.print('RouteRule', {
+        logger.print('RouteRule', {
             escapePattern: escapePattern,
             escapeRule: escapeRule,
             escapedTemplate: template,
@@ -214,7 +216,7 @@ RouteRule = RouteRuleInterface.inherit({
         for (i = 0; i < len; ++i) {
             c = this.paramRules[i];
 
-            this.logger.print('template2', c.value, params[c.key], this.match(c.value, params[c.key]));
+            logger.print('template2', c.value, params[c.key], this.match(c.value, params[c.key]));
 
             if (params.hasOwnProperty(c.key) && (c.value === '' || (Type.isRegExp(c.value) && c.value.test(params[c.key])) ||  this.match(c.value, params[c.key]).length > 0) ) {
                 escape.push({
