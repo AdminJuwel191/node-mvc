@@ -26,13 +26,11 @@ module.exports = function (componet) {
         route: 'user/view',
         method: ['GET']
     });
-
     router.add({
-        pattern: 'test/forward',
+        pattern: 'test/test',
         route: 'test/forward',
         method: ['GET']
     });
-
 
     router.add({
         pattern: 'test/redirect',
@@ -61,6 +59,8 @@ module.exports = function (componet) {
      router.add({
      dynamic: true,
      constructor: app.load('@{appPath}/routes')
-     });*/
+     });
+
+     */
 
 };

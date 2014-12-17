@@ -1,5 +1,6 @@
 "use strict";
 var di = require('../../../'), // mvcjs as node package
+    Type = di.load('typejs'),
     Controller = di.load('core/controller'),
     Core;
 
@@ -9,7 +10,6 @@ Core = Controller.inherit({}, {
 
 
     },
-
     action_error: function (params) {
 
         return 'CUSTOM ERROR HANDLER; ' + params;

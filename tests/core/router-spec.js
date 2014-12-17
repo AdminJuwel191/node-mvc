@@ -1,4 +1,4 @@
-var di = require('../../'), fs = require('fs'), path = require('path');
+var di = require('../../'), fs = di.load('fs'), path = di.load('path');
 describe('core/router', function () {
     var router,
         config = {
@@ -241,12 +241,7 @@ describe('core/router', function () {
                     return ['user/view', {id: 1}];
                 }
             },
-            createUrl: function (route, params) {
-                if (route === 'user/view') {
-                    return 'user/' + params.id;
-                }
-                return false;
-            }
+            createUrl: function (route, params) {}
         });
         var Constructor = di.mock('core/router', core.extend(mock, {
             "core/routeRule": RouteRule
