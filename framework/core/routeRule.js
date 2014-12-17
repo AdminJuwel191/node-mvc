@@ -9,7 +9,7 @@ var di = require('../di'),
     logger = component.get('core/logger'),
     PATTERN_MATCH = /<(\w+):?([^>]+)?>/ig,
     ROUTE_MATCH = /<(\w+)>/ig,
-    PATTERN_CAPTURE_REGEX = /\(((\?P?<(\w+)>)((\:?(\((.*)\)))?|([^\)]+))|([^\)]+))\)/g,
+    PATTERN_CAPTURE_REGEX = /\(((\?P?<(\w+)>)((:?(\(([^\/]+)\)))?|([^\)]+))|([^\)]+))\)/g,
     IS_NAMED = /\(\?P?<(\w+)>([^\)]+)\)/,
     RouteRule;
 /**
@@ -68,6 +68,7 @@ RouteRule = RouteRuleInterface.inherit({
 
         matches = core.match(PATTERN_MATCH, pattern);
 
+
         if (Array.isArray(matches) && matches.length) {
             matches.forEach(function (item) {
                 var esc, nPattern;
@@ -99,13 +100,19 @@ RouteRule = RouteRuleInterface.inherit({
         this.pattern = this.toRegex('^' + this.trim(template, '/') + '$');
 
         if (this.routeParams.length) {
-            this.routeRule = this.escape(this.route, escapeRule);
+            this.routeRule = '^' + this.escape(this.route, escapeRule) + '$';
         }
 
         if (config.method) {
             this.methods = config.method;
         } else {
             this.methods = ['GET'];
+        }
+
+        if (this.template.indexOf('<') > -1 && this.route.indexOf('<') > -1) {
+            if (this.template.indexOf(this.route) === -1) {
+                throw new error.HttpError(500, config, 'RouteRule: invalid route rule');
+            }
         }
 
         logger.print('RouteRule', {
@@ -178,7 +185,6 @@ RouteRule = RouteRuleInterface.inherit({
             route = this.route;
         }
 
-
         result.push(route);
         result.push(params);
 
@@ -191,6 +197,7 @@ RouteRule = RouteRuleInterface.inherit({
      *
      * @description
      * Create an url
+     * @return {object}
      */
     createUrl: function RouteRule_createUrl(route, params) {
         var escape = [], i, len, c, url;
@@ -214,13 +221,10 @@ RouteRule = RouteRuleInterface.inherit({
 
         for (i = 0; i < len; ++i) {
             c = this.paramRules[i];
-
-            logger.print('template2', c.value, params[c.key], this.match(c.value, params[c.key]));
-
-            if (params.hasOwnProperty(c.key) && (c.value === '' || (Type.isRegExp(c.value) && c.value.test(params[c.key])) ||  this.match(c.value, params[c.key]).length > 0) ) {
+            if (params.hasOwnProperty(c.key) && (c.value === '' || (Type.isRegExp(c.value) && c.value.test(params[c.key])) || this.match(c.value, params[c.key].toString()).length > 0)) {
                 escape.push({
                     key: '<' + c.key + '>',
-                    value: params[c.key]
+                    value: params[c.key].toString()
                 });
                 delete params[c.key];
             } else if (Type.isUndefined(params[c.key])) {
@@ -231,6 +235,10 @@ RouteRule = RouteRuleInterface.inherit({
         url = this.trim(this.escape(this.template, escape), '/');
         if (url.indexOf('//') > -1) {
             url = url.replace(/\/+/g, '/');
+        }
+
+        if (this.match(this.pattern.regex, url).length === 0) {
+            return false;
         }
 
         if (Object.keys(params).length > 0) {

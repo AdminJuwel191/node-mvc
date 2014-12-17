@@ -13,7 +13,7 @@ describe('cache/memory', function () {
             error: di.load('error')
         });
 
-        Instance = new MemoryCache;
+
     });
 
     it('should be function', function () {
@@ -22,19 +22,21 @@ describe('cache/memory', function () {
 
 
     it('set', function () {
+        Instance = new MemoryCache;
         expect(Instance.set('KEY', 'CACHED')).toBe(true);
         expect(Instance.set('KEY', 'CACHED')).toBe(false);
-
     });
 
 
     it('remove', function () {
+        Instance = new MemoryCache;
         expect(Instance.set('KEY', 'CACHED')).toBe(true);
         Instance.remove('KEY');
         expect(Instance.get('KEY')).toBe(null);
     });
 
     it('get', function (done) {
+        Instance = new MemoryCache;
         expect(Instance.set('KEY', 'CACHED')).toBe(true);
         expect(Instance.get('KEY')).toBe('CACHED');
         expect(Instance.get('KEY1')).toBe(null);

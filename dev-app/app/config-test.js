@@ -27,7 +27,7 @@ module.exports = function (componet) {
         method: ['GET']
     });
     router.add({
-        pattern: 'test/test',
+        pattern: 'test/forward',
         route: 'test/forward',
         method: ['GET']
     });
