@@ -4,11 +4,11 @@ var di = require('../di'),
     Type = di.load('typejs'),
     core = di.load('core'),
     error = di.load('error'),
-    component = di.load('core/component'),
-    RouteRule = di.load('core/routeRule'),
     Promise = di.load('promise'),
-    logger = component.get('core/logger'),
     RouteRuleInterface = di.load('interface/routeRule'),
+    RouteRule = di.load('core/routeRule'),
+    component = di.load('core/component'),
+    logger = component.get('core/logger'),
     Router;
 /**
  * @license Mit Licence 2014
@@ -23,7 +23,7 @@ var di = require('../di'),
 Router = Type.create({
     routes: Type.ARRAY,
     config: Type.OBJECT
-},{
+}, {
     _construct: function Router(config) {
         this.routes = [];
         this.config = core.extend({
@@ -61,24 +61,24 @@ Router = Type.create({
             return;
         }
         if (route.dynamic) {
-            if (core.isFunction(route.constructor)) {
-                rule = new route.constructor(component);
+            if (Type.isFunction(route.constructor)) {
+                rule = new route.constructor();
             } else {
-                throw new error.HttpError(500, route, 'Router.add: dynamic route is not constructor');
+                throw new error.HttpError(500, {route: route}, 'Router.add: dynamic route is not function');
             }
         } else {
             rule = new RouteRule(route);
         }
 
         if (!(rule instanceof RouteRuleInterface)) {
-            throw new error.HttpError(500, rule, 'Router.add: rule must be instance of RouteRuleInterface');
+            throw new error.HttpError(500, {rule: rule}, 'Router.add: rule must be instance of RouteRuleInterface');
         }
 
         logger.print('Router.add: route', route);
         this.routes.push(rule);
 
     },
-   
+
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
@@ -92,12 +92,12 @@ Router = Type.create({
         var i, len = this.routes.length, routeRule, url, anchor = '';
 
         if (!Type.isString(route)) {
-            throw new error.HttpError(500, route, 'RouteRule.createUrl: route must be string type');
+            throw new error.HttpError(500, {route: route}, 'RouteRule.createUrl: route must be string type');
         }
         if (!params) {
             params = {};
         } else if (!Type.isObject(params)) {
-            throw new error.HttpError(500, params, 'RouteRule.createUrl: params must be object type');
+            throw new error.HttpError(500, {params: params}, 'RouteRule.createUrl: params must be object type');
         }
 
         Object.keys(params).forEach(function (item) {
@@ -193,15 +193,25 @@ Router = Type.create({
      * Process request
      */
     process: function Router_process(method, parsedUrl) {
-        return Promise.resolve(this.parseRequest(method, parsedUrl)).then(function(routeRule) {
-            if (Type.isArray(routeRule) && routeRule.length === 2) {
-                return Promise.resolve(routeRule);
+
+        return new Promise(handlePromise.bind(this))
+            .then(function (routeRule) {
+                if (Type.isArray(routeRule) && routeRule.length === 2) {
+                    return Promise.resolve(routeRule);
+                }
+                // only on not found throw an error 404
+                throw new error.HttpError(404, core.toObject(routeRule), 'Not found');
+            }, function (e) {
+                throw new error.HttpError(500, {}, 'Not found', e);
+            });
+
+        function handlePromise(resolve, reject) {
+            try {
+                resolve(this.parseRequest(method, parsedUrl));
+            } catch (e) {
+                reject(e);
             }
-            // only on not found throw an error 404
-            throw new error.HttpError(404, core.toObject(routeRule), 'Not found');
-        }, function (error) {
-            throw new error.HttpError(500, error, 'Not found');
-        });
+        }
     }
 });
 

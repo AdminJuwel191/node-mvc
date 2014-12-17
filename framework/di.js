@@ -130,15 +130,22 @@ var DI = Type.create({
      */
     mock: function DI_mock(file, mocks) {
         // save original
-        var load =  DI.prototype.load;
+        var load =  DI.prototype.load, path;
         // mock load
-        DI.prototype.load = function (file) {
-            return mocks[file];
+
+        DI.prototype.load = function (name) {
+            return mocks[name];
         };
         try {
             // load module or exec if its function
             if (Type.isString(file)) {
-                return require(this.getFilePath(file));
+                // get file
+                path = this.getFilePath(file);
+                // because all modules in node are cached while executing tests we want to delete cached version
+                delete require.cache[require.resolve(path + '.js')];
+                // do require
+                return require(path);
+
             } else if (Type.isFunction(file)) {
                 return file();
             }

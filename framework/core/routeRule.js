@@ -38,7 +38,6 @@ RouteRule = RouteRuleInterface.inherit({
         this.paramRules = [];
         this.template = null;
         this.routeRule = null;
-       
 
         if (!config.pattern) {
             throw new error.HttpError(500, config, 'RouteRule: rule object must have an pattern property');

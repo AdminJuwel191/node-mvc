@@ -29,7 +29,7 @@ describe('hooks/request', function () {
                 callback(function resolve(data) {
                     _data = data;
                 }, function reject(data) {
-                    console.log('reject', data);
+                    //console.log('reject', data);
                     _data = data;
                 });
             }

@@ -122,7 +122,7 @@ describe('bootstrap', function () {
 
         result = di.mock(function () {
             return bootstrap.init('');
-        }, mock, true);
+        }, mock);
 
         expect(logs.length).toBe(2);
         // required components
@@ -170,7 +170,7 @@ describe('bootstrap', function () {
 
         result = di.mock(function () {
             return bootstrap.init('');
-        }, mock, true);
+        }, mock);
 
         expect(result.customMessage).toBe('You cannot reinitialize application');
 
@@ -179,7 +179,7 @@ describe('bootstrap', function () {
 
         result = di.mock(function () {
             return bootstrap.init('/abc', 'ccas.json');
-        }, mock, true);
+        }, mock);
 
         expect(result.customMessage).toBe('Problem with loading file, do you have your environment file json in path: "' + di.getAlias('appPath') + '" ?');
 
@@ -187,7 +187,7 @@ describe('bootstrap', function () {
 
         result = di.mock(function () {
             return bootstrap.init('', 'invalid.json');
-        }, mock, true);
+        }, mock);
 
         expect(result.customMessage).toBe('Problem with parsing environment json file');
 
@@ -197,7 +197,7 @@ describe('bootstrap', function () {
         isLoggerGet = false;
         result = di.mock(function () {
             return bootstrap.init('', 'valid.json');
-        }, mock, true);
+        }, mock);
 
 
         expect(di.getAlias('my')).toBe('/this-is-an-alias-test');
@@ -212,7 +212,7 @@ describe('bootstrap', function () {
 
         result = di.mock(function () {
             return bootstrap.init('', 'noconfig.json');
-        }, mock, true);
+        }, mock);
 
         expect(result.customMessage).toBe('Config file is not defined');
 
@@ -220,7 +220,7 @@ describe('bootstrap', function () {
         bootstrap.initalized = false;
         result = di.mock(function () {
             return bootstrap.init('', 'valid2.json');
-        }, mock, true);
+        }, mock);
 
         expect(result.customMessage).toBe('Initialize config');
 
