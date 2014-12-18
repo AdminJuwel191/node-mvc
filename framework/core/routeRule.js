@@ -233,9 +233,6 @@ RouteRule = RouteRuleInterface.inherit({
         }
 
         url = this.trim(this.escape(this.template, escape), '/');
-        if (url.indexOf('//') > -1) {
-            url = url.replace(/\/+/g, '/');
-        }
 
         if (this.match(this.pattern.regex, url).length === 0) {
             return false;
@@ -280,8 +277,8 @@ RouteRule = RouteRuleInterface.inherit({
      * @description
      * Find route rule
      */
-    find: function RouteRule_find(data, key, filter) {
-        return data.filter(filter ? filter : function (item) {
+    find: function RouteRule_find(data, key) {
+        return data.filter(Type.isFunction(key) ? key : function (item) {
             return item.key === key;
         }).pop();
     },
@@ -380,6 +377,11 @@ RouteRule = RouteRuleInterface.inherit({
      * Escape
      */
     escape: function RouteRule_escape(str, escape) {
+        if (!Type.isString(str)) {
+            throw new error.HttpError(500, {str: str}, 'RouteRule.escape: str must be a string type');
+        } else if(!Type.isArray(escape)) {
+            throw new error.HttpError(500, {escape: escape}, 'RouteRule.escape: escape must be a array type');
+        }
         escape.forEach(function (item) {
             str = str.replace(item.key, item.value);
         });

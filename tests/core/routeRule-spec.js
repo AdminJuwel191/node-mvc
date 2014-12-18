@@ -99,8 +99,21 @@ describe('core/routeRule', function () {
         expect(result[1].id).toBe('55');
         expect(result.length).toBe(2);
 
-        expect(routeRule.createUrl('posts/test', {id: 55})).toBe('posts/test/55');
 
+        result = routeRule.parseRequest('GET', {pathname: '/posts/test/55', query: {test: 'one'}});
+
+
+        expect(result[0]).toBe('posts/test');
+        expect(result[1].id).toBe('55');
+        expect(result[1].test).toBe('one');
+        expect(result.length).toBe(2);
+
+
+        result = routeRule.parseRequest('GET', {pathname: '/posts/test/77', query: {id: '555'}});
+        expect(result[0]).toBe('posts/test');
+        expect(result[1].id).toBe('77');
+        expect(routeRule.createUrl('posts/test', {id: 55})).toBe('posts/test/55');
+        expect(routeRule.createUrl('posts/test', {id: 55, a: 1, b: 2})).toBe('posts/test/55?a=1&b=2');
         expect(routeRule.createUrl('posts/test', {id: 'A'})).toBe(false);
     });
 
@@ -246,6 +259,11 @@ describe('core/routeRule', function () {
         var result = routeRule.parseRequest('GET', {pathname: '/posts/test', query: {}});
         expect(result[0]).toBe('posts/index');
         expect(result[1].action).toBe('test');
+
+
+        result = routeRule.parseRequest('POST', {pathname: '/posts/test', query: {}});
+        expect(result).toBe(false);
+
         /// this is valid since routeRule is null in this case
         expect(routeRule.createUrl('posts/test', {})).toBe(false);
         expect(routeRule.createUrl('posts/index', {})).toBe(false);
@@ -331,19 +349,155 @@ describe('core/routeRule', function () {
     });
 
 
-    it('toRegex', function () {
+    it('construct case 7', function () {
+        var message = tryCatch(function() {
+            new Constructor({
+                pattern: 'posts/<view:(create|update|delete)>/<id:(\\d+)>',
+                route: 'posts/<action>'
+            });
+        });
+        expect(message.customMessage).toBe('RouteRule: invalid route rule');
+    });
 
 
-        routeRule = new Constructor({
+
+    it('buildQuery', function () {
+        var routeRule = new Constructor({
             pattern: 'posts/<action:(create|update|delete)>/<id:(\\d+)>',
             route: 'posts/<action>'
         });
 
-
-        //var regex = routeRule.toRegex('^posts/(?P<action>(create|update|delete))/(?P<id>(\\d+))$');
-        //console.log('regex', regex);
+        expect(routeRule.buildQuery({id: 1, a: 'test', b: '"', c: '&'})).toBe('id=1&a=test&b=%22&c=%26');
     });
 
+
+    it('checkMethod', function () {
+        var routeRule = new Constructor({
+            pattern: 'posts/<action:(create|update|delete)>/<id:(\\d+)>',
+            route: 'posts/<action>',
+            method: ['GET', 'POST', 'PUT']
+        });
+        expect(routeRule.checkMethod('PUT')).toBe(true);
+        expect(routeRule.checkMethod('GET')).toBe(true);
+        expect(routeRule.checkMethod('POST')).toBe(true);
+        expect(routeRule.checkMethod('OPTION')).toBe(false);
+    });
+
+    it('find', function () {
+        var routeRule = new Constructor({
+            pattern: 'posts/<action:(create|update|delete)>/<id:(\\d+)>',
+            route: 'posts/<action>',
+            method: ['GET', 'POST', 'PUT']
+        });
+        var item = {key: 'test', item: 'test'};
+        var data = [item];
+        expect(routeRule.find(data, 'test')).toBe(item);
+
+        expect(routeRule.find(data, function(a) {return a.item === 'test'; })).toBe(item);
+    });
+
+
+    it('toObject', function () {
+        var routeRule = new Constructor({
+            pattern: 'posts/<action:(create|update|delete)>/<id:(\\d+)>',
+            route: 'posts/<action>',
+            method: ['GET', 'POST', 'PUT']
+        });
+        var arr = [1, 2, 3];
+        var obj = routeRule.toObject(arr);
+        expect(obj[0]).toBe(1);
+        expect(obj[1]).toBe(2);
+        expect(obj[2]).toBe(3);
+    });
+
+
+    it('trim', function () {
+        var routeRule = new Constructor({
+            pattern: 'posts/<action:(create|update|delete)>/<id:(\\d+)>',
+            route: 'posts/<action>',
+            method: ['GET', 'POST', 'PUT']
+        });
+
+        expect(routeRule.trim('/aaa/bcc', '/')).toBe('aaa/bcc');
+
+        var message = tryCatch(function() {
+            routeRule.escape(1, [{key: 'bcc', value: 'ac'}]);
+        });
+        expect(message.customMessage).toBe('RouteRule.escape: str must be a string type');
+
+        message = tryCatch(function() {
+            routeRule.escape('abc', 1);
+        });
+        expect(message.customMessage).toBe('RouteRule.escape: escape must be a array type');
+    });
+
+
+
+    it('escape', function () {
+        var routeRule = new Constructor({
+            pattern: 'posts/<action:(create|update|delete)>/<id:(\\d+)>',
+            route: 'posts/<action>',
+            method: ['GET', 'POST', 'PUT']
+        });
+
+        expect(routeRule.escape('aaa/bcc', [{key: 'bcc', value: 'ac'}])).toBe('aaa/ac');
+    });
+
+
+    it('toRegex', function () {
+        var routeRule = new Constructor({
+            pattern: 'posts/index',
+            route: 'posts/index',
+            method: ['GET', 'POST', 'PUT']
+        });
+
+        var obj = routeRule.toRegex('([0-9]+)/<action:(create|update|delete)>/<id:(\\d+)>');
+
+        expect(obj.group.length).toBe(3);
+
+        var g = obj.group;
+
+        expect(g[0].isNamed).toBe(false);
+        expect(g[0].pattern).toBe('([0-9]+)');
+        expect(g[0].key).toBe(null);
+        expect(g[0].index).toBe(0);
+
+        expect(g[1].isNamed).toBe(false);
+        expect(g[1].pattern).toBe('(create|update|delete)');
+        expect(g[1].key).toBe(null);
+        expect(g[1].index).toBe(1);
+
+        expect(g[1].isNamed).toBe(false);
+        expect(g[1].pattern).toBe('(create|update|delete)');
+        expect(g[1].key).toBe(null);
+        expect(g[1].index).toBe(1);
+
+        obj = routeRule.toRegex('abc/cd');
+        expect(obj.group).toBe(false);
+        expect(obj.regex.source).toBe('abc/cd');
+    });
+
+
+
+    it('match', function () {
+        var routeRule = new Constructor({
+            pattern: 'posts/<action:(create|update|delete)>/<id:(\\d+)>',
+            route: 'posts/index',
+            method: ['GET', 'POST', 'PUT']
+        });
+
+        var rgx = routeRule.toRegex('(?P<action>(create|update|delete))/(?P<id>(\\d+))');
+        var matches = routeRule.match(rgx, 'create/1');
+
+        expect(matches[0].key).toBe('action');
+        expect(matches[0].value).toBe('create');
+
+        expect(matches[1].key).toBe('id');
+        expect(matches[1].value).toBe('1');
+
+        expect(matches.length).toBe(2);
+
+    });
 
 
     function tryCatch(callback) {
