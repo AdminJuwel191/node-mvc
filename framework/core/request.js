@@ -135,7 +135,7 @@ Request = Type.create({
         if (Type.isString(key)) {
             return this.request.headers[key.toLowerCase()];
         } else {
-            throw new error.HttpError(500, {key: key}, "Request.hasHeader: Header key must be string type");
+            throw new error.HttpError(500, {key: key}, "Request.getRequestHeader: Header key must be string type");
         }
     },
     /**
@@ -178,12 +178,12 @@ Request = Type.create({
      */
     addHeader: function Request_addHeader(key, value) {
         if (Type.isString(key)) {
-            this.headers[key.toLowerCase()] = value;
+            this.headers[key.toLowerCase()] = Type.isString(value) ? value : value.toString();
         } else {
             throw new error.HttpError(500, {
                 key: key,
                 value: value
-            }, "Request.addHeader: Header key and value must be string type");
+            }, "Request.addHeader: Header key must be string type");
         }
     },
     /**
@@ -242,7 +242,7 @@ Request = Type.create({
      * No change header
      */
     sendNoChange: function () {
-        this.response.writeHead(304);
+        this.response.writeHead(304, this.headers);
         this.response.end();
     },
     /**
@@ -419,8 +419,15 @@ Request = Type.create({
      */
     _chain: function Request__chain(promise, next) {
         if (!promise) {
-            return Promise.resolve(_handler());
+            return new Promise(function(resolve, reject) {
+                try {
+                    resolve(next.apply(next, arguments));
+                } catch (e) {
+                    reject(new error.HttpError(500, arguments, "Error on executing action", e));
+                }
+            });
         }
+
         return promise.then(function (data) {
             return Promise.resolve(_handler(data));
         }, this._handleError.bind(this));
@@ -516,6 +523,7 @@ Request = Type.create({
      * @description
      * Resolve valid route
      * @return {object} Promise
+     * @todo implement modules
      */
     _resolveRoute: function Request__resolveRoute(routeRule) {
         var route;
