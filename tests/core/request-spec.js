@@ -489,6 +489,76 @@ describe('core/request', function () {
     });
 
 
+    it('parse', function (done) {
+        var _d, _e;
+
+
+        hooks.process = function() {
+            return Promise.resolve(1);
+        };
+        router.process = function() {
+            return Promise.resolve(1);
+        };
+        var ctx = {
+            _render: function() {
+
+            },
+            _resolveRoute: function() {
+
+            },
+            _getApi: function() {
+
+            },
+            _handleError: function() {
+
+            }
+        };
+
+        request = new Constructor(config, '/home/index');
+        request.parse.call(ctx).then(function(data) {
+            _d = data;
+        }, function(error) {
+            _e = error;
+        });
+
+        setTimeout(done, 100);
+    });
+
+
+    it('parse 2', function (done) {
+        hooks.process = function() {
+            return Promise.resolve(false);
+        };
+        router.process = function() {
+            return Promise.resolve(1);
+        };
+        var ctx = {
+            _render: function() {
+
+            },
+            _resolveRoute: function() {
+
+            },
+            _getApi: function() {
+
+            },
+            _handleError: function() {
+
+            }
+        };
+        request = new Constructor(config, '/home/index');
+
+        var _d, _e;
+        request.parse.call(ctx).then(function(data) {
+            _d = data;
+        }, function(error) {
+            _e = error;
+        });
+
+        setTimeout(function() {
+            done();
+        }, 100);
+    });
 
     function tryCatch(callback) {
         try {
