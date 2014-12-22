@@ -331,7 +331,7 @@ Request = Type.create({
                         this._render(util.inspect(response));
                     }
                 } else {
-                    logger.print('Request.render: no error controller provided', errorController);
+                    throw new error.HttpError(500, {errorAction: errorAction}, "No error action defined at error controller");
                 }
             } catch (e) {
                 this.isERROR = true;
@@ -348,7 +348,7 @@ Request = Type.create({
             this.addHeader('Content-Type', 'text/plain');
             this._render(util.inspect(response));
         } else {
-            return this._render(response);
+            this._render(response);
         }
     },
     /**
@@ -453,7 +453,9 @@ Request = Type.create({
             LoadedController,
             controller,
             action,
-            promise;
+            promise,
+            afterActionPromise = false,
+            afterEachPromise = false;
 
         try {
             LoadedController = di.load(controllerToLoad);
@@ -503,16 +505,19 @@ Request = Type.create({
 
 
         if (controller.has('after_' + this.action)) {
-            promise = this._chain(promise, controller.get('after_' + this.action).bind(controller, this.params));
+            afterActionPromise = this._chain(promise, controller.get('after_' + this.action).bind(controller, this.params));
         }
 
         if (controller.has("afterEach")) {
-            promise = this._chain(promise, controller.afterEach.bind(controller, this.action, this.params));
+            afterEachPromise = this._chain(promise, controller.afterEach.bind(controller, this.action, this.params));
         }
 
         this.onEnd(controller.destroy.bind(controller));
 
-        return promise;
+        return Promise.all([afterActionPromise, afterEachPromise]).then(function (data) {
+            logger.print('afterActionPromise, afterEachPromise', data);
+            return promise;
+        });
     },
 
     /**

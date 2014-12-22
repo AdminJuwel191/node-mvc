@@ -30,8 +30,8 @@ User = Core.inherit({}, {
         return template;
     },
     after_view: function (params, data) {
-
-        return data;
+        console.log('after view ca')
+        return false;
     }
 
 

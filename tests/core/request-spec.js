@@ -1,23 +1,30 @@
 var di = require('../../'), fs = di.load('fs'), path = di.load('path');
 describe('core/request', function () {
+    "use strict";
     var request,
         config = {},
+        Promise = di.load('promise'),
         logger = {
             print: function () {
-
             },
             log: function () {
-
             }
         },
         router = {
             createUrl: function () {
+            },
+            process: function () {
+                return Promise.resolve('handler');
+            },
+            getErrorRoute: function () {
+
             }
         },
         hooks = {
-            process: function() {}
+            process: function () {
+            }
         },
-        Promise = di.load('promise'),
+        error = di.load('error'),
         componentMock = {
             get: function (name) {
                 if (name == "core/logger") {
@@ -60,7 +67,7 @@ describe('core/request', function () {
         mock = {
             typejs: Type,
             core: core,
-            error: di.load('error'),
+            error: error,
             promise: Promise,
             util: di.load('util'),
             url: di.load('url'),
@@ -373,7 +380,8 @@ describe('core/request', function () {
         var params = {id: 1};
 
         var ctx = {};
-        ctx._handleRoute = function () {};
+        ctx._handleRoute = function () {
+        };
         spyOn(ctx, '_handleRoute');
         request._resolveRoute.call(ctx, ['user/home/index', params]);
 
@@ -390,16 +398,23 @@ describe('core/request', function () {
 
     it('_chain', function (done) {
         var ctx = {
-            _handleError: function() {}
+            _handleError: function () {
+            }
         };
         request = new Constructor(config, '/home/index');
 
-        var promise = request._chain(null, function() {return 1;});
+        var promise = request._chain(null, function () {
+            return 1;
+        });
 
-        promise = request._chain(promise, function(n) {return n + 1;});
-        promise = request._chain(promise, function(n) {return n + 1;});
+        promise = request._chain(promise, function (n) {
+            return n + 1;
+        });
+        promise = request._chain(promise, function (n) {
+            return n + 1;
+        });
 
-        promise.then(function(n) {
+        promise.then(function (n) {
             expect(n).toBe(3);
             done();
         });
@@ -407,7 +422,7 @@ describe('core/request', function () {
 
     it('_chain error', function (done) {
         var ctx = {
-            _handleError: function(error) {
+            _handleError: function (error) {
                 expect(error.customMessage).toBe('Error on executing action');
             }
         };
@@ -415,11 +430,16 @@ describe('core/request', function () {
 
         spyOn(ctx, '_handleError').and.callThrough();
 
-        var promise = request._chain.call(ctx, null, function() {return 1;});
+        var promise = request._chain.call(ctx, null, function () {
+            return 1;
+        });
 
-        promise = request._chain.call(ctx, promise, function(n) {return n + 1;});
-        promise = request._chain.call(ctx, promise, function(n) {return n.aa.a + 1;});
-
+        promise = request._chain.call(ctx, promise, function (n) {
+            return n + 1;
+        });
+        promise = request._chain.call(ctx, promise, function (n) {
+            return n.aa.a + 1;
+        });
 
 
         promise.then(null, done);
@@ -427,7 +447,7 @@ describe('core/request', function () {
 
     it('_chain error2', function (done) {
         var ctx = {
-            _handleError: function(error) {
+            _handleError: function (error) {
                 expect(error.customMessage).toBe('Error on executing action');
             }
         };
@@ -435,27 +455,31 @@ describe('core/request', function () {
 
         spyOn(ctx, '_handleError').and.callThrough();
 
-        var promise = request._chain.call(ctx, null, function() {return {}.b.c;});
+        var promise = request._chain.call(ctx, null, function () {
+            return {}.b.c;
+        });
 
         promise.then(null, done);
     });
 
     it('_render', function () {
         var ctx = {
-            addHeader: function() {},
+            addHeader: function () {
+            },
             response: {
-                writeHead: function() {
+                writeHead: function () {
 
                 }
             },
             isRendered: false,
-            _checkContentType: function() {}
+            _checkContentType: function () {
+            }
         };
         var response = 'TEST';
 
         request = new Constructor(config, '/home/index');
 
-        ctx.response.end = function(r) {
+        ctx.response.end = function (r) {
             expect(r).toBe(response);
         };
         spyOn(ctx, '_checkContentType');
@@ -466,12 +490,12 @@ describe('core/request', function () {
 
         ctx.isRendered = false;
         var response = new Buffer(111);
-        ctx.response.end = function(r) {
+        ctx.response.end = function (r) {
             expect(r).toBe(response);
         };
         request._render.call(ctx, response);
 
-        var message = tryCatch(function() {
+        var message = tryCatch(function () {
             ctx.isRendered = false;
             request = new Constructor(config, '/home/index');
             request._render.call(ctx);
@@ -479,7 +503,7 @@ describe('core/request', function () {
         expect(message.code).toBe(500);
         expect(message.customMessage).toBe('No data to render');
 
-        message = tryCatch(function() {
+        message = tryCatch(function () {
             ctx.isRendered = false;
             request = new Constructor(config, '/home/index');
             request._render.call(ctx, {});
@@ -490,74 +514,299 @@ describe('core/request', function () {
 
 
     it('parse', function (done) {
+
+        hooks.process = function () {
+            return Promise.resolve(10);
+        };
+        router.process = function () {
+            return Promise.resolve(10);
+        };
+
         var _d, _e;
-
-
-        hooks.process = function() {
-            return Promise.resolve(1);
-        };
-        router.process = function() {
-            return Promise.resolve(1);
-        };
         var ctx = {
-            _render: function() {
-
+            _render: function () {
+                return 'render';
             },
-            _resolveRoute: function() {
-
+            _resolveRoute: function () {
+                return 'resolveRoute';
             },
-            _getApi: function() {
-
+            _getApi: function () {
+                return 'getApi';
             },
-            _handleError: function() {
-
+            _handleError: function () {
+                return '_handleError';
             }
         };
 
-        request = new Constructor(config, '/home/index');
-        request.parse.call(ctx).then(function(data) {
+        spyOn(ctx, '_render').and.callThrough();
+        spyOn(ctx, '_resolveRoute').and.callThrough();
+        spyOn(ctx, '_getApi').and.callThrough();
+        spyOn(ctx, '_handleError').and.callThrough();
+
+        var request = new Constructor(config, '/home/index');
+        request.parse.call(ctx).then(function (data) {
             _d = data;
-        }, function(error) {
+        }, function (error) {
             _e = error;
         });
+        expect(ctx._getApi).toHaveBeenCalled();
+        var rSpy = expect(ctx._render);
 
-        setTimeout(done, 100);
+
+        setTimeout(function () {
+            expect(_d).toBe('render');
+            rSpy.toHaveBeenCalled();
+            done();
+        }, 100);
     });
 
 
     it('parse 2', function (done) {
-        hooks.process = function() {
-            return Promise.resolve(false);
+        var _d, _e;
+
+        hooks.process = function () {
+            return Promise.resolve(null);
         };
-        router.process = function() {
-            return Promise.resolve(1);
-        };
+
         var ctx = {
-            _render: function() {
-
+            _render: function (a) {
+                return a;
             },
-            _resolveRoute: function() {
-
+            _resolveRoute: function () {
+                return 'resolveRoute';
             },
-            _getApi: function() {
-
+            _getApi: function () {
+                return 'getApi';
             },
-            _handleError: function() {
-
+            _handleError: function () {
+                return '_handleError';
             }
         };
-        request = new Constructor(config, '/home/index');
 
-        var _d, _e;
-        request.parse.call(ctx).then(function(data) {
+
+        spyOn(ctx, '_render').and.callThrough();
+        spyOn(ctx, '_resolveRoute').and.callThrough();
+        spyOn(ctx, '_getApi').and.callThrough();
+        spyOn(ctx, '_handleError').and.callThrough();
+
+        var request = new Constructor(config, '/home/index');
+        request.parse.call(ctx).then(function (data) {
             _d = data;
-        }, function(error) {
+        }, function (error) {
             _e = error;
         });
 
-        setTimeout(function() {
+
+        expect(ctx._getApi).toHaveBeenCalled();
+
+
+        var rSpy = expect(ctx._render);
+        var rSpy2 = expect(ctx._handleError);
+
+
+        setTimeout(function () {
+            expect(_d).toBe('_handleError');
+            rSpy.toHaveBeenCalled();
+            rSpy2.toHaveBeenCalled();
             done();
         }, 100);
+    });
+
+
+    it('_handleError', function () {
+
+        var ctx = {
+            addHeader: function () {
+            },
+            _render: function () {
+                return 'RENDERED';
+            },
+            statusCode: 0,
+            isERROR: false
+        };
+        router.getErrorRoute = function () {
+            return 'core/error'.split('/');
+        };
+        var response = {};
+
+        spyOn(ctx, '_render').and.callThrough();
+
+        var request = new Constructor(config, '/home/index');
+        request._handleError.call(ctx, response);
+        expect(ctx._render).toHaveBeenCalled();
+
+        response = {};
+        ctx.isERROR = true;
+        ctx._render = function (a) {
+            expect(a).toBe('{}');
+        };
+        spyOn(ctx, '_render').and.callThrough();
+        request._handleError.call(ctx, response);
+        expect(ctx._render).toHaveBeenCalled();
+
+
+        response = {};
+        response.trace = 'TRACE';
+        ctx.isERROR = true;
+        ctx._render = function (a) {
+            expect(a).toBe('TRACE');
+        };
+        spyOn(ctx, '_render').and.callThrough();
+        request._handleError.call(ctx, response);
+        expect(ctx._render).toHaveBeenCalled();
+
+
+        response = {};
+        response.stack = 'TRACE';
+        ctx.isERROR = true;
+        ctx._render = function (a) {
+            expect(a).toBe('TRACE');
+        };
+        spyOn(ctx, '_render').and.callThrough();
+        request._handleError.call(ctx, response);
+        expect(ctx._render).toHaveBeenCalled();
+
+
+    });
+
+
+    it('_handleError controller/core/error', function () {
+
+        var ctx = {
+            addHeader: function () {
+            },
+            _render: function () {
+                return 'RENDERED';
+            },
+            statusCode: 0,
+            isERROR: false
+        };
+        router.getErrorRoute = function () {
+            return 'core/error'.split('/');
+        };
+
+
+        spyOn(ctx, '_render').and.callThrough();
+
+        var request = new Constructor(config, '/home/index');
+        var cpath = path.normalize(__dirname + "/../tf/controllers");
+        di.setAlias('controllersPath', cpath);
+        var eExists = di.exists(di.normalizePath('@{controllersPath}/core') + '.js');
+        expect(eExists).toBe(true);
+
+
+        ctx._render = function (a) {
+            expect(a.indexOf('CUSTOM ERROR HANDLER') > -1).toBe(true);
+        };
+        spyOn(ctx, '_render').and.callThrough();
+
+        var response = new Error('Message');
+        response.code = 404;
+        request._handleError.call(ctx, response);
+        expect(ctx._render).toHaveBeenCalled();
+
+        expect(ctx.statusCode).toBe(404);
+
+        response.code = null;
+        request._handleError.call(ctx, response);
+        expect(ctx._render).toHaveBeenCalled();
+        expect(ctx.statusCode).toBe(500);
+    });
+
+
+    it('_handleError controller/core/handler', function () {
+
+        var ctx = {
+            addHeader: function () {
+            },
+            _render: function () {
+                return 'RENDERED';
+            },
+            statusCode: 0,
+            isERROR: false
+        };
+        router.getErrorRoute = function () {
+            return 'core/handler'.split('/');
+        };
+
+
+        spyOn(ctx, '_render').and.callThrough();
+
+        var request = new Constructor(config, '/home/index');
+        var cpath = path.normalize(__dirname + "/../tf/controllers");
+        di.setAlias('controllersPath', cpath);
+        var eExists = di.exists(di.normalizePath('@{controllersPath}/core') + '.js');
+        expect(eExists).toBe(true);
+
+
+        ctx._render = function (a) {
+            expect(a).toBe('trace');
+        };
+        spyOn(ctx, '_render').and.callThrough();
+
+        var response = new Error('Message');
+        response.trace = 'trace';
+        request._handleError.call(ctx, response);
+        expect(ctx._render).toHaveBeenCalled();
+        expect(ctx.statusCode).toBe(500);
+
+
+        ctx._render = function (a) {
+            expect(a).toBe('stack');
+        };
+        spyOn(ctx, '_render').and.callThrough();
+
+        response = new Error('Message');
+        response.stack = 'stack';
+        request._handleError.call(ctx, response);
+        expect(ctx._render).toHaveBeenCalled();
+        expect(ctx.statusCode).toBe(500);
+    });
+
+
+    it('_handleError controller/core/noaction', function () {
+
+        var ctx = {
+            addHeader: function () {
+            },
+            _render: function () {
+                return 'RENDERED';
+            },
+            statusCode: 0,
+            isERROR: false
+        };
+        router.getErrorRoute = function () {
+            return 'core/noaction'.split('/');
+        };
+
+
+        spyOn(ctx, '_render').and.callThrough();
+
+        var request = new Constructor(config, '/home/index');
+        var cpath = path.normalize(__dirname + "/../tf/controllers");
+        di.setAlias('controllersPath', cpath);
+        var eExists = di.exists(di.normalizePath('@{controllersPath}/core') + '.js');
+        expect(eExists).toBe(true);
+
+
+        var response = new Error('Message');
+
+        var message = tryCatch(function () {
+            return request._handleError.call(ctx, response);
+        });
+
+        expect(ctx.isERROR).toBe(true);
+        expect(message.customMessage).toBe('Error on executing error action');
+        expect(ctx.statusCode).toBe(500);
+
+    });
+
+
+
+    xit('_handleRoute', function () {
+
+
+
     });
 
     function tryCatch(callback) {
