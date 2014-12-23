@@ -16,6 +16,8 @@
   "core/routeRule": "@{framework}/core/routeRule",
   "core/view": "@{framework}/core/view",
 
+  "db/mongo": "@{framework}/db/mongo",
+
   "hooks/request": "@{framework}/hooks/request",
 
   "interface/requestHooks": "@{framework}/interface/requestHooks",

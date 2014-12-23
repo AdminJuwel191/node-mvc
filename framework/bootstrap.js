@@ -103,9 +103,7 @@ Bootstrap = Type.create({
         } else {
             logger = component.get('core/logger');
         }
-        // logger
-        logger.print(env);
-        logger.print(this.__dynamic__);
+
         // add memory cache
         if (!component.has('cache/memory')) {
             component.set('cache/memory', {});
@@ -129,7 +127,7 @@ Bootstrap = Type.create({
         // load config
         if (Type.isString(env.config)) {
             try {
-                di.load('@{appPath}/' + env.config)(component);
+                di.load('@{appPath}/' + env.config)(component, di);
             } catch (e) {
                 throw new error.Exception('Initialize config', e);
             }
@@ -171,6 +169,10 @@ Bootstrap = Type.create({
         } else {
             server.listen(DEFAULT_SERVER_PORT);
         }
+
+        // logger
+        logger.print(env);
+        logger.print(this.__dynamic__);
 
     },
     /**

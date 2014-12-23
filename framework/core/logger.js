@@ -26,26 +26,28 @@ for (var i = 0; i < 100; ++i) {
 Logger = Type.create({
         stream: Type.OBJECT,
         server: Type.OBJECT,
-        config: Type.OBJECT
+        config: Type.OBJECT,
+        hooks: Type.ARRAY
     },
     {
         _construct: function Logger(config) {
             var file;
             this.stream = null;
             this.server = null;
-            this.config = {
+            this.hooks = [];
+            this.config = core.extend({
+                enabled: false,
+                write: false,
                 publish: false,
+                console: false,
                 port: 9001,
-                debug: false,
                 file: "server.log",
                 level: 5
-            };
-            core.extend(this.config, config);
-            if (this.config.debug) {
+            }, config);
 
+            if (this.config.write && this.config.enabled) {
                 file = di.normalizePath('@{basePath}/' + this.config.file);
                 this.stream = fs.createWriteStream(file, {encoding: 'utf8'});
-
                 if (this.config.publish) {
                     this.server = http.createServer();
                     this.server.on('request', function (request, response) {
@@ -57,6 +59,21 @@ Logger = Type.create({
                     this.print('Publishing log write stream on port: ' + this.config.port);
                 }
             }
+        },
+        /**
+         * @since 0.0.1
+         * @author Igor Ivanovic
+         * @method Logger#addHook
+         *
+         * @description
+         * Hooks are used to do an extra stuff on log.
+         * Eg. if we want to store in db
+         */
+        addHook: function (callback) {
+            if (!Type.isFunction(callback)) {
+                throw new error.Exception('Logger hook must be function');
+            }
+            this.hooks.push(callback);
         },
         /**
          * @since 0.0.1
@@ -84,46 +101,59 @@ Logger = Type.create({
          */
         log: function Logger_log() {
             var logs = "",
-                date = new Date().toISOString(),
-                args = Array.prototype.slice.call(arguments),
-                url = '';
+                url = '',
+                date,
+                args = Array.prototype.slice.call(arguments);
 
-            if (this.config.debug) {
+            if (!this.config.enabled) {
+                return args;
+            }
 
-                logs += date + '\n';
+            date = new Date().toISOString();
+            logs += date + '\n';
+            try {
+                throw new Error();
+            } catch (e) {
+                url = core.trim(e.stack.split('\n').slice(3, 4).shift());
+                logs += url + '\n';
+            }
+            args.forEach(function (item) {
+                logs += core.trim(item);
+            });
+            logs += '\n';
+            logs += '\n';
+            if (this.config.console) {
+                console.log(logs);
+            }
+            try {
+                replace.forEach(function (value) {
+                    logs = logs.replace(value, '');
+                });
+                logs = logs.replace(/\\'/g, "'");
+                logs = logs.replace(/\\n/g, '\n');
+                logs = logs.replace(/\\u001b/g, '\u001b');
+
+            } catch (e) {
+                this.print(e);
+            }
+
+            if (this.config.write && this.stream) {
                 try {
-                    throw new Error();
-                } catch (e) {
-                    url = core.trim(e.stack.split('\n').slice(3, 4).shift());
-                    logs += url + '\n';
-                }
-                console.log(date + ':');
-                args.forEach(function (item) {
-                    console.log(item);
-                    logs += core.trim(item);
-                }.bind(this));
-                logs += '\n';
-                logs += '\n';
-                try {
-                    replace.forEach(function (value) {
-                        logs = logs.replace(value, '');
-                    });
-                    logs = logs.replace(/\\'/g, "'");
-                    logs = logs.replace(/\\n/g, '\n');
-                    logs = logs.replace(/\\u001b/g, '\u001b');
-
+                    this.stream.write(logs);
                 } catch (e) {
                     this.print(e);
                 }
-                if (this.stream) {
-                    try {
-                        this.stream.write(logs);
-                    } catch (e) {
-                        this.print(e);
-                    }
-                }
             }
-            return logs;
+
+            this.hooks.forEach(function (hook) {
+                try {
+                    hook(logs);
+                } catch (e) {
+                    this.print(e);
+                }
+            }.bind(this));
+
+
         },
         /**
          * @since 0.0.1
@@ -134,7 +164,11 @@ Logger = Type.create({
          * Inspect
          */
         print: function Logger_print() {
-            var log = "", args = Array.prototype.slice.call(arguments);
+            var log = "",
+                args = Array.prototype.slice.call(arguments);
+            if (!this.config.enabled) {
+                return args;
+            }
             util.inspect.styles.string = 'green';
             args.forEach(function (item) {
                 log += " " + util.inspect(item, {colors: true, depth: this.config.level});

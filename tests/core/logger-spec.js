@@ -1,25 +1,25 @@
 var di = require('../../'), fs = require('fs'), path = require('path');
 describe('core/logger', function () {
-    var logger,
+    var
         nPath,
         config = {
+            enabled: true,
+            write: true,
             publish: true,
+            console: true,
             port: 10000,
-            debug: true,
             file: "server.log",
-            level: 5
+            level: 3
         },
         Logger = di.load('core/logger');
 
     beforeEach(function () {
         nPath = path.normalize(__dirname + '/../tf/');
         di.setAlias('basePath', nPath);
-        logger = new Logger(config);
-
     });
 
-    it('instance|close', function (done) {
-
+    it('instance|close|print', function (done) {
+        var logger = new Logger(config);
         var filePath = nPath + config.file;
         expect(di.exists(filePath)).toBe(true);
 
@@ -29,9 +29,11 @@ describe('core/logger', function () {
             writeHead: function () {
             },
             end: function () {
+            },
+            hook: function () {
             }
         };
-
+        spyOn(response, 'hook');
         logger.server.emit('request', {}, response);
 
 
@@ -45,8 +47,20 @@ describe('core/logger', function () {
         logger.close();
 
 
+        expect(logger.config.enabled).toBe(true);
+        expect(logger.config.write).toBe(true);
+        expect(logger.config.publish).toBe(true);
+        expect(logger.config.console).toBe(true);
+        expect(logger.config.port).toBe(10000);
+        expect(logger.config.file).toBe('server.log');
+        expect(logger.config.level).toBe(3);
+
+        logger.addHook(response.hook);
+        logger.print('printing');
+
+
         setTimeout(function () {
-            var html =  "Publishing log write stream on port: 10000";
+            var html = "Publishing log write stream on port: 10000";
             var message = fs.readFileSync(filePath, {encoding: 'utf-8'});
             expect(message.indexOf(html) > -1).toBe(true);
 
@@ -56,6 +70,7 @@ describe('core/logger', function () {
                     expect(isStreamEnded).toBe(true);
                     expect(isServerEnded).toBe(true);
                     expect(di.exists(filePath)).toBe(false);
+                    expect(response.hook).toHaveBeenCalled();
                     done();
                 }, 200);
             }, 100);
@@ -63,8 +78,33 @@ describe('core/logger', function () {
     });
 
 
-    it('construct', function (done) {
+    it('instance|print not enabled|log|addHook', function () {
 
+        var logger = new Logger({enabled: false});
+        var print = logger.print('printing');
+        expect(logger.config.enabled).toBe(false);
+        expect(print.shift()).toBe('printing');
+
+        print = logger.log('printing2');
+        expect(logger.config.enabled).toBe(false);
+        expect(print.shift()).toBe('printing2');
+
+        var message = tryCatch(function() {
+            logger.addHook(1);
+        });
+
+        expect(message.customMessage).toBe('Logger hook must be function');
+
+        logger.addHook(n);
+
+        expect(logger.hooks.length).toBe(1);
+        function n(){};
+    });
+
+
+    it('construct', function (done) {
+        var logger = new Logger(config);
+        var _e;
         nPath = path.normalize(__dirname + '/../tf/ab/cd/');
         di.setAlias('basePath', nPath);
         config.port = 11111;
@@ -72,20 +112,16 @@ describe('core/logger', function () {
             logger._construct(config);
         });
 
-        process.once('uncaughtException', errorHandler);
+        process.once('uncaughtException', function (e) {
+            _e = e;
+        });
 
-        function errorHandler(error) {
-            expect(error.errno).toBe(34);
-            expect(error.path).toBe(nPath + 'server.log');
-            done();
-        }
-
-        setTimeout(function() {
+        setTimeout(function () {
+            expect(_e.errno).toBe(34);
+            expect(_e.path).toBe(nPath + 'server.log');
             done();
         }, 100);
     });
-
-
 
 
     function tryCatch(callback) {
