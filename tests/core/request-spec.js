@@ -11,13 +11,16 @@ describe('core/request', function () {
             }
         },
         router = {
-            createUrl: function () {
+            createUrl: function (a, params) {
+                return '/' + a + '?id=' + params.id;
             },
             process: function () {
                 return Promise.resolve('handler');
             },
             getErrorRoute: function () {
-
+            },
+            trim: function (a) {
+                return a;
             }
         },
         hooks = {
@@ -442,7 +445,9 @@ describe('core/request', function () {
         });
 
 
-        promise.then(null, done);
+        promise.then(null, function () {
+            done();
+        });
     });
 
     it('_chain error2', function (done) {
@@ -459,7 +464,10 @@ describe('core/request', function () {
             return {}.b.c;
         });
 
-        promise.then(null, done);
+        promise.then(null, function () {
+
+            done();
+        });
     });
 
     it('_render', function () {
@@ -605,7 +613,7 @@ describe('core/request', function () {
 
 
         setTimeout(function () {
-            expect(_d).toBe('_handleError');
+
             rSpy.toHaveBeenCalled();
             rSpy2.toHaveBeenCalled();
             done();
@@ -802,11 +810,93 @@ describe('core/request', function () {
     });
 
 
+    it('_handleRoute', function (done) {
+        var cpath = path.normalize(__dirname + "/../tf/controllers");
+        di.setAlias('controllersPath', cpath);
+        var request = new Constructor(config, '/home/index');
+        request.controller = 'core';
+        request.action = 'index';
+        var promise = request._handleRoute();
 
-    xit('_handleRoute', function () {
+
+        promise.then(function (data) {
+            expect(data.indexOf('before_index') > -1).toBe(true);
+            expect(data.indexOf('action_index') > -1).toBe(true);
+            expect(data.indexOf('beforeEach') > -1).toBe(true);
+
+            expect(data.indexOf('after_index') > -1).toBe(false);
+            expect(data.indexOf('afterEach') > -1).toBe(false);
+            done();
+        });
+    });
 
 
+    it('_handleRoute', function () {
+        var cpath = path.normalize(__dirname + "/../tf/controllers");
+        di.setAlias('controllersPath', cpath);
+        var request = new Constructor(config, '/home/index');
+        request.controller = 'core';
+        request.action = 'test';
 
+        var message = tryCatch(function () {
+            return request._handleRoute();
+        });
+
+        expect(message.customMessage).toBe('Missing action in controller');
+    });
+
+
+    it('_handleRoute 2', function () {
+        var cpath = path.normalize(__dirname + "/../tf/controllers");
+        di.setAlias('controllersPath', cpath);
+        var request = new Constructor(config, '/home/index');
+        request.controller = 'index';
+        request.action = 'test';
+
+        var message = tryCatch(function () {
+            return request._handleRoute();
+        });
+        expect(message.customMessage).toBe('Missing controller');
+    });
+
+
+    it('_handleRoute 3', function () {
+        var cpath = path.normalize(__dirname + "/../tf/controllers");
+        di.setAlias('controllersPath', cpath);
+        var request = new Constructor(config, '/home/index');
+        request.controller = 'test';
+        request.action = 'test';
+
+        var message = tryCatch(function () {
+            return request._handleRoute();
+        });
+        expect(message.customMessage).toBe('Controller must be instance of ControllerInterface "core/controller"');
+    });
+
+    it('forward', function () {
+        var cpath = path.normalize(__dirname + "/../tf/controllers");
+        di.setAlias('controllersPath', cpath);
+        Constructor.prototype.parse = function () {
+            return this;
+        };
+        var request = new Constructor(config, '/home/index');
+        var route = request.forward('index/index', {id: 1});
+        expect(route.url).toBe('/index/index?id=1');
+    });
+
+
+    it('forward error', function () {
+        var cpath = path.normalize(__dirname + "/../tf/controllers");
+        di.setAlias('controllersPath', cpath);
+        Constructor.prototype.parse = function () {
+            return this;
+        };
+        var request = new Constructor(config, '/index/index');
+        request.route = 'index/index';
+        var message = tryCatch(function() {
+            request.forward('index/index', {id: 1});
+        });
+        expect(message.customMessage).toBe('Cannot forward to same route');
     });
 
     function tryCatch(callback) {
