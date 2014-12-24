@@ -7,11 +7,12 @@ Features
 ====
 1. Fully extensible
 2. TDD driven
-3. Custom DI
-4. Component based
-5. Twig (swigjs) templating engine 
-6. Dynamic routing
-7. Logger
+3. Type checking at runtime!
+4. Custom DI
+5. Component based
+6. Twig (swigjs) templating engine 
+7. Dynamic routing
+8. Logger
 
 [Demo application](https://github.com/igorzg/mvcjs-testapp)
 
