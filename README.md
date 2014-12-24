@@ -7,7 +7,7 @@ Features
 ====
 1. Fully extensible
 2. TDD driven
-3. Type checking at runtime!
+3. Type checking at runtime
 4. Custom DI
 5. Component based
 6. Twig (swigjs) templating engine 
