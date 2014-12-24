@@ -81,13 +81,13 @@ describe("di", function () {
     });
 
     it("setAliasError", function () {
-        var message;
+        var message, val = __dirname + "/newtest/%*:<>";
         try {
-            di.setAlias("test", __dirname + "/newtest/%*:<>");
+            di.setAlias("test", val);
         } catch (e) {
             message = e.customMessage;
         }
-        expect(message).toBe('DI.setAlias: Invalid alias value, chars \'\\?%*:|"<>.\' and spaces are not allowed. KEY: test');
+        expect(message).toBe('DI.setAlias: Invalid alias value, chars \'\\?%*:|"<>.\' and spaces are not allowed. KEY: test, VAL:' + val);
     });
 
     it("loadError", function () {
