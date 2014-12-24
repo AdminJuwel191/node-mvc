@@ -328,7 +328,7 @@ Request = Type.create({
                     } else if (response.stack) {
                         this._render(response.stack);
                     } else  {
-                        this._render(util.inspect(response));
+                        this._render(response);
                     }
                 } else {
                     throw new error.HttpError(500, {errorAction: errorAction}, "No error action defined at error controller");
