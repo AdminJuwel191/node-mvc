@@ -1,4 +1,4 @@
 var di = require('../');
 var framework = di.load('bootstrap');
 framework.setBasePath(__dirname);
-framework.init('app/', 'env.json');
+framework.init('app/', '../env/env.json');

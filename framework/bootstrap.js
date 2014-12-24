@@ -61,6 +61,9 @@ Bootstrap = Type.create({
             filePath = envPath + "env.json";
         }
 
+        envPath = di.dirname(filePath);
+        // set env path
+        di.setAlias('envPath', envPath);
 
         // load config
         try {
@@ -127,9 +130,9 @@ Bootstrap = Type.create({
         // load config
         if (Type.isString(env.config)) {
             try {
-                di.load('@{appPath}/' + env.config)(component, di);
+                di.load(envPath + '/' + env.config)(component, di);
             } catch (e) {
-                throw new error.Exception('Initialize config', e);
+                throw new error.Exception('Initialize config: ' + envPath + '/' + env.config, e);
             }
         } else {
             throw new error.DataError(env.config, 'Config file is not defined');

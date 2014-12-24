@@ -79,7 +79,8 @@ describe('bootstrap', function () {
 
         bootstrap.setBasePath(basePath);
 
-        mock["@{appPath}/bootstrap-config.js"] = di.load("@{basePath}/bootstrap-config.js");
+        var envPath = di.getAlias('basePath');
+        mock[envPath + "bootstrap-config.js"] = di.load(envPath + "bootstrap-config.js");
 
 
         logger = {
@@ -123,6 +124,7 @@ describe('bootstrap', function () {
         result = di.mock(function () {
             return bootstrap.init('');
         }, mock);
+
 
         expect(logs.length).toBe(2);
         // required components
@@ -181,7 +183,7 @@ describe('bootstrap', function () {
             return bootstrap.init('/abc', 'ccas.json');
         }, mock);
 
-        expect(result.customMessage).toBe('Problem with loading file, do you have your environment file json in path: "' + di.getAlias('appPath') + '" ?');
+        expect(result.customMessage).toBe('Problem with loading file, do you have your environment file json in path: "' + di.getAlias('envPath') + '" ?');
 
         bootstrap.initalized = false;
 
@@ -222,7 +224,7 @@ describe('bootstrap', function () {
             return bootstrap.init('', 'valid2.json');
         }, mock);
 
-        expect(result.customMessage).toBe('Initialize config');
+        expect(result.customMessage).toBe('Initialize config: '+ envPath + 'bootstrap-config2.js');
 
     });
 });

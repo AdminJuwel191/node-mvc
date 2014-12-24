@@ -159,6 +159,17 @@ var DI = Type.create({
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
+     * @method DI#dirname
+     *
+     * @description
+     * Get dir of file
+     */
+    dirname: function DI_dirname(name) {
+        return path.dirname(name);
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
      * @method DI#getPath
      *
      * @description
