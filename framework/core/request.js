@@ -322,7 +322,7 @@ Request = Type.create({
                 errorController = new Controller();
                 if (errorController.has('action_' + errorAction)) {
 
-                    response = errorController.get('action_' + errorAction)(response);
+                    response = errorController.get('action_' + errorAction).call(errorController, response);
                     if (response.trace) {
                         this._render(response.trace);
                     } else if (response.stack) {
