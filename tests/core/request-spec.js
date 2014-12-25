@@ -678,7 +678,7 @@ describe('core/request', function () {
     });
 
 
-    it('_handleError controller/core/error', function () {
+    it('_handleError controller/core/error 404', function () {
 
         var ctx = {
             addHeader: function () {
@@ -686,15 +686,21 @@ describe('core/request', function () {
             _render: function () {
                 return 'RENDERED';
             },
+            _resolveRoute: function(a) {
+                var a1 = a.shift(), a2 = a.shift();
+                expect(a1).toBe('core/error');
+                expect(a2 instanceof Error).toBe(true);
+                return Promise.reject('RESOLVED');
+            },
             statusCode: 0,
             isERROR: false
         };
         router.getErrorRoute = function () {
-            return 'core/error'.split('/');
+            return 'core/error';
         };
 
 
-        spyOn(ctx, '_render').and.callThrough();
+        spyOn(ctx, '_resolveRoute').and.callThrough();
 
         var request = new Constructor(config, '/home/index');
         var cpath = path.normalize(__dirname + "/../tf/controllers");
@@ -704,25 +710,22 @@ describe('core/request', function () {
 
 
         ctx._render = function (a) {
-            expect(a.indexOf('CUSTOM ERROR HANDLER') > -1).toBe(true);
+            expect(a.indexOf('Error') > -1).toBe(true);
         };
-        spyOn(ctx, '_render').and.callThrough();
+
 
         var response = new Error('Message');
         response.code = 404;
         request._handleError.call(ctx, response);
-        expect(ctx._render).toHaveBeenCalled();
+        expect(ctx._resolveRoute).toHaveBeenCalled();
 
         expect(ctx.statusCode).toBe(404);
 
-        response.code = null;
-        request._handleError.call(ctx, response);
-        expect(ctx._render).toHaveBeenCalled();
-        expect(ctx.statusCode).toBe(500);
     });
 
 
-    it('_handleError controller/core/handler', function () {
+
+    it('_handleError controller/core/error 500', function () {
 
         var ctx = {
             addHeader: function () {
@@ -730,15 +733,21 @@ describe('core/request', function () {
             _render: function () {
                 return 'RENDERED';
             },
+            _resolveRoute: function(a) {
+                var a1 = a.shift(), a2 = a.shift();
+                expect(a1).toBe('core/error');
+                expect(a2 instanceof Error).toBe(true);
+                return Promise.reject('RESOLVED');
+            },
             statusCode: 0,
             isERROR: false
         };
         router.getErrorRoute = function () {
-            return 'core/handler'.split('/');
+            return 'core/error';
         };
 
 
-        spyOn(ctx, '_render').and.callThrough();
+        spyOn(ctx, '_resolveRoute').and.callThrough();
 
         var request = new Constructor(config, '/home/index');
         var cpath = path.normalize(__dirname + "/../tf/controllers");
@@ -748,63 +757,13 @@ describe('core/request', function () {
 
 
         ctx._render = function (a) {
-            expect(a).toBe('trace');
+            expect(a.indexOf('Error') > -1).toBe(true);
         };
-        spyOn(ctx, '_render').and.callThrough();
-
-        var response = new Error('Message');
-        response.trace = 'trace';
-        request._handleError.call(ctx, response);
-        expect(ctx._render).toHaveBeenCalled();
-        expect(ctx.statusCode).toBe(500);
-
-
-        ctx._render = function (a) {
-            expect(a).toBe('stack');
-        };
-        spyOn(ctx, '_render').and.callThrough();
-
-        response = new Error('Message');
-        response.stack = 'stack';
-        request._handleError.call(ctx, response);
-        expect(ctx._render).toHaveBeenCalled();
-        expect(ctx.statusCode).toBe(500);
-    });
-
-
-    it('_handleError controller/core/noaction', function () {
-
-        var ctx = {
-            addHeader: function () {
-            },
-            _render: function () {
-                return 'RENDERED';
-            },
-            statusCode: 0,
-            isERROR: false
-        };
-        router.getErrorRoute = function () {
-            return 'core/noaction'.split('/');
-        };
-
-
-        spyOn(ctx, '_render').and.callThrough();
-
-        var request = new Constructor(config, '/home/index');
-        var cpath = path.normalize(__dirname + "/../tf/controllers");
-        di.setAlias('controllersPath', cpath);
-        var eExists = di.exists(di.normalizePath('@{controllersPath}/core') + '.js');
-        expect(eExists).toBe(true);
 
 
         var response = new Error('Message');
-
-        var message = tryCatch(function () {
-            return request._handleError.call(ctx, response);
-        });
-
-        expect(ctx.isERROR).toBe(true);
-        expect(message.customMessage).toBe('Error on executing error action');
+        request._handleError.call(ctx, response);
+        expect(ctx._resolveRoute).toHaveBeenCalled();
         expect(ctx.statusCode).toBe(500);
 
     });

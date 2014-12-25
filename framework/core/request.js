@@ -302,42 +302,15 @@ Request = Type.create({
      * Handle error
      */
     _handleError: function Request_handleError(response) {
-        var Controller,
-            errorRoute = router.getErrorRoute(),
-            errorController = '@{controllersPath}/' + errorRoute.shift(),
-            errorAction = errorRoute.shift();
 
-
-
-        if (response instanceof Error && !this.isERROR && di.exists(di.normalizePath(errorController) + '.js')) {
-
+        if (response instanceof Error && !this.isERROR && !!router.getErrorRoute()) {
             if (response.code) {
                 this.statusCode = response.code;
             } else {
                 this.statusCode = 500;
             }
-
-            try {
-                Controller = di.load(errorController);
-                errorController = new Controller();
-                if (errorController.has('action_' + errorAction)) {
-
-                    response = errorController.get('action_' + errorAction).call(errorController, response);
-                    if (response.trace) {
-                        this._render(response.trace);
-                    } else if (response.stack) {
-                        this._render(response.stack);
-                    } else  {
-                        this._render(response);
-                    }
-                } else {
-                    throw new error.HttpError(500, {errorAction: errorAction}, "No error action defined at error controller");
-                }
-            } catch (e) {
-                this.isERROR = true;
-                throw new error.HttpError(500, {}, "Error on executing error action", e);
-            }
-
+            this.isERROR = true;
+            return this._resolveRoute([router.getErrorRoute(), response]).then(null, this._handleError);
         } else if (response.trace) {
             this.addHeader('Content-Type', 'text/plain');
             this._render(response.trace);

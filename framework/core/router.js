@@ -27,12 +27,8 @@ Router = Type.create({
     _construct: function Router(config) {
         this.routes = [];
         this.config = core.extend({
-            errorRoute: "error/index"
+            errorRoute: false
         }, config);
-
-        if (!Type.assert(Type.STRING, this.config.errorRoute)) {
-            throw new error.DataError(this.config, 'Router.construct: errorRoute must be string type');
-        }
     },
     /**
      * @since 0.0.1
@@ -44,7 +40,7 @@ Router = Type.create({
      * @return {object}
      */
     getErrorRoute: function Router_getErrorRoute() {
-        return this.config.errorRoute.split('/').splice(0, 2);
+        return this.config.errorRoute;
     },
     /**
      * @since 0.0.1

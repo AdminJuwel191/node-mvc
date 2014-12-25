@@ -55,21 +55,17 @@ describe('core/router', function () {
     it('construct', function () {
         router = new Constructor(config);
         expect(router.config.errorRoute).toBe('core/error');
-        var message = tryCatch(function () {
-            new Constructor({
-                errorRoute: 1
-            });
-        });
-        expect(message.data.errorRoute).toBe(1);
-        expect(message.customMessage).toBe('Router.construct: errorRoute must be string type');
     });
 
 
     it('getErrorRoute', function () {
         router = new Constructor(config);
         var error = router.getErrorRoute();
-        expect(error[0]).toBe('core');
-        expect(error[1]).toBe('error');
+        expect(error).toBe('core/error');
+
+        router = new Constructor({});
+        error = router.getErrorRoute();
+        expect(error).toBe(false);
     });
 
 
