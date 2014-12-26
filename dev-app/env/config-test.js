@@ -42,10 +42,12 @@ module.exports = function (componet, di) {
         pattern: 'test/nodata',
         route: 'test/nodata'
     });
+
     router.add({
         pattern: 'home',
-        route: 'home/index'
+        route: 'user/view'
     });
+
     router.add({
         pattern: '/',
         route: 'home/index'

@@ -72,7 +72,6 @@ Router = Type.create({
 
         logger.print('Router.add: route', route);
         this.routes.push(rule);
-
     },
 
     /**
@@ -129,21 +128,29 @@ Router = Type.create({
      * Parse request
      */
     parseRequest: function Router_parseRequest(method, parsedUrl) {
-        var i, len = this.routes.length, routeRule, route = [];
+        var all = [];
 
-        for (i = len - 1; i > -1; --i) {
-            routeRule = this.routes[i];
-            route = routeRule.parseRequest(method, parsedUrl);
-            if (Type.isArray(route) && route.length) {
-                break;
+        this.routes.forEach(function (routeRule) {
+            all.push(
+                new Promise(function (resolve, reject) {
+                    try {
+                        resolve(routeRule.parseRequest(method, parsedUrl))
+                    } catch (e) {
+                        reject(e);
+                    }
+                })
+            );
+        });
+        return Promise.all(all).then(function (data) {
+            var route;
+            while (data.length) {
+                route = data.shift();
+                if (Type.isArray(route) && route.length === 2) {
+                    return route;
+                }
             }
-        }
-        if (!Type.isArray(route)) {
-            route = [];
-        }
-
-        logger.print('Router.parseRequest', route);
-        return route;
+            return [];
+        });
     },
     /**
      * @since 0.0.1
@@ -190,7 +197,7 @@ Router = Type.create({
      */
     process: function Router_process(method, parsedUrl) {
 
-        return new Promise(handlePromise.bind(this))
+        return this.parseRequest(method, parsedUrl)
             .then(function (routeRule) {
                 if (Type.isArray(routeRule) && routeRule.length === 2) {
                     return Promise.resolve(routeRule);
@@ -200,14 +207,6 @@ Router = Type.create({
             }, function (e) {
                 throw new error.HttpError(500, {}, 'Not found', e);
             });
-
-        function handlePromise(resolve, reject) {
-            try {
-                resolve(this.parseRequest(method, parsedUrl));
-            } catch (e) {
-                reject(e);
-            }
-        }
     }
 });
 

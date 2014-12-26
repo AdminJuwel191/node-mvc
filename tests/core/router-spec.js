@@ -180,7 +180,7 @@ describe('core/router', function () {
     });
 
 
-    it('parseRequest', function () {
+    it('parseRequest', function (done) {
         var RouteRule = RouteRuleInterface.inherit({}, {
             parseRequest: function (method, parsedUrl) {
                 if (parsedUrl.pathname === '/user/view') {
@@ -207,13 +207,52 @@ describe('core/router', function () {
         });
 
 
-        var route = router.parseRequest('GET', {pathname: '/user/view'});
-        expect(route[0]).toBe('user/view');
-        expect(route[1].id).toBe(1);
-        expect(route.length).toBe(2);
+        var promise = router.parseRequest('GET', {pathname: '/user/view'});
 
-        route = router.parseRequest('GET', {pathname: '/home/view'});
-        expect(route.length).toBe(0);
+        promise.then(function(route) {
+            expect(route[0]).toBe('user/view');
+            expect(route[1].id).toBe(1);
+            expect(route.length).toBe(2);
+            done();
+        });
+
+    });
+
+
+    it('parseRequest2', function (done) {
+        var RouteRule = RouteRuleInterface.inherit({}, {
+            parseRequest: function (method, parsedUrl) {
+                if (parsedUrl.pathname === '/user/view') {
+                    return ['user/view', {id: 1}];
+                }
+            },
+            createUrl: function (route, params) {
+                if (route === 'user/view') {
+                    return 'user/' + params.id;
+                }
+                return false;
+            }
+        });
+        var Constructor = di.mock('core/router', core.extend(mock, {
+            "core/routeRule": RouteRule
+        }));
+        router = new Constructor(config);
+
+
+        router.add({
+            pattern: 'user/<id:(\\d+)>',
+            route: 'user/view',
+            method: ['GET']
+        });
+
+
+        var promise = router.parseRequest('GET', {pathname: '/home/view'});
+
+        promise.then(function(route) {
+            expect(route.length).toBe(0);
+            done();
+        });
+
     });
 
 
