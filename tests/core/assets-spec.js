@@ -18,7 +18,7 @@ describe('core/assets', function () {
             error: di.load('error'),
             core: di.load('core'),
             fs: di.load('fs'),
-            promise: di.load('Promise'),
+            promise: di.load('promise'),
             etag: etag,
             'mime-types': mime,
             "core/component": {
