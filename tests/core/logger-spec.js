@@ -28,6 +28,8 @@ describe('core/logger', function () {
         var response = {
             writeHead: function () {
             },
+            write: function () {
+            },
             end: function () {
             },
             hook: function () {
