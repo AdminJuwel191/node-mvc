@@ -17,6 +17,8 @@ describe('core/assets', function () {
             typejs: Type,
             error: di.load('error'),
             core: di.load('core'),
+            fs: di.load('fs'),
+            promise: di.load('Promise'),
             etag: etag,
             'mime-types': mime,
             "core/component": {
@@ -59,7 +61,7 @@ describe('core/assets', function () {
     });
 
 
-    it('onRequest', function () {
+    it('onRequest', function (done) {
         mime.lookup = function () {
             return 'application/javascript';
         };
@@ -94,50 +96,158 @@ describe('core/assets', function () {
             hook: '^\\/files'
         });
 
-        var file = instance.onRequest(api);
+        var promise = instance.onRequest(api);
 
-        expect(file).toBe('module.exports = "CORRECT";');
-        expect(api.addHeader).toHaveBeenCalled();
-        expect(api.getMethod).toHaveBeenCalled();
-        expect(api.isHeaderCacheUnModified).toHaveBeenCalled();
+        promise.then(function(data) {
 
-        var ob = headers.shift();
-        expect(ob.key).toBe('Content-Type');
-        expect(ob.value).toBe('application/javascript');
+            expect(data.toString()).toBe('module.exports = "CORRECT";');
+            expect(api.addHeader).toHaveBeenCalled();
+            expect(api.getMethod).toHaveBeenCalled();
+            expect(api.isHeaderCacheUnModified).toHaveBeenCalled();
 
-        ob = headers.shift();
-        expect(ob.key).toBe('Cache-Control');
-        expect(ob.value).toBe('public, max-age=31104000');
+            var ob = headers.shift();
+            expect(ob.key).toBe('Content-Type');
+            expect(ob.value).toBe('application/javascript');
 
-        ob = headers.shift();
-        expect(ob.key).toBe('ETag');
-        expect(ob.value).toBe('ETAG');
+            ob = headers.shift();
+            expect(ob.key).toBe('Cache-Control');
+            expect(ob.value).toBe('public, max-age=31104000');
 
+            ob = headers.shift();
+            expect(ob.key).toBe('ETag');
+            expect(ob.value).toBe('ETAG');
+
+            done();
+        });
+    });
+
+
+    it('onRequest 2', function (done) {
+        mime.lookup = function () {
+            return 'application/javascript';
+        };
+        var headers = [], method = 'GET', headerModified = false, isSended = false;
+        var api = {
+            parsedUrl: {
+                pathname: '/tf/di-test-load.js'
+            },
+            addHeader: function (key, value) {
+                headers.push({
+                    key: key,
+                    value: value
+                });
+            },
+            getMethod: function () {
+                return method;
+            },
+            isHeaderCacheUnModified: function () {
+                return headerModified;
+            },
+            sendNoChange: function () {
+                isSended = true;
+            }
+        };
+        spyOn(api, 'sendNoChange').and.callThrough();
+
+        var instance = new Assets({
+            path: path.normalize(__dirname + '/../'),
+            hook: '^\\/files'
+        });
         headerModified = true;
-        instance.onRequest(api);
+        var promise =  instance.onRequest(api);
 
-        expect(isSended).toBe(true);
-        expect(api.sendNoChange).toHaveBeenCalled();
+        promise.then(function() {
+            expect(isSended).toBe(true);
+            expect(api.sendNoChange).toHaveBeenCalled();
+            done();
+        });
+    });
+
+
+
+   it('onRequest 3', function (done) {
+        mime.lookup = function () {
+            return 'application/javascript';
+        };
+        var headers = [], method = 'GET', headerModified = false, isSended = false;
+        var api = {
+            parsedUrl: {
+                pathname: '/tf/di-test-load.js'
+            },
+            addHeader: function (key, value) {
+                headers.push({
+                    key: key,
+                    value: value
+                });
+            },
+            getMethod: function () {
+                return method;
+            },
+            isHeaderCacheUnModified: function () {
+                return headerModified;
+            },
+            sendNoChange: function () {
+                isSended = true;
+            }
+        };
+        var instance = new Assets({
+            path: path.normalize(__dirname + '/../'),
+            hook: '^\\/files'
+        });
+        headerModified = true;
 
         method = 'POST';
-        var message = tryCatch(function () {
-            return instance.onRequest(api);
+        var promise =  instance.onRequest(api);
+        promise.then(null, function(message) {
+            expect(message.customMessage).toBe('Assets are accessible only via GET request');
+            done();
         });
+    });
 
-        expect(message.customMessage).toBe('Assets are accessible only via GET request');
+
+    it('onRequest 4', function (done) {
+        mime.lookup = function () {
+            return 'application/javascript';
+        };
+        var headers = [], method = 'GET', headerModified = false, isSended = false;
+        var api = {
+            parsedUrl: {
+                pathname: '/tf/di-test-load.js'
+            },
+            addHeader: function (key, value) {
+                headers.push({
+                    key: key,
+                    value: value
+                });
+            },
+            getMethod: function () {
+                return method;
+            },
+            isHeaderCacheUnModified: function () {
+                return headerModified;
+            },
+            sendNoChange: function () {
+                isSended = true;
+            }
+        };
+
+        var instance = new Assets({
+            path: path.normalize(__dirname + '/../'),
+            hook: '^\\/files'
+        });
+        headerModified = true;
 
         mime.lookup = function () {
             return false;
         };
 
-        method = 'GET';
-        message = tryCatch(function () {
-            return instance.onRequest(api);
+        var promise =  instance.onRequest(api);
+        promise.then(function(data) {
+            expect(data).toBe(false);
+            done();
         });
 
-        expect(message).toBe(false);
     });
-
 
     it('mimeType', function () {
         mime.lookup = function () {
@@ -155,14 +265,19 @@ describe('core/assets', function () {
     });
 
 
-    it('readFile', function () {
+    it('readFile', function (done) {
         var obj = {
             path: '@{basePath}/assetFiles/',
             hook: '^\\/files'
         };
         var instance = new Assets(obj);
         var nPath = path.normalize(__dirname + '/../tf/di-test-load.js');
-        expect(instance.readFile(nPath)).toBe('module.exports = "CORRECT";');
+
+        instance.readFile(nPath, {encoding: 'utf8'}, function(err, data) {
+            expect(data).toBe('module.exports = "CORRECT";');
+            done();
+        });
+
     });
 
 

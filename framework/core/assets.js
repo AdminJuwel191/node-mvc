@@ -5,6 +5,8 @@ var di = require('../di'),
     core = di.load('core'),
     etag = di.load('etag'),
     mime = di.load('mime-types'),
+    fs = di.load('fs'),
+    Promise = di.load('promise'),
     component = di.load('core/component'),
     logger = component.get('core/logger'),
     hook = component.get('hooks/request'),
@@ -46,36 +48,40 @@ Assets = Type.create({
     onRequest: function Favicon_onRequest(api) {
 
         var maxAge = 60 * 60 * 24 * 30 * 12,  // one year
-            filePath = this.config.path + api.parsedUrl.pathname,
-            mimeType,
-            file;
+            filePath = di.normalizePath(this.config.path + api.parsedUrl.pathname),
+            mimeType;
 
 
         mimeType = this.mimeType(filePath);
 
         if (!mimeType) {
             logger.print('MimeType', mimeType, filePath);
-            return false;
+            return Promise.resolve(false);
         }
 
-        file = this.readFile(filePath);
+        return new Promise(function (resolve, reject) {
+            if (api.getMethod() !== 'GET') {
+                return reject(new error.HttpError(500, {path: filePath}, 'Assets are accessible only via GET request'));
+            }
+            this.readFile(filePath, function (err, file) {
+                if (err) {
+                    return reject(err);
+                }
+
+                api.addHeader('Content-Type', mimeType);
+                api.addHeader('Cache-Control', 'public, max-age=' + ~~(maxAge));
+                api.addHeader('ETag', etag(file));
 
 
-        api.addHeader('Content-Type', mimeType);
-        api.addHeader('Cache-Control', 'public, max-age=' + ~~(maxAge));
-        api.addHeader('ETag', etag(file));
+                if (api.isHeaderCacheUnModified()) {
+                    return resolve(api.sendNoChange());
+                }
 
+                logger.print('MimeType', mimeType, filePath);
+                resolve(file);
+            });
+        }.bind(this));
 
-        if (api.getMethod() !== 'GET') {
-            throw new error.HttpError(500, {path: filePath}, 'Assets are accessible only via GET request');
-        } else if (api.isHeaderCacheUnModified()) {
-            api.sendNoChange();
-        }
-
-
-        logger.print('MimeType', mimeType, filePath);
-
-        return file;
     },
     /**
      * @since 0.0.1
@@ -96,8 +102,8 @@ Assets = Type.create({
      * @description
      * Get default error route
      */
-    readFile: function Assets_readFile(filePath) {
-        return di.readFileSync(filePath);
+    readFile: function Assets_readFile() {
+        return fs.readFile.apply(fs, arguments);
     }
 });
 
