@@ -25,7 +25,15 @@ describe('interface/controller', function () {
             forward: n,
             addHeader: n,
             onEnd: n,
-            createUrl: n
+            createUrl: n,
+            hasHeader: n,
+            getRequestHeader: n,
+            getHeaders: n,
+            getMethod: n,
+            getRequestHeaders: n,
+            isHeaderCacheUnModified: n,
+            sendNoChange: n,
+            getParsedUrl: n
         });
         var message = tryCatch(function () {
             return new IFace(config);
@@ -73,6 +81,118 @@ describe('interface/controller', function () {
         addHeader: n,
         onEnd: n
     });
+
+
+    createMethodTest('hasHeader', {
+        has: n,
+        get: n,
+        redirect: n,
+        forward: n,
+        addHeader: n,
+        onEnd: n,
+        createUrl: n
+    });
+
+
+    createMethodTest('getRequestHeader', {
+        has: n,
+        get: n,
+        redirect: n,
+        forward: n,
+        addHeader: n,
+        onEnd: n,
+        createUrl: n,
+        hasHeader: n
+    });
+
+    createMethodTest('getHeaders', {
+        has: n,
+        get: n,
+        redirect: n,
+        forward: n,
+        addHeader: n,
+        onEnd: n,
+        createUrl: n,
+        hasHeader: n,
+        getRequestHeader: n
+    });
+
+
+    createMethodTest('getMethod', {
+        has: n,
+        get: n,
+        redirect: n,
+        forward: n,
+        addHeader: n,
+        onEnd: n,
+        createUrl: n,
+        hasHeader: n,
+        getRequestHeader: n,
+        getHeaders: n
+    });
+
+    createMethodTest('getRequestHeaders', {
+        has: n,
+        get: n,
+        redirect: n,
+        forward: n,
+        addHeader: n,
+        onEnd: n,
+        createUrl: n,
+        hasHeader: n,
+        getRequestHeader: n,
+        getHeaders: n,
+        getMethod: n
+    });
+
+    createMethodTest('isHeaderCacheUnModified', {
+        has: n,
+        get: n,
+        redirect: n,
+        forward: n,
+        addHeader: n,
+        onEnd: n,
+        createUrl: n,
+        hasHeader: n,
+        getRequestHeader: n,
+        getHeaders: n,
+        getMethod: n,
+        getRequestHeaders: n
+    });
+
+    createMethodTest('sendNoChange', {
+        has: n,
+        get: n,
+        redirect: n,
+        forward: n,
+        addHeader: n,
+        onEnd: n,
+        createUrl: n,
+        hasHeader: n,
+        getRequestHeader: n,
+        getHeaders: n,
+        getMethod: n,
+        getRequestHeaders: n,
+        isHeaderCacheUnModified: n
+    });
+
+    createMethodTest('getParsedUrl', {
+        has: n,
+        get: n,
+        redirect: n,
+        forward: n,
+        addHeader: n,
+        onEnd: n,
+        createUrl: n,
+        hasHeader: n,
+        getRequestHeader: n,
+        getHeaders: n,
+        getMethod: n,
+        getRequestHeaders: n,
+        isHeaderCacheUnModified: n,
+        sendNoChange: n
+    });
+
 
 
     function createMethodTest(method, extend, callback) {

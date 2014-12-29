@@ -20,7 +20,13 @@ ControllerInterface = Type.create({
 }, {
     _invoke: function ControllerInterface(request) {
         this._request = request;
-        ["has", "get", "redirect", "forward", "addHeader", "onEnd", "createUrl"].forEach(function (method) {
+        [
+            "has", "get", "redirect",
+            "forward", "addHeader", "onEnd",
+            "createUrl", "hasHeader", "getRequestHeader",
+            "getHeaders", "getMethod", "getRequestHeaders",
+            "isHeaderCacheUnModified", "sendNoChange", "getParsedUrl"
+        ].forEach(function (method) {
             if (!(method in this)) {
                 throw new error.DataError({method: method}, 'ControllerInterface: missing method in Controller object');
             }

@@ -27,6 +27,64 @@ describe('core/controller', function () {
     });
 
 
+    it('parsedUrl', function () {
+        request.parsedUrl = 'ABC';
+        expect(controller.getParsedUrl()).toBe('ABC');
+    });
+
+
+    it('sendNoChange', function () {
+        request.sendNoChange = function() {};
+        spyOn(request, 'sendNoChange').and.callThrough();
+        controller.sendNoChange();
+        expect(request.sendNoChange).toHaveBeenCalled();
+    });
+
+    it('isHeaderCacheUnModified', function () {
+        request.isHeaderCacheUnModified = function() {};
+        spyOn(request, 'isHeaderCacheUnModified').and.callThrough();
+        controller.isHeaderCacheUnModified();
+        expect(request.isHeaderCacheUnModified).toHaveBeenCalled();
+    });
+
+    it('getRequestHeaders', function () {
+        request.getRequestHeaders = function() {};
+        spyOn(request, 'getRequestHeaders').and.callThrough();
+        controller.getRequestHeaders();
+        expect(request.getRequestHeaders).toHaveBeenCalled();
+    });
+
+    it('getMethod', function () {
+        request.getMethod = function() {};
+        spyOn(request, 'getMethod').and.callThrough();
+        controller.getMethod();
+        expect(request.getMethod).toHaveBeenCalled();
+    });
+
+    it('getHeaders', function () {
+        request.getHeaders = function() {};
+        spyOn(request, 'getHeaders').and.callThrough();
+        controller.getHeaders();
+        expect(request.getHeaders).toHaveBeenCalled();
+    });
+
+
+    it('getRequestHeader', function () {
+        request.getRequestHeader = function() {};
+        spyOn(request, 'getRequestHeader').and.callThrough();
+        controller.getRequestHeader();
+        expect(request.getRequestHeader).toHaveBeenCalled();
+    });
+
+
+
+    it('hasHeader', function () {
+        request.hasHeader = function() {};
+        spyOn(request, 'hasHeader').and.callThrough();
+        controller.hasHeader();
+        expect(request.hasHeader).toHaveBeenCalled();
+    });
+
     it('createUrl', function () {
         request.createUrl = function() {};
         spyOn(request, 'createUrl').and.callThrough();

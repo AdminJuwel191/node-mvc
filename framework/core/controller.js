@@ -17,6 +17,95 @@ var di = require('../di'),
  * Controller is a collection of Controller
  */
 Controller = ControllerInterface.inherit({}, {
+
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Controller#hasHeader
+     *
+     * @description
+     * has response header
+     */
+    hasHeader: function Controller_hasHeader(key) {
+        return this._request.hasHeader(key);
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Controller#getRequestHeader
+     *
+     * @description
+     * Get request header
+     */
+    getRequestHeader: function Controller_getRequestHeader(key) {
+        return this._request.getRequestHeader(key);
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Controller#getHeaders
+     *
+     * @description
+     * Return response headers
+     */
+    getHeaders: function Controller_getHeaders() {
+        return this._request.getHeaders();
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Controller#getMethod
+     *
+     * @description
+     * Return request method
+     */
+    getMethod: function Controller_getMethod() {
+        return this._request.getMethod();
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Controller#getRequestHeaders
+     *
+     * @description
+     * Return request headers
+     */
+    getRequestHeaders: function Controller_getRequestHeaders() {
+        return this._request.getRequestHeaders();
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Controller#isHeaderCacheUnModified
+     *
+     * @description
+     * Check if cache is unmodified
+     */
+    isHeaderCacheUnModified: function Controller_isHeaderCacheUnModified() {
+        return this._request.isHeaderCacheUnModified();
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Controller#sendNoChange
+     *
+     * @description
+     * Send no change 304 response
+     */
+    sendNoChange: function Controller_sendNoChange() {
+        return this._request.sendNoChange();
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Controller#getParsedUrl
+     *
+     * @description
+     * Return parsed url
+     */
+    getParsedUrl: function Controller_getParsedUrl() {
+        return this._request.parsedUrl;
+    },
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
@@ -72,7 +161,6 @@ Controller = ControllerInterface.inherit({}, {
     redirect: function Controller_redirect(url, isTemp) {
         return this._request.redirect(url, isTemp);
     },
-
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
