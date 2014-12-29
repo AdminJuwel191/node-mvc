@@ -402,7 +402,7 @@ Request = Type.create({
         }
 
         return promise.then(function (data) {
-            return Promise.resolve(_handler(data));
+            return _handler(data);
         }, this._handleError.bind(this));
 
         function _handler() {
@@ -426,9 +426,7 @@ Request = Type.create({
             LoadedController,
             controller,
             action,
-            promise,
-            afterActionPromise = false,
-            afterEachPromise = false;
+            promise;
 
         try {
             LoadedController = di.load(controllerToLoad);
@@ -478,19 +476,16 @@ Request = Type.create({
 
 
         if (controller.has('after_' + this.action)) {
-            afterActionPromise = this._chain(promise, controller.get('after_' + this.action).bind(controller, this.params));
+            promise = this._chain(promise, controller.get('after_' + this.action).bind(controller, this.params));
         }
 
         if (controller.has("afterEach")) {
-            afterEachPromise = this._chain(promise, controller.afterEach.bind(controller, this.action, this.params));
+            promise = this._chain(promise, controller.afterEach.bind(controller, this.action, this.params));
         }
 
         this.onEnd(controller.destroy.bind(controller));
 
-        return Promise.all([afterActionPromise, afterEachPromise]).then(function (data) {
-            logger.print('afterActionPromise, afterEachPromise', data);
-            return promise;
-        });
+        return promise;
     },
 
     /**

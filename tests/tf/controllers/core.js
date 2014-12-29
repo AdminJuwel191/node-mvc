@@ -11,20 +11,20 @@ Core = Controller.inherit({}, {
     action_handler: function (params) {
         return params;
     },
-    beforeEach: function() {
-        return 'beforeEach';
+    beforeEach: function (action, params) {
+        return 'beforeEach,b' + action;
     },
-    before_index: function(params, data) {
-        return 'before_index,' + data;
+    before_index: function (params, data) {
+        return 'before_i,' + data;
     },
     action_index: function (params, data) {
-        return "action_index," + data;
+        return "action_i," + data;
     },
     after_index: function (params, data) {
-        return "after_index," + data;
+        return "after_i," + data;
     },
-    afterEach: function (params, data) {
-        return "afterEach," + data;
+    afterEach: function (action, params, data) {
+        return "afterEach,a" + action + data;
     }
 });
 

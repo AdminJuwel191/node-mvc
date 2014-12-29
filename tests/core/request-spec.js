@@ -775,16 +775,19 @@ describe('core/request', function () {
         var request = new Constructor(config, '/home/index');
         request.controller = 'core';
         request.action = 'index';
+        request.params = {id: 1};
         var promise = request._handleRoute();
 
 
         promise.then(function (data) {
-            expect(data.indexOf('before_index') > -1).toBe(true);
-            expect(data.indexOf('action_index') > -1).toBe(true);
+            expect(data.indexOf('bindex') > -1).toBe(true);
+            expect(data.indexOf('before_i') > -1).toBe(true);
+            expect(data.indexOf('action_i') > -1).toBe(true);
             expect(data.indexOf('beforeEach') > -1).toBe(true);
 
-            expect(data.indexOf('after_index') > -1).toBe(false);
-            expect(data.indexOf('afterEach') > -1).toBe(false);
+            expect(data.indexOf('after_i') > -1).toBe(true);
+            expect(data.indexOf('afterEach') > -1).toBe(true);
+            expect(data.indexOf('aindex') > -1).toBe(true);
             done();
         });
     });
