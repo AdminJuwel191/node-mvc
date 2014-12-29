@@ -27,19 +27,21 @@ Logger = Type.create({
         stream: Type.OBJECT,
         server: Type.OBJECT,
         config: Type.OBJECT,
+        length: Type.NUMBER,
         hooks: Type.ARRAY
     },
     {
         _construct: function Logger(config) {
             var file;
-            this.stream = null;
-            this.server = null;
+            this.length = 0;
+            this.stream = this.server = null;
             this.hooks = [];
             this.config = core.extend({
                 enabled: false,
                 write: false,
                 publish: false,
                 console: false,
+                readLength: 20000,
                 port: 9001,
                 file: "server.log",
                 level: 5
@@ -49,12 +51,40 @@ Logger = Type.create({
                 file = di.normalizePath('@{basePath}/' + this.config.file);
                 this.stream = fs.createWriteStream(file, {encoding: 'utf8'});
                 if (this.config.publish) {
+
                     this.server = http.createServer();
                     this.server.on('request', function (request, response) {
-                        var read = fs.readFileSync(file);
-                        response.writeHead(200, {'Content-type': 'text/plain', 'Content-Length': read.length});
-                        response.end(read);
-                    });
+                        var len = this.length,
+                            start = len - this.config.readLength,
+                            blen = 0,
+                            buffer,
+                            blenMessage;
+
+                        if (start < 0) {
+                            start = 0;
+                            blen = 1000;
+                        } else {
+                            blen = len - start;
+                        }
+
+                        blenMessage = 'LAST '+ blen + ' BYTES:\n\n';
+                        buffer =  new Buffer(blen + blenMessage.length, 'utf8');
+
+                        fs.open(file, 'r', 755, function(status, fd) {
+                            fs.read(fd, buffer,  0, blen, start, function(err) {
+                                if (err) {
+                                    var errorMessage = 'Error reading logger buffer';
+                                    response.writeHead(200, {'Content-type': 'text/plain', 'Content-Length': errorMessage.length});
+                                    response.end(errorMessage);
+                                } else {
+                                    response.writeHead(200, {'Content-type': 'text/plain', 'Content-Length': buffer.length});
+                                    response.write(blenMessage);
+                                    response.end(buffer);
+                                }
+                            });
+                        });
+
+                    }.bind(this));
                     this.server.listen(this.config.port);
                     this.print('Publishing log write stream on port: ' + this.config.port);
                 }
@@ -139,6 +169,7 @@ Logger = Type.create({
 
             if (this.config.write && this.stream) {
                 try {
+                    this.length += logs.length;
                     this.stream.write(logs);
                 } catch (e) {
                     this.print(e);
