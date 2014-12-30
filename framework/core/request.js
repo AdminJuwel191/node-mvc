@@ -338,9 +338,9 @@ Request = Type.create({
 
         if (response instanceof Error && !this.isERROR && !!router.getErrorRoute()) {
             if (response.code) {
-                this.statusCode = response.code;
+                this.setStatusCode(response.code);
             } else {
-                this.statusCode = 500;
+                this.setStatusCode(500);
             }
             this.isERROR = true;
             return this._resolveRoute([router.getErrorRoute(), response]).then(null, this._handleError);
@@ -538,7 +538,6 @@ Request = Type.create({
      */
     _resolveRoute: function Request__resolveRoute(routeRule) {
         var route;
-        this.statusCode = 200;
         this.route = routeRule.shift();
         this.params = routeRule.shift();
         route = this.route.split('/');

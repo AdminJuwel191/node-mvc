@@ -403,7 +403,7 @@ describe('core/request', function () {
         request._resolveRoute.call(ctx, ['user/home/index', params]);
 
         expect(ctx._handleRoute).toHaveBeenCalled();
-        expect(ctx.statusCode).toBe(200);
+        expect(ctx.statusCode).toBe(undefined);
         expect(ctx.route).toBe('user/home/index');
         expect(ctx.params).toBe(params);
         expect(ctx.module).toBe('user');
@@ -706,6 +706,9 @@ describe('core/request', function () {
                 expect(a2 instanceof Error).toBe(true);
                 return Promise.reject('RESOLVED');
             },
+            setStatusCode: function(code) {
+                this.statusCode = code;
+            },
             statusCode: 0,
             isERROR: false
         };
@@ -752,6 +755,9 @@ describe('core/request', function () {
                 expect(a1).toBe('core/error');
                 expect(a2 instanceof Error).toBe(true);
                 return Promise.reject('RESOLVED');
+            },
+            setStatusCode: function(code) {
+                this.statusCode = code;
             },
             statusCode: 0,
             isERROR: false
