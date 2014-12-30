@@ -20,6 +20,17 @@ Controller = ControllerInterface.inherit({}, {
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
+     * @method Controller#setStatusCode
+     *
+     * @description
+     * Set status code
+     */
+    setStatusCode: function Controller_setStatusCode(code) {
+        this._request.setStatusCode(code);
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
      * @method Controller#stopChain
      *
      * @description

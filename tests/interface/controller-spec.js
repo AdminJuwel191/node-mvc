@@ -36,7 +36,8 @@ describe('interface/controller', function () {
             getParsedUrl: n,
             render: n,
             renderFile: n,
-            stopChain: n
+            stopChain: n,
+            setStatusCode: n
         });
         var message = tryCatch(function () {
             return new IFace(config);
@@ -252,6 +253,28 @@ describe('interface/controller', function () {
         stopChain: n,
         render: n
     });
+
+    createMethodTest('setStatusCode', {
+        has: n,
+        get: n,
+        redirect: n,
+        forward: n,
+        addHeader: n,
+        onEnd: n,
+        createUrl: n,
+        hasHeader: n,
+        getRequestHeader: n,
+        getHeaders: n,
+        getMethod: n,
+        getRequestHeaders: n,
+        isHeaderCacheUnModified: n,
+        sendNoChange: n,
+        getParsedUrl: n,
+        stopChain: n,
+        render: n,
+        renderFile: n
+    });
+
     function createMethodTest(method, extend, callback) {
         it('should have ' + method + ' method', function () {
 

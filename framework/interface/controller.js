@@ -26,7 +26,7 @@ ControllerInterface = Type.create({
             "createUrl", "hasHeader", "getRequestHeader",
             "getHeaders", "getMethod", "getRequestHeaders",
             "isHeaderCacheUnModified", "sendNoChange", "getParsedUrl",
-            "stopChain", "render", "renderFile"
+            "stopChain", "render", "renderFile", "setStatusCode"
         ].forEach(function (method) {
             if (!(method in this)) {
                 throw new error.DataError({method: method}, 'ControllerInterface: missing method in Controller object');

@@ -101,6 +101,20 @@ describe('core/request', function () {
     });
 
 
+    it('setStatusCode', function () {
+        request = new Constructor(config, '/home/index');
+        request.setStatusCode(500);
+        expect(request.statusCode).toBe(500);
+
+        var message = tryCatch(function() {
+            request.setStatusCode('500');
+        });
+
+        expect(message.customMessage).toBe('Status code must be number type');
+    });
+
+
+
     it('getHeaders|addHeader|getHeader|hasHeader|getMethod|sendNoChange', function () {
         config.response.writeHead = function (code, headers) {
             expect(code).toBe(304);

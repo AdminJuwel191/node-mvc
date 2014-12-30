@@ -105,6 +105,21 @@ Request = Type.create({
 
         return !!(etagMatches && notModified);
     },
+
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Request#setStatusCode
+     *
+     * @description
+     * HTTP status code
+     */
+    setStatusCode: function Request_setStatusCode(code) {
+        if (!Type.isNumber(code)) {
+            throw new error.HttpError(500, {code: code}, "Status code must be number type");
+        }
+        this.statusCode = code;
+    },
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
@@ -397,6 +412,7 @@ Request = Type.create({
             onEnd: this.onEnd.bind(this),
             sendNoChange: this.sendNoChange.bind(this),
             stopPromiseChain: this.stopPromiseChain.bind(this),
+            setStatusCode: this.setStatusCode.bind(this),
             createUrl: router.createUrl.bind(router),
             parsedUrl: core.copy(this.parsedUrl)
         };

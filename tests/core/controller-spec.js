@@ -40,6 +40,13 @@ describe('core/controller', function () {
     });
 
 
+    it('setStatusCode', function () {
+        request.setStatusCode = function() {};
+        spyOn(request, 'setStatusCode').and.callThrough();
+        controller.setStatusCode();
+        expect(request.setStatusCode).toHaveBeenCalled();
+    });
+
     it('sendNoChange', function () {
         request.sendNoChange = function() {};
         spyOn(request, 'sendNoChange').and.callThrough();
