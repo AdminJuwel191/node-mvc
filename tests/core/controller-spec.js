@@ -32,6 +32,13 @@ describe('core/controller', function () {
         expect(controller.getParsedUrl()).toBe('ABC');
     });
 
+    it('stopChain', function () {
+        request.stopPromiseChain = function() {return true;};
+        spyOn(request, 'stopPromiseChain').and.callThrough();
+        expect(controller.stopChain()).toBe(true);
+        expect(request.stopPromiseChain).toHaveBeenCalled();
+    });
+
 
     it('sendNoChange', function () {
         request.sendNoChange = function() {};

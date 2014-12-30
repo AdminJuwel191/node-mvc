@@ -793,12 +793,90 @@ describe('core/request', function () {
     });
 
 
+    it('_handleRoute stopChain', function (done) {
+        var cpath = path.normalize(__dirname + "/../tf/controllers");
+        di.setAlias('controllersPath', cpath);
+        var request = new Constructor(config, '/home/stop');
+        request.controller = 'core';
+        request.action = 'stop';
+        request.params = {id: 1};
+        var promise = request._handleRoute();
+
+
+        promise.then(function (data) {
+            expect(request.isPromiseChainStopped).toBe(true);
+            expect(data.indexOf('beforeEach') > -1).toBe(true);
+            expect(data.indexOf('bstop') > -1).toBe(true);
+            expect(data.indexOf('before_stop') > -1).toBe(true);
+
+            expect(data.indexOf('action_stop') > -1).toBe(false);
+
+            expect(data.indexOf('after_stop') > -1).toBe(false);
+            expect(data.indexOf('afterEach') > -1).toBe(false);
+            expect(data.indexOf('astop') > -1).toBe(false);
+            done();
+        });
+    });
+
+    it('_handleRoute stopChain 2', function (done) {
+        var cpath = path.normalize(__dirname + "/../tf/controllers");
+        di.setAlias('controllersPath', cpath);
+        var request = new Constructor(config, '/home/stop');
+        request.controller = 'core';
+        request.action = 'test';
+        request.params = {id: 1};
+        var promise = request._handleRoute();
+
+
+        promise.then(function (data) {
+            expect(request.isPromiseChainStopped).toBe(true);
+            expect(data.indexOf('beforeEach') > -1).toBe(true);
+            expect(data.indexOf('btest') > -1).toBe(true);
+            expect(data.indexOf('before_test') > -1).toBe(true);
+
+            expect(data.indexOf('action_test') > -1).toBe(true);
+
+            expect(data.indexOf('after_test') > -1).toBe(false);
+            expect(data.indexOf('afterEach') > -1).toBe(false);
+            expect(data.indexOf('atest') > -1).toBe(false);
+            done();
+        });
+    });
+
+
+
+    it('_handleRoute stopChain 3', function (done) {
+        var cpath = path.normalize(__dirname + "/../tf/controllers");
+        di.setAlias('controllersPath', cpath);
+        var request = new Constructor(config, '/home/stop');
+        request.controller = 'core';
+        request.action = 'test2';
+        request.params = {id: 1};
+        var promise = request._handleRoute();
+
+
+        promise.then(function (data) {
+            expect(request.isPromiseChainStopped).toBe(true);
+            expect(data.indexOf('beforeEach') > -1).toBe(true);
+            expect(data.indexOf('btest2') > -1).toBe(true);
+            expect(data.indexOf('before_test2') > -1).toBe(true);
+
+            expect(data.indexOf('action_test2') > -1).toBe(true);
+
+            expect(data.indexOf('after_test2') > -1).toBe(true);
+            expect(data.indexOf('afterEach') > -1).toBe(false);
+            expect(data.indexOf('atest2') > -1).toBe(false);
+            done();
+        });
+    });
+
+
     it('_handleRoute', function () {
         var cpath = path.normalize(__dirname + "/../tf/controllers");
         di.setAlias('controllersPath', cpath);
         var request = new Constructor(config, '/home/index');
         request.controller = 'core';
-        request.action = 'test';
+        request.action = 'undefined';
 
         var message = tryCatch(function () {
             return request._handleRoute();
@@ -841,9 +919,10 @@ describe('core/request', function () {
         Constructor.prototype.parse = function () {
             return this;
         };
-        var request = new Constructor(config, '/home/index');
-        var route = request.forward('index/index', {id: 1});
-        expect(route.url).toBe('/index/index?id=1');
+        var request = new Constructor(config, '/core/index');
+        var route = request.forward('test/index', {id: 1});
+        expect(route.url).toBe('/test/index?id=1');
+        expect(request.isPromiseChainStopped).toBe(true);
     });
 
 

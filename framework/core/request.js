@@ -36,7 +36,8 @@ Request = Type.create({
     statusCode: Type.NUMBER,
     headers: Type.OBJECT,
     isRendered: Type.BOOLEAN,
-    isERROR: Type.BOOLEAN
+    isERROR: Type.BOOLEAN,
+    isPromiseChainStopped: Type.BOOLEAN
 }, {
     _construct: function Request(config, url) {
         core.extend(this, config);
@@ -44,6 +45,9 @@ Request = Type.create({
         this.headers = {};
         this.url = url;
         this.parsedUrl = URLParser.parse(this.url, true);
+        this.isPromiseChainStopped = false;
+        this.isERROR = false;
+        this.isRendered = false;
     },
     /**
      * @since 0.0.1
@@ -100,6 +104,17 @@ Request = Type.create({
         }
 
         return !!(etagMatches && notModified);
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Request#stopPromiseChain
+     *
+     * @description
+     * Stop promise chain
+     */
+    stopPromiseChain: function Request_stopPromiseChain() {
+        this.isPromiseChainStopped = true;
     },
     /**
      * @since 0.0.1
@@ -205,6 +220,8 @@ Request = Type.create({
             }, 'Cannot forward to same route');
         } else {
 
+            this.stopPromiseChain();
+
             request = new Request({
                 request: this.request,
                 response: this.response
@@ -226,6 +243,7 @@ Request = Type.create({
     redirect: function Request_redirect(url, isTemp) {
         logger.print('Request.redirect', url, isTemp);
         this.addHeader('Location', url);
+        this.stopPromiseChain();
         if (Type.isBoolean(isTemp) && !!isTemp) {
             this.response.writeHead(302, this.headers);
         } else {
@@ -378,6 +396,7 @@ Request = Type.create({
             isHeaderCacheUnModified: this.isHeaderCacheUnModified.bind(this),
             onEnd: this.onEnd.bind(this),
             sendNoChange: this.sendNoChange.bind(this),
+            stopPromiseChain: this.stopPromiseChain.bind(this),
             createUrl: router.createUrl.bind(router),
             parsedUrl: core.copy(this.parsedUrl)
         };
@@ -402,8 +421,11 @@ Request = Type.create({
         }
 
         return promise.then(function (data) {
+            if (!!this.isPromiseChainStopped) {
+                return promise;
+            }
             return _handler(data);
-        }, this._handleError.bind(this));
+        }.bind(this), this._handleError.bind(this));
 
         function _handler() {
             try {

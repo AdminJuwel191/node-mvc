@@ -17,7 +17,17 @@ var di = require('../di'),
  * Controller is a collection of Controller
  */
 Controller = ControllerInterface.inherit({}, {
-
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Controller#stopChain
+     *
+     * @description
+     * Stop promise chain
+     */
+    stopChain: function Controller_stopChain() {
+        return this._request.stopPromiseChain();
+    },
     /**
      * @since 0.0.1
      * @author Igor Ivanovic

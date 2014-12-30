@@ -33,7 +33,10 @@ describe('interface/controller', function () {
             getRequestHeaders: n,
             isHeaderCacheUnModified: n,
             sendNoChange: n,
-            getParsedUrl: n
+            getParsedUrl: n,
+            render: n,
+            renderFile: n,
+            stopChain: n
         });
         var message = tryCatch(function () {
             return new IFace(config);
@@ -193,8 +196,62 @@ describe('interface/controller', function () {
         sendNoChange: n
     });
 
+    createMethodTest('stopChain', {
+        has: n,
+        get: n,
+        redirect: n,
+        forward: n,
+        addHeader: n,
+        onEnd: n,
+        createUrl: n,
+        hasHeader: n,
+        getRequestHeader: n,
+        getHeaders: n,
+        getMethod: n,
+        getRequestHeaders: n,
+        isHeaderCacheUnModified: n,
+        sendNoChange: n,
+        getParsedUrl: n
+    });
 
+    createMethodTest('render', {
+        has: n,
+        get: n,
+        redirect: n,
+        forward: n,
+        addHeader: n,
+        onEnd: n,
+        createUrl: n,
+        hasHeader: n,
+        getRequestHeader: n,
+        getHeaders: n,
+        getMethod: n,
+        getRequestHeaders: n,
+        isHeaderCacheUnModified: n,
+        sendNoChange: n,
+        getParsedUrl: n,
+        stopChain: n
+    });
 
+    createMethodTest('renderFile', {
+        has: n,
+        get: n,
+        redirect: n,
+        forward: n,
+        addHeader: n,
+        onEnd: n,
+        createUrl: n,
+        hasHeader: n,
+        getRequestHeader: n,
+        getHeaders: n,
+        getMethod: n,
+        getRequestHeaders: n,
+        isHeaderCacheUnModified: n,
+        sendNoChange: n,
+        getParsedUrl: n,
+        stopChain: n,
+        render: n
+    });
     function createMethodTest(method, extend, callback) {
         it('should have ' + method + ' method', function () {
 
