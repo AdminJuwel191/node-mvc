@@ -7,12 +7,12 @@ var di = require('./di'),
     fs = di.load('fs'),
     component = di.load('core/component'),
     ENV_END_PATTERN = new RegExp('.*\\.json$'),
-    DEFAULT_SERVER_PORT = 8080,
     Bootstrap;
 
 
 Bootstrap = Type.create({
-    initalized: Type.BOOLEAN
+    initalized: Type.BOOLEAN,
+    listenPort: Type.NUMBER
 }, {
     /**
      * @license Mit Licence 2014
@@ -26,6 +26,7 @@ Bootstrap = Type.create({
      */
     _construct: function Bootstrap() {
         this.initalized = false;
+        this.listenPort = 8080;
     },
     /**
      * @since 0.0.1
@@ -75,6 +76,10 @@ Bootstrap = Type.create({
             env = JSON.parse(file);
         } catch (e) {
             throw new error.DataError({file: file}, 'Problem with parsing environment json file', e);
+        }
+
+        if (Type.isNumber(env.port)) {
+            this.setListenPort(env.port);
         }
         // set aliases
         if (Type.isArray(env.aliases)) {
@@ -130,7 +135,7 @@ Bootstrap = Type.create({
         // load config
         if (Type.isString(env.config)) {
             try {
-                di.load(envPath + '/' + env.config)(component, di);
+                di.load(envPath + '/' + env.config)(component, di, this);
             } catch (e) {
                 throw new error.Exception('Initialize config: ' + envPath + '/' + env.config, e);
             }
@@ -166,17 +171,27 @@ Bootstrap = Type.create({
             logger.close();
             logger.destroy();
         });
-        // this must be last !! in config order
-        if (Type.isNumber(env.port)) {
-            server.listen(env.port);
-        } else {
-            server.listen(DEFAULT_SERVER_PORT);
-        }
-
+        // this must be last !
+        server.listen(this.listenPort);
         // logger
         logger.print(env);
         logger.print(this.__dynamic__);
 
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Bootstrap#setListenPort
+     *
+     * @description
+     * Set listen port
+     */
+    setListenPort: function Bootstrap_setListenPort(port) {
+        if (Type.isNumber(port)) {
+            this.listenPort = port;
+        } else {
+            this.listenPort = parseInt(port);
+        }
     },
     /**
      * @since 0.0.1
