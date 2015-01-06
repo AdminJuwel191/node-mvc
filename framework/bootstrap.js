@@ -12,7 +12,8 @@ var di = require('./di'),
 
 Bootstrap = Type.create({
     initalized: Type.BOOLEAN,
-    listenPort: Type.NUMBER
+    listenPort: Type.NUMBER,
+    listenHost: Type.STRING
 }, {
     /**
      * @license Mit Licence 2014
@@ -27,6 +28,8 @@ Bootstrap = Type.create({
     _construct: function Bootstrap() {
         this.initalized = false;
         this.listenPort = 8080;
+        this.listenHost = "127.0.0.1";
+
     },
     /**
      * @since 0.0.1
@@ -172,11 +175,24 @@ Bootstrap = Type.create({
             logger.destroy();
         });
         // this must be last !
-        server.listen(this.listenPort);
+        server.listen(this.listenPort, this.listenHost);
         // logger
         logger.print(env);
         logger.print(this.__dynamic__);
 
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Bootstrap#setListenHost
+     *
+     * @description
+     * Set listen host
+     */
+    setListenHost: function Bootstrap_setListenHost(host) {
+        if (Type.isString(host)) {
+            this.listenHost = host;
+        }
     },
     /**
      * @since 0.0.1
