@@ -309,11 +309,14 @@ Request = Type.create({
                 }
                 return router
                     .process(this.request.method, this.parsedUrl) // find route
-                    .then(this._resolveRoute.bind(this), this._handleError.bind(this)); // resolve route chain
+                    .then(this._resolveRoute.bind(this)); // resolve route chain
 
-            }.bind(this), this._handleError.bind(this))
-            .then(this._render.bind(this), this._handleError.bind(this))  // render chain
-            .then(this._render.bind(this), this._handleError.bind(this)); // render error thrown in render function
+            }.bind(this)) // handle hook chain
+            .then(this._render.bind(this)) // resolve route chain
+            .catch(this._handleError.bind(this)) // catch hook error
+            .then(this._render.bind(this)) // render hook error
+            .catch(this._handleError.bind(this)) // catch render error
+            .then(this._render.bind(this)); // resolve render error
     },
     /**
      * @since 0.0.1
@@ -336,6 +339,7 @@ Request = Type.create({
      *
      * @description
      * Handle error
+     * @return boolean
      */
     _handleError: function Request_handleError(response) {
 
@@ -346,18 +350,18 @@ Request = Type.create({
                 this.setStatusCode(500);
             }
             this.isERROR = true;
-            return this._resolveRoute([router.getErrorRoute(), response]).then(null, this._handleError);
+            return this._resolveRoute([router.getErrorRoute(), response]);
         } else if (response.trace) {
             this.addHeader('Content-Type', 'text/plain');
-            this._render(response.trace);
+            return this._render(response.trace);
         } else if (response.stack) {
             this.addHeader('Content-Type', 'text/plain');
-            this._render(response.stack);
+            return this._render(response.stack);
         } else if (this.isERROR) {
             this.addHeader('Content-Type', 'text/plain');
-            this._render(util.inspect(response));
+            return this._render(util.inspect(response));
         } else {
-            this._render(response);
+            return this._render(response);
         }
     },
     /**
@@ -367,30 +371,37 @@ Request = Type.create({
      *
      * @description
      * End request
+     * @return boolean
      */
     _render: function Request__render(response) {
 
-        if (!this.isRendered) {
-
-            logger.print('Request.render', response);
-
-            this._checkContentType('text/html');
-
-            this.response.writeHead(this.statusCode, this.headers);
-
-            if (Type.isString(response)) {
-                this.addHeader('Content-Length', response.length);
-                this.response.end(response);
-            } else if (response instanceof Buffer) {
-                this.addHeader('Content-Length', response.length);
-                this.response.end(response);
-            } else if (!response) {
-                throw new error.HttpError(500, {}, 'No data to render');
-            } else {
-                throw new error.HttpError(500, {}, 'Invalid response type, string or buffer is required!');
-            }
+        if (this.isRendered) {
+            logger.print('Request.render: data are rendered', response);
+            return false;
         }
+
+
+        logger.print('Request.render', response);
+
+        this._checkContentType('text/html');
+
+        this.response.writeHead(this.statusCode, this.headers);
+
+        if (Type.isString(response)) {
+            this.addHeader('Content-Length', response.length);
+            this.response.end(response);
+        } else if (response instanceof Buffer) {
+            this.addHeader('Content-Length', response.length);
+            this.response.end(response);
+        } else if (!response) {
+            throw new error.HttpError(500, {}, 'No data to render');
+        } else {
+            throw new error.HttpError(500, {}, 'Invalid response type, string or buffer is required!');
+        }
+
         this.isRendered = true;
+
+        return true;
     },
 
     /**
