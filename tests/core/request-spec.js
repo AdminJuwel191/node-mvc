@@ -115,7 +115,7 @@ describe('core/request', function () {
 
 
 
-    it('getHeaders|addHeader|getHeader|hasHeader|getMethod|sendNoChange', function () {
+    it('getHeaders|addHeader|getHeader', function () {
         config.response.writeHead = function (code, headers) {
             expect(code).toBe(304);
             expect(headers['content-type']).toBe('text/html');
@@ -137,12 +137,35 @@ describe('core/request', function () {
         expect(request.getHeader('content-type')).toBe('text/html');
         expect(request.getHeader('non-existing')).toBe(false);
 
-        message = tryCatch(function () {
+    });
+
+
+    it('hasHeader', function () {
+        request = new Constructor(config, '/home/index');
+
+        request.addHeader('Content-Type', 'text/html');
+        request.addHeader('Content-Length', 180);
+
+        expect(request.hasHeader('Content-Type')).toBe(true);
+        expect(request.hasHeader('Content-Length')).toBe(true);
+        var message = tryCatch(function () {
             request.hasHeader(1);
         });
         expect(message.customMessage).toBe('Request.hasHeader: Header key must be string type');
+    });
 
+
+    it('getMethod', function () {
+        request = new Constructor(config, '/home/index');
         expect(request.getMethod()).toBe('GET');
+    });
+
+    it('sendNoChange', function () {
+        config.response.writeHead = function (code, headers) {
+            expect(code).toBe(304);
+        };
+        request = new Constructor(config, '/home/index');
+
 
         spyOn(config.response, 'writeHead').and.callThrough();
         spyOn(config.response, 'end').and.callThrough();
@@ -152,7 +175,6 @@ describe('core/request', function () {
         expect(config.response.writeHead).toHaveBeenCalled();
         expect(config.response.end).toHaveBeenCalled();
     });
-
 
     it('getRequestHeaders|getRequestHeader', function () {
         var request = new Constructor({
@@ -632,6 +654,48 @@ describe('core/request', function () {
             rSpy2.toHaveBeenCalled();
             done();
         }, 100);
+    });
+
+
+    it('parse 3', function (done) {
+
+
+        hooks.process = function (api) {
+            api.sendNoChange();
+            return Promise.resolve(false);
+        };
+
+        var ctx = {
+            _render: function (a) {
+                return a;
+            },
+            _resolveRoute: function () {
+                return 'resolveRoute';
+            },
+            _getApi: function () {
+                var that = this;
+                return {
+                    sendNoChange: function() {
+                        that.isPromiseChainStopped = true;
+                    }
+                };
+            },
+            _handleError: function () {
+                return '_handleError';
+            },
+            isPromiseChainStopped: false
+        };
+
+
+
+        var request = new Constructor(config, '/home/index');
+        request.parse.call(ctx).then(function (data) {
+            expect(data).toBe(false);
+            expect(ctx.isPromiseChainStopped).toBe(true);
+            done();
+        });
+
+
     });
 
 

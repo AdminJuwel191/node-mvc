@@ -56,16 +56,27 @@ Assets = Type.create({
 
         if (!mimeType) {
             logger.print('MimeType', mimeType, filePath);
-            return Promise.resolve(false);
+            return this.handleError(function() {
+                new error.HttpError(500, {path: filePath}, 'Invalid mime type');
+            });
+        }
+
+        if (api.getMethod() !== 'GET') {
+            return this.handleError(function() {
+                new error.HttpError(500, {path: filePath}, 'Assets are accessible only via GET request');
+            });
         }
 
         return new Promise(function (resolve, reject) {
-            if (api.getMethod() !== 'GET') {
-                return reject(new error.HttpError(500, {path: filePath}, 'Assets are accessible only via GET request'));
-            }
+
             this.readFile(filePath, function (err, file) {
+
                 if (err) {
-                    return reject(err);
+                    try {
+                        new error.HttpError(500, {path: filePath}, 'No file found', err);
+                    } catch (e) {
+                        return reject(e);
+                    }
                 }
 
                 api.addHeader('Content-Type', mimeType);
@@ -82,6 +93,23 @@ Assets = Type.create({
             });
         }.bind(this));
 
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Favicon#handleError
+     *
+     * @description
+     * Handle error response
+     */
+    handleError: function Assets_handleError(callback) {
+        return new Promise(function (resolve, reject) {
+            try {
+                callback();
+            } catch (e) {
+                reject(e);
+            }
+        });
     },
     /**
      * @since 0.0.1

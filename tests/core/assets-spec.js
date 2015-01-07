@@ -165,6 +165,46 @@ describe('core/assets', function () {
 
 
 
+
+
+    it('onRequest 5', function (done) {
+        mime.lookup = function () {
+            return 'application/javascript';
+        };
+        var headers = [], method = 'GET', headerModified = false, isSended = false;
+        var api = {
+            parsedUrl: {
+                pathname: '/tf/di-test-load-not-found.js'
+            },
+            addHeader: function (key, value) {
+                headers.push({
+                    key: key,
+                    value: value
+                });
+            },
+            getMethod: function () {
+                return method;
+            },
+            isHeaderCacheUnModified: function () {
+                return headerModified;
+            },
+            sendNoChange: function () {
+                isSended = true;
+            }
+        };
+        var instance = new Assets({
+            path: path.normalize(__dirname + '/../'),
+            hook: '^\\/files'
+        });
+        headerModified = true;
+
+        var promise =  instance.onRequest(api);
+        promise.then(null, function(message) {
+            expect(message.customMessage).toBe('No file found');
+            done();
+        });
+    });
+
    it('onRequest 3', function (done) {
         mime.lookup = function () {
             return 'application/javascript';
@@ -242,8 +282,8 @@ describe('core/assets', function () {
         };
 
         var promise =  instance.onRequest(api);
-        promise.then(function(data) {
-            expect(data).toBe(false);
+        promise.then(null, function(data) {
+            expect(data.customMessage).toBe('Invalid mime type');
             done();
         });
 

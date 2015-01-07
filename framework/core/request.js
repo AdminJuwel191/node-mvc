@@ -275,8 +275,9 @@ Request = Type.create({
      * No change header
      */
     sendNoChange: function () {
-        this.response.writeHead(304, this.headers);
-        this.response.end();
+        this.stopPromiseChain();
+        this.setStatusCode(304);
+        this._render('');
     },
     /**
      * @since 0.0.1
@@ -303,6 +304,8 @@ Request = Type.create({
             .then(function handleHooks(data) {
                 if (Type.isInitialized(data) && !!data) {
                     return data;
+                } else if (this.isPromiseChainStopped) {
+                    return false;
                 }
                 return router
                     .process(this.request.method, this.parsedUrl) // find route
