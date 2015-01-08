@@ -32,11 +32,21 @@ describe('core/controller', function () {
         expect(controller.getParsedUrl()).toBe('ABC');
     });
 
+
+
     it('stopChain', function () {
         request.stopPromiseChain = function() {return true;};
         spyOn(request, 'stopPromiseChain').and.callThrough();
         expect(controller.stopChain()).toBe(true);
         expect(request.stopPromiseChain).toHaveBeenCalled();
+    });
+
+
+    it('getRequestBody', function () {
+        request.getRequestBody = function() {};
+        spyOn(request, 'getRequestBody').and.callThrough();
+        controller.getRequestBody();
+        expect(request.getRequestBody).toHaveBeenCalled();
     });
 
 

@@ -53,6 +53,17 @@ Controller = ControllerInterface.inherit({}, {
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
+     * @method Controller#getRequestBody
+     *
+     * @description
+     * Get request body
+     */
+    getRequestBody: function Controller_getRequestBody() {
+        return this._request.getRequestBody();
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
      * @method Controller#getRequestHeader
      *
      * @description

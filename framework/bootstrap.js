@@ -160,14 +160,13 @@ Bootstrap = Type.create({
             // new request
             var nRequest = new Request({
                 request: request,
-                response: response
+                response: response,
+                encoding: server.getEncoding()
             }, request.url);
             /// parse request
             nRequest.parse();
             // on end destory
-            request.on('end', function () {
-                nRequest.destroy();
-            });
+            nRequest.onEnd(nRequest.destroy.bind(nRequest));
         });
         // server close event
         server.on('close', function () {

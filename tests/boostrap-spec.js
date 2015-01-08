@@ -21,6 +21,9 @@ describe('bootstrap', function () {
             },
             listen: function (port) {
 
+            },
+            getEncoding: function () {
+
             }
         };
         mock = {
@@ -75,7 +78,7 @@ describe('bootstrap', function () {
     });
 
     it('should init', function () {
-        var basePath = di.normalizePath(__dirname + '/tf/'), logs = [], result, isDestroyed = false, isListened = false, events = [], config, url, isparsed = false;
+        var basePath = di.normalizePath(__dirname + '/tf/'), logs = [], result, isDestroyed = false, isListened = false, events = [], config = {}, url, isparsed = false;
 
         bootstrap.setBasePath(basePath);
 
@@ -105,6 +108,9 @@ describe('bootstrap', function () {
             },
             listen: function (port) {
                 isListened = port;
+            },
+            getEncoding: function() {
+                return 'utf8';
             }
         };
 
@@ -117,6 +123,10 @@ describe('bootstrap', function () {
                 },
                 destroy: function () {
                     isDestroyed = true;
+                },
+                onEnd: function(callback) {
+                    expect(typeof callback).toBe("function");
+                    callback();
                 }
             };
         };
@@ -148,21 +158,19 @@ describe('bootstrap', function () {
         expect(ev2.evn).toBe('close');
 
         var a1 = {
-                url: 1, on: function (name, callback) {
-                    expect(name).toBe('end');
-                    expect(typeof callback).toBe("function");
-                    callback();
-                }
+                url: 1
             },
             a2 = {b: 1};
         ev1.callback(a1, a2);
+
+
         expect(config.request).toBe(a1);
         expect(config.response).toBe(a2);
         expect(url).toBe(1);
         expect(isDestroyed).toBe(true);
         expect(isparsed).toBe(true);
         expect(isListened).toBe(8080);
-
+        expect(config.encoding).toBe('utf8');
 
         ev2.callback();
 

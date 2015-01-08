@@ -5,7 +5,8 @@ describe('core/http', function () {
             on: function() {},
             listen: function() {},
             close: function() {},
-            setTimeout: function() {}
+            setTimeout: function() {},
+            getEncoding: function() {}
         },
         core = di.load('core'),
         Type = di.load('typejs');
@@ -13,6 +14,7 @@ describe('core/http', function () {
     beforeEach(function () {
         var Http = di.mock('core/http', {
             typejs: Type,
+            core: core,
             'interface/http': di.load('interface/http'),
             http: {
                 createServer: function() {
@@ -23,6 +25,10 @@ describe('core/http', function () {
         http = new Http();
     });
 
+
+    it('getEncoding', function () {
+        expect(http.getEncoding()).toBe('utf8');
+    });
 
     it('on', function () {
         spyOn(server, 'on').and.callThrough();

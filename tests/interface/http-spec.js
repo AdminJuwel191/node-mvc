@@ -22,7 +22,8 @@ describe('interface/http', function () {
             on: n,
             close: n,
             listen: n,
-            setTimeout: n
+            setTimeout: n,
+            getEncoding: n
         });
         var message = tryCatch(function () {
             return new IFace(config);
@@ -47,6 +48,12 @@ describe('interface/http', function () {
         on: n,
         close: n,
         listen: n
+    });
+    createMethodTest('getEncoding', {
+        on: n,
+        close: n,
+        listen: n,
+        setTimeout: n
     });
 
 

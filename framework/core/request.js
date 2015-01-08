@@ -37,10 +37,17 @@ Request = Type.create({
     headers: Type.OBJECT,
     isRendered: Type.BOOLEAN,
     isERROR: Type.BOOLEAN,
-    isPromiseChainStopped: Type.BOOLEAN
+    isPromiseChainStopped: Type.BOOLEAN,
+    isForwarded: Type.BOOLEAN,
+    encoding: Type.STRING,
+    body: Type.STRING
 }, {
     _construct: function Request(config, url) {
+        this.isForwarded = false;
+        this.body = '';
+        // body and isForwarded can be overriden
         core.extend(this, config);
+
         this.statusCode = 200;
         this.headers = {};
         this.url = url;
@@ -48,6 +55,7 @@ Request = Type.create({
         this.isPromiseChainStopped = false;
         this.isERROR = false;
         this.isRendered = false;
+
     },
     /**
      * @since 0.0.1
@@ -58,7 +66,7 @@ Request = Type.create({
      * Write header
      */
     onEnd: function Request_onEnd(callback) {
-        this.request.on('end', callback);
+        this.request.on('destory', callback);
     },
     /**
      * @since 0.0.1
@@ -141,6 +149,17 @@ Request = Type.create({
      */
     getHeaders: function Request_getHeaders() {
         return core.copy(this.headers);
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Request#getRequestBody
+     *
+     * @description
+     * Return body data
+     */
+    getRequestBody: function Request_getRequestBody() {
+        return this.body;
     },
     /**
      * @since 0.0.1
@@ -239,7 +258,9 @@ Request = Type.create({
 
             request = new Request({
                 request: this.request,
-                response: this.response
+                response: this.response,
+                isForwarded: true,
+                body: this.body
             }, router.createUrl(route, params));
 
             logger.print('Request.forward', route, params);
@@ -300,6 +321,34 @@ Request = Type.create({
      */
     parse: function Request_parse() {
 
+        if (this.isForwarded) {
+            return this._process().then(
+                this.request.emit.bind(this.request, 'destory'),
+                this.request.emit.bind(this.request, 'destory')
+            );  // emit destroy on error and resolve
+        }
+
+        this.request.setEncoding(this.encoding);
+        this.request.on('data', function (body) {
+            this.body += body;
+        }.bind(this));
+
+        return new Promise(this.request.on.bind(this.request, 'end'))
+            .then(this._process.bind(this))
+            .then(
+            this.request.emit.bind(this.request, 'destory'),
+            this.request.emit.bind(this.request, 'destory')
+        );  // emit destroy on error and resolve
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Request#_process
+     *
+     * @description
+     * Process request
+     */
+    _process: function () {
         return hooks.process(this._getApi())
             .then(function handleHooks(data) {
                 if (Type.isInitialized(data) && !!data) {
@@ -420,6 +469,7 @@ Request = Type.create({
             addHeader: this.addHeader.bind(this),
             getHeaders: this.getHeaders.bind(this),
             getMethod: this.getMethod.bind(this),
+            getRequestBody: this.getRequestBody.bind(this),
             getRequestHeaders: this.getRequestHeaders.bind(this),
             getRequestHeader: this.getRequestHeader.bind(this),
             isHeaderCacheUnModified: this.isHeaderCacheUnModified.bind(this),
@@ -441,7 +491,7 @@ Request = Type.create({
      */
     _chain: function Request__chain(promise, next) {
         if (!promise) {
-            return new Promise(function(resolve, reject) {
+            return new Promise(function (resolve, reject) {
                 try {
                     resolve(next.apply(next, arguments));
                 } catch (e) {

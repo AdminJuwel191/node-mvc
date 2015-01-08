@@ -63,6 +63,9 @@ describe('core/request', function () {
                 writeHead: function () {
                 },
                 end: function () {
+                },
+                on: function () {
+
                 }
             }
         };
@@ -557,7 +560,7 @@ describe('core/request', function () {
     });
 
 
-    it('parse', function (done) {
+    it('_process', function (done) {
 
         hooks.process = function () {
             return Promise.resolve(10);
@@ -588,7 +591,7 @@ describe('core/request', function () {
         spyOn(ctx, '_handleError').and.callThrough();
 
         var request = new Constructor(config, '/home/index');
-        request.parse.call(ctx).then(function (data) {
+        request._process.call(ctx).then(function (data) {
             _d = data;
         }, function (error) {
             _e = error;
@@ -605,7 +608,7 @@ describe('core/request', function () {
     });
 
 
-    it('parse 2', function (done) {
+    it('_process 2', function (done) {
         var _d, _e;
 
         hooks.process = function () {
@@ -634,7 +637,7 @@ describe('core/request', function () {
         spyOn(ctx, '_handleError').and.callThrough();
 
         var request = new Constructor(config, '/home/index');
-        request.parse.call(ctx).then(function (data) {
+        request._process.call(ctx).then(function (data) {
             _d = data;
         }, function (error) {
             _e = error;
@@ -657,7 +660,7 @@ describe('core/request', function () {
     });
 
 
-    it('parse 3', function (done) {
+    it('_process 3', function (done) {
 
 
         hooks.process = function (api) {
@@ -689,7 +692,7 @@ describe('core/request', function () {
 
 
         var request = new Constructor(config, '/home/index');
-        request.parse.call(ctx).then(function (data) {
+        request._process.call(ctx).then(function (data) {
             expect(data).toBe(false);
             expect(ctx.isPromiseChainStopped).toBe(true);
             done();
