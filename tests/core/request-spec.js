@@ -94,6 +94,81 @@ describe('core/request', function () {
     });
 
 
+    it('parse', function (done) {
+        request = new Constructor(config, '/home/index');
+
+        var ctx = {
+            isForwarded: false,
+            request: {
+                on: function(name, resolve) {
+
+                    resolve();
+                    return true;
+                },
+                emit: function() {
+                    return true;
+                },
+                setEncoding: function() {
+                    return 'utf8';
+                }
+            },
+            _process: function() {
+                return 'process';
+            }
+        };
+
+        spyOn(ctx.request, 'on').and.callThrough();
+        spyOn(ctx.request, 'emit').and.callThrough();
+        spyOn(ctx, '_process').and.callThrough();
+        spyOn(ctx.request, 'setEncoding').and.callThrough();
+
+
+        request.parse.call(ctx).then(function(data) {
+            console.log('data', data);
+            expect(ctx.request.on).toHaveBeenCalled();
+            expect(ctx.request.emit).toHaveBeenCalled();
+            expect(ctx._process).toHaveBeenCalled();
+            expect(ctx.request.setEncoding).toHaveBeenCalled();
+            done();
+        });
+    });
+
+
+    it('parse forward', function () {
+        request = new Constructor(config, '/home/index');
+
+        var ctx = {
+            isForwarded: true,
+            request: {
+                emit: function() {
+                    return true;
+                }
+            },
+            _process: function() {
+                return {
+                    then: function(a, b) {
+                        a();
+                        b();
+                    }
+                };
+            }
+        };
+
+        spyOn(ctx.request, 'emit').and.callThrough();
+        spyOn(ctx, '_process').and.callThrough();
+
+
+        request.parse.call(ctx);
+
+        expect(ctx.request.emit).toHaveBeenCalled();
+        expect(ctx._process).toHaveBeenCalled();
+    });
+
+    it('getRequestBody', function () {
+        request = new Constructor(config, '/home/index');
+        expect(request.getRequestBody()).toBe('');
+    });
+
     it('onEnd', function () {
         request = new Constructor(config, '/home/index');
         spyOn(config.request, "on").and.callThrough();
@@ -531,7 +606,7 @@ describe('core/request', function () {
         };
         spyOn(ctx, '_checkContentType');
         spyOn(ctx, 'addHeader');
-        request._render.call(ctx, response);
+        expect(request._render.call(ctx, response)).toBe(true);
         expect(ctx.addHeader).toHaveBeenCalled();
         expect(ctx._checkContentType).toHaveBeenCalled();
 
@@ -540,7 +615,7 @@ describe('core/request', function () {
         ctx.response.end = function (r) {
             expect(r).toBe(response);
         };
-        request._render.call(ctx, response);
+        expect(request._render.call(ctx, response)).toBe(true);
 
         var message = tryCatch(function () {
             ctx.isRendered = false;
@@ -557,6 +632,9 @@ describe('core/request', function () {
         });
         expect(message.code).toBe(500);
         expect(message.customMessage).toBe('Invalid response type, string or buffer is required!');
+
+        ctx.isRendered = true;
+        expect(request._render.call(ctx, response)).toBe(false);
     });
 
 
