@@ -536,6 +536,10 @@ Request = Type.create({
             throw new error.HttpError(500, {path: controllerToLoad}, 'Missing controller', e);
         }
 
+        if (!Type.assert(Type.FUNCTION, LoadedController)) {
+            throw new error.HttpError(500, {path: controllerToLoad}, 'Controller must be function type');
+        }
+
         controller = new LoadedController(this._getApi());
 
         if (!(controller instanceof  ControllerInterface)) {

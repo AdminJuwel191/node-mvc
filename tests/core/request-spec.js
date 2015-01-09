@@ -1036,6 +1036,23 @@ describe('core/request', function () {
     });
 
 
+
+    it('_handleRoute', function () {
+        var cpath = path.normalize(__dirname + "/../tf/controllers");
+        di.setAlias('controllersPath', cpath);
+        var request = new Constructor(config, '/home/index');
+        request.controller = 'invalid';
+        request.action = 'undefined';
+
+        var message = tryCatch(function () {
+            return request._handleRoute();
+        });
+
+        expect(message.customMessage).toBe('Controller must be function type');
+    });
+
+
+
     it('_handleRoute', function () {
         var cpath = path.normalize(__dirname + "/../tf/controllers");
         di.setAlias('controllersPath', cpath);
