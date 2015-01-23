@@ -23,7 +23,11 @@ describe('core/controller', function () {
         var C = Controller.inherit({}, {
             action_create: function() {}
         });
-        controller = new C(request);
+        controller = new C(request, {
+            controller: 'c',
+            action: 'a',
+            module: 'm'
+        });
     });
 
 
@@ -174,6 +178,16 @@ describe('core/controller', function () {
 
     it('get', function () {
         expect(controller.get('action_create')).toBe(controller.action_create);
+    });
+
+    it('getActionName', function () {
+        expect(controller.getActionName()).toBe('a');
+    });
+    it('getControllerName', function () {
+        expect(controller.getControllerName()).toBe('c');
+    });
+    it('getModuleName', function () {
+        expect(controller.getModuleName()).toBe('m');
     });
 
     function tryCatch(callback) {
