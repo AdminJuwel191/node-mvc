@@ -254,6 +254,34 @@ describe('core/view', function () {
     });
 
 
+
+    it('setPaths', function () {
+        swig.Swig = function () {
+
+        };
+        nPath = path.normalize(__dirname + '/../tf/');
+        config.suffix = '.twig';
+        config.cache = true;
+        config.themes = nPath + 'templates/theme/';
+        config.views = nPath + 'templates/view/';
+        spyOn(swig, 'Swig').and.callThrough();
+        view = new ViewConstructor(config);
+        expect(swig.Swig).toHaveBeenCalled();
+
+        view.setPaths('a', 'b');
+
+        expect(di.getAlias('themesPath')).toBe('a');
+        expect(di.getAlias('viewsPath')).toBe('b');
+
+        view.setPaths();
+
+        expect(di.getAlias('themesPath')).toBe( nPath + 'templates/theme/');
+        expect(di.getAlias('viewsPath')).toBe(nPath + 'templates/view/');
+    });
+
+
+
+
     it('setLoader|setFilter|setTag|setExpression|render|renderFile', function () {
         swig.Swig = function () {
             return {

@@ -83,7 +83,8 @@ describe('core/request', function () {
             util: di.load('util'),
             url: di.load('url'),
             "interface/controller": di.load('interface/controller'),
-            "core/component": componentMock
+            "core/component": componentMock,
+            "interface/module": di.load('interface/module')
         };
         Constructor = di.mock('core/request', mock);
     });
@@ -133,7 +134,6 @@ describe('core/request', function () {
 
 
         request.parse.call(ctx).then(function(data) {
-            console.log('data', data);
             expect(ctx.request.on).toHaveBeenCalled();
             expect(ctx.request.emit).toHaveBeenCalled();
             expect(ctx._process).toHaveBeenCalled();
@@ -969,6 +969,76 @@ describe('core/request', function () {
         request._handleError.call(ctx, response);
         expect(ctx._resolveRoute).toHaveBeenCalled();
         expect(ctx.statusCode).toBe(500);
+
+    });
+
+
+
+    it('_handleModule', function (done) {
+        var cpath = path.normalize(__dirname + "/../tf/modules");
+        di.setAlias('modulesPath', cpath);
+        var request = new Constructor(config, '/home/index');
+        request.controller = 'core';
+        request.action = 'index';
+        request.module = 'admin';
+        request.params = {id: 1};
+        var promise = request._handleModule();
+
+
+        promise.then(function (data) {
+            expect(data.indexOf('bindex') > -1).toBe(true);
+            expect(data.indexOf('before_i') > -1).toBe(true);
+            expect(data.indexOf('action_i') > -1).toBe(true);
+            expect(data.indexOf('beforeEach') > -1).toBe(true);
+
+            expect(data.indexOf('after_i') > -1).toBe(true);
+            expect(data.indexOf('afterEach') > -1).toBe(true);
+            expect(data.indexOf('aindex') > -1).toBe(true);
+            done();
+        });
+    });
+
+
+
+    it('_handleModule error', function () {
+        var cpath = path.normalize(__dirname + "/../tf/modules");
+        di.setAlias('modulesPath', cpath);
+        var request = new Constructor(config, '/home/index');
+        request.controller = 'core';
+        request.action = 'index';
+        request.module = 'test';
+        request.params = {id: 1};
+        var message = tryCatch(function () {
+            request._handleModule();
+        });
+
+        expect(message.customMessage).toBe('Missing module');
+
+
+        request.module = 'invalid2';
+        message = tryCatch(function () {
+            request._handleModule();
+        });
+
+        expect(message.customMessage).toBe('Module must be function type');
+
+
+    });
+
+    it('_handleModule error 2', function () {
+        var cpath = path.normalize(__dirname + "/../tf/modules");
+        di.setAlias('modulesPath', cpath);
+        var request = new Constructor(config, '/home/index');
+        request.controller = 'core';
+        request.action = 'index';
+        request.module = 'user';
+        request.params = {id: 1};
+        var message;
+        message = tryCatch(function () {
+            request._handleModule();
+        });
+
+        expect(message.customMessage).toBe('Module must be instance of ModuleInterface "core/module"');
 
     });
 

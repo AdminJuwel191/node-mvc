@@ -644,7 +644,7 @@ Request = Type.create({
         module = new LoadedModule(this.module);
 
         if (!(module instanceof  ModuleInterface)) {
-            throw new error.HttpError(500, controller, 'Module must be instance of ModuleInterface "core/module"');
+            throw new error.HttpError(500, module, 'Module must be instance of ModuleInterface "core/module"');
         }
 
         module.setControllersPath();
