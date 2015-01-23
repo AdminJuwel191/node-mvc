@@ -3,6 +3,8 @@ MVC JS  [![Build Status](https://api.travis-ci.org/igorzg/node-mvc.svg?branch=ma
 
 Powerful lightweight mvc framework for nodejs inspired by [Yii](http://www.yiiframework.com/)
 
+Mvcjs is a first nodejs framework which supports modules as bundles! 
+
 Features
 ====
 1. Fully extensible
@@ -13,6 +15,7 @@ Features
 6. Twig (swigjs) templating engine 
 7. Dynamic routing
 8. Logger
+9. Modules
 
 [Demo application](https://github.com/igorzg/mvcjs-testapp)
 
