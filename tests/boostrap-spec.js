@@ -142,7 +142,7 @@ describe('bootstrap', function () {
             'cache/memory',
             'core/router',
             'hooks/request',
-            'core/favicon',
+            //'core/favicon',
             'core/view',
             'core/http'
         ].forEach(

@@ -2,10 +2,12 @@
 /* global loader: true, Promise: true, Type: true, core: true, error: true, util: true, Request: true, Controller: true */
 var di = require('../di'),
     ControllerInterface = di.load('interface/controller'),
+    ModuleInterface = di.load('interface/module'),
     component = di.load('core/component'),
     router = component.get('core/router'),
     hooks = component.get('hooks/request'),
     logger = component.get('core/logger'),
+    view = component.get('core/view'),
     URLParser = di.load('url'),
     Type = di.load('typejs'),
     core = di.load('core'),
@@ -55,7 +57,7 @@ Request = Type.create({
         this.isPromiseChainStopped = false;
         this.isERROR = false;
         this.isRendered = false;
-
+        view.setPaths();
     },
     /**
      * @since 0.0.1
@@ -518,12 +520,12 @@ Request = Type.create({
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
-     * @method Request#_handleRoute
+     * @method Request#_handleController
      *
      * @description
      * Load response
      */
-    _handleRoute: function Request_handleRoute() {
+    _handleController: function Request_handleController() {
         var controllerToLoad = '@{controllersPath}/' + this.controller,
             LoadedController,
             controller,
@@ -540,7 +542,11 @@ Request = Type.create({
             throw new error.HttpError(500, {path: controllerToLoad}, 'Controller must be function type');
         }
 
-        controller = new LoadedController(this._getApi());
+        controller = new LoadedController(this._getApi(), {
+            controller: this.controller,
+            action: this.action,
+            module: this.module
+        });
 
         if (!(controller instanceof  ControllerInterface)) {
             throw new error.HttpError(500, controller, 'Controller must be instance of ControllerInterface "core/controller"');
@@ -593,7 +599,42 @@ Request = Type.create({
 
         return promise;
     },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Request#_handleModule
+     *
+     * @description
+     * Handle module
+     * @return {object} Promise
+     */
+    _handleModule: function Request__handleModule() {
+        var moduleToLoad = '@{modulesPath}/' + this.module,
+            LoadedModule,
+            module;
 
+        try {
+            LoadedModule = di.load(moduleToLoad);
+        } catch (e) {
+            throw new error.HttpError(500, {path: moduleToLoad}, 'Missing module', e);
+        }
+
+        if (!Type.assert(Type.FUNCTION, LoadedModule)) {
+            throw new error.HttpError(500, {path: moduleToLoad}, 'Module must be function type');
+        }
+
+        module = new LoadedModule(this.module);
+
+        if (!(module instanceof  ModuleInterface)) {
+            throw new error.HttpError(500, controller, 'Module must be instance of ModuleInterface "core/module"');
+        }
+
+        module.setControllersPath();
+        module.setViewsPath();
+        module.setThemesPath();
+
+        return this._handleController();
+    },
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
@@ -602,7 +643,6 @@ Request = Type.create({
      * @description
      * Resolve valid route
      * @return {object} Promise
-     * @todo implement modules
      */
     _resolveRoute: function Request__resolveRoute(routeRule) {
         var route;
@@ -615,7 +655,11 @@ Request = Type.create({
         this.controller = route.shift();
         this.action = route.shift();
 
-        return this._handleRoute();
+        if (!!this.module) {
+            return this._handleModule();
+        }
+
+        return this._handleController();
     }
 
 });

@@ -13,7 +13,10 @@ var di = require('./di'),
 Bootstrap = Type.create({
     initalized: Type.BOOLEAN,
     listenPort: Type.NUMBER,
-    listenHost: Type.STRING
+    listenHost: Type.STRING,
+    controllersPath: Type.STRING,
+    modulesPath: Type.STRING,
+    modelsPath: Type.STRING
 }, {
     /**
      * @license Mit Licence 2014
@@ -29,7 +32,9 @@ Bootstrap = Type.create({
         this.initalized = false;
         this.listenPort = 8080;
         this.listenHost = "127.0.0.1";
-
+        this.controllersPath = '@{appPath}/controllers/';
+        this.modulesPath = '@{appPath}/modules/';
+        this.modelsPath = '@{appPath}/models/';
     },
     /**
      * @since 0.0.1
@@ -94,12 +99,24 @@ Bootstrap = Type.create({
         }
         // if there is no controllers path
         if (!di.hasAlias('controllersPath')) {
-            di.setAlias('controllersPath', '@{appPath}/controllers/');
+            di.setAlias('controllersPath', this.controllersPath);
+        } else {
+            this.controllersPath = di.getAlias('controllersPath');
+        }
+        // if there is no modules path
+        if (!di.hasAlias('modulesPath')) {
+            di.setAlias('modulesPath', this.modulesPath);
+        } else {
+            this.modulesPath = di.getAlias('modulesPath');
         }
         // if there is no models path
         if (!di.hasAlias('modelsPath')) {
-            di.setAlias('modelsPath', '@{appPath}/models/');
+            di.setAlias('modelsPath', this.modelsPath);
+        } else {
+            this.modelsPath = di.getAlias('modelsPath');
         }
+
+
         // assets path
         if (Type.isString(env.assetsPath)) {
             this.setAssetsPath(env.assetsPath);
@@ -127,10 +144,7 @@ Bootstrap = Type.create({
         if (!component.has('hooks/request')) {
             component.set('hooks/request', {});
         }
-        // set favicon path
-        if (!component.has('core/favicon')) {
-            component.set('core/favicon', {});
-        }
+
         // set view component
         if (!component.has('core/view')) {
             component.set('core/view', {});
@@ -157,6 +171,12 @@ Bootstrap = Type.create({
         Request = di.load('core/request');
         server.on('request', function (request, response) {
             logger.print('Create new request', request.url);
+
+            // set paths on each request
+            di.setAlias('controllersPath', this.controllersPath);
+            di.setAlias('modulesPath', this.modulesPath);
+            di.setAlias('modelsPath', this.modelsPath);
+
             // new request
             var nRequest = new Request({
                 request: request,
@@ -167,7 +187,8 @@ Bootstrap = Type.create({
             nRequest.parse();
             // on end destory
             nRequest.onEnd(nRequest.destroy.bind(nRequest));
-        });
+
+        }.bind(this));
         // server close event
         server.on('close', function () {
             logger.close();

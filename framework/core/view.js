@@ -61,8 +61,7 @@ View = ViewInterface.inherit(
             };
 
             if (this.config.cache) {
-                this.preloadTemplates(di.getAlias('viewsPath'));
-                this.preloadTemplates(di.getAlias('themesPath'));
+                this.preloadTemplates(di.getAlias('appPath'));
             }
 
             defaults = core.extend({}, this.config);
@@ -316,6 +315,28 @@ View = ViewInterface.inherit(
                 locals: locals,
                 autoescape: !escape
             });
+        },
+        /**
+         * @since 0.0.1
+         * @author Igor Ivanovic
+         * @method View#setPaths
+         *
+         * @description
+         * Set default paths
+         *  @return {string}
+         */
+        setPaths: function View_setPaths(themesPath, viewsPath) {
+            if (Type.isString(themesPath) && !!themesPath) {
+                di.setAlias('themesPath', themesPath);
+            } else {
+                di.setAlias('themesPath', this.config.themes);
+            }
+
+            if (Type.isString(viewsPath) && !!viewsPath) {
+                di.setAlias('viewsPath', viewsPath);
+            } else {
+                di.setAlias('viewsPath', this.config.views);
+            }
         },
         /**
          * @since 0.0.1

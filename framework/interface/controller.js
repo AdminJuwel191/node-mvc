@@ -16,10 +16,12 @@ var di = require('../di'),
  * Controller interface
  */
 ControllerInterface = Type.create({
-    _request: Type.OBJECT
+    _request: Type.OBJECT,
+    _routeInfo: Type.OBJECT
 }, {
-    _invoke: function ControllerInterface(request) {
+    _invoke: function ControllerInterface(request, routeInfo) {
         this._request = request;
+        this._routeInfo = routeInfo;
         [
             "has", "get", "redirect",
             "forward", "addHeader", "onEnd",
@@ -27,7 +29,10 @@ ControllerInterface = Type.create({
             "getHeaders", "getMethod", "getRequestHeaders",
             "isHeaderCacheUnModified", "sendNoChange", "getParsedUrl",
             "stopChain", "render", "renderFile", "setStatusCode",
-            "getRequestBody"
+            "getRequestBody",
+            "getActionName",
+            "getControllerName",
+            "getModuleName"
         ].forEach(function (method) {
             if (!(method in this)) {
                 throw new error.DataError({method: method}, 'ControllerInterface: missing method in Controller object');

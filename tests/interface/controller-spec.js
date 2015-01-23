@@ -34,11 +34,14 @@ describe('interface/controller', function () {
             isHeaderCacheUnModified: n,
             sendNoChange: n,
             getParsedUrl: n,
+            stopChain: n,
             render: n,
             renderFile: n,
-            stopChain: n,
             setStatusCode: n,
-            getRequestBody: n
+            getRequestBody: n,
+            getActionName: n,
+            getControllerName: n,
+            getModuleName: n
         });
         var message = tryCatch(function () {
             return new IFace(config);
@@ -296,6 +299,82 @@ describe('interface/controller', function () {
         render: n,
         renderFile: n,
         setStatusCode: n
+    });
+
+
+    createMethodTest('getActionName', {
+        has: n,
+        get: n,
+        redirect: n,
+        forward: n,
+        addHeader: n,
+        onEnd: n,
+        createUrl: n,
+        hasHeader: n,
+        getRequestHeader: n,
+        getHeaders: n,
+        getMethod: n,
+        getRequestHeaders: n,
+        isHeaderCacheUnModified: n,
+        sendNoChange: n,
+        getParsedUrl: n,
+        stopChain: n,
+        render: n,
+        renderFile: n,
+        setStatusCode: n,
+        getRequestBody: n
+    });
+
+
+
+    createMethodTest('getControllerName', {
+        has: n,
+        get: n,
+        redirect: n,
+        forward: n,
+        addHeader: n,
+        onEnd: n,
+        createUrl: n,
+        hasHeader: n,
+        getRequestHeader: n,
+        getHeaders: n,
+        getMethod: n,
+        getRequestHeaders: n,
+        isHeaderCacheUnModified: n,
+        sendNoChange: n,
+        getParsedUrl: n,
+        stopChain: n,
+        render: n,
+        renderFile: n,
+        setStatusCode: n,
+        getRequestBody: n,
+        getActionName: n
+    });
+
+
+    createMethodTest('getModuleName', {
+        has: n,
+        get: n,
+        redirect: n,
+        forward: n,
+        addHeader: n,
+        onEnd: n,
+        createUrl: n,
+        hasHeader: n,
+        getRequestHeader: n,
+        getHeaders: n,
+        getMethod: n,
+        getRequestHeaders: n,
+        isHeaderCacheUnModified: n,
+        sendNoChange: n,
+        getParsedUrl: n,
+        stopChain: n,
+        render: n,
+        renderFile: n,
+        setStatusCode: n,
+        getRequestBody: n,
+        getActionName: n,
+        getControllerName: n
     });
 
 

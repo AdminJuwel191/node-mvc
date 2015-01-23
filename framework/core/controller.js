@@ -218,6 +218,42 @@ Controller = ControllerInterface.inherit({}, {
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
+     * @method Controller#getActionName
+     *
+     * @description
+     * Get action name
+     * @return {string}
+     */
+    getActionName: function Controller_getActionName() {
+        return this._routeInfo.action;
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Controller#getControllerName
+     *
+     * @description
+     * Get controller name
+     * @return {string}
+     */
+    getControllerName: function Controller_getControllerName() {
+        return this._routeInfo.controller;
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Controller#getModuleName
+     *
+     * @description
+     * Get module name
+     * @return {string}
+     */
+    getModuleName: function Controller_getModuleName() {
+        return this._routeInfo.module;
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
      * @method Controller#hasAction
      *
      * @description

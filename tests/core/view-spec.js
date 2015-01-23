@@ -55,6 +55,8 @@ describe('core/view', function () {
             },
             swig: swig
         });
+        nPath = path.normalize(__dirname + '/../tf/');
+        di.setAlias('appPath', nPath);
     });
     it('construct|nocache', function () {
         swig.Swig = function () {

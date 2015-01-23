@@ -84,10 +84,14 @@ var DI = Type.create({
      * Normalize path
      */
     normalizePath: function DI_normalizePath(value) {
-        Object.keys(this.aliases).forEach(function (key) {
-            value = value.replace('@{' + key + '}', this.aliases[key]);
-        }.bind(this));
-        return path.normalize(value);
+        if (Type.isString(value)) {
+            Object.keys(this.aliases).forEach(function (key) {
+                value = value.replace('@{' + key + '}', this.aliases[key]);
+            }.bind(this));
+            return path.normalize(value);
+        } else {
+            throw new error.DataError({value: value}, 'DI.normalizePath: value is not string');
+        }
     },
     /**
      * @since 0.0.1

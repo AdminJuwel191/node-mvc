@@ -27,6 +27,9 @@ describe('core/request', function () {
             process: function () {
             }
         },
+        view = {
+            setPaths: function () {}
+        },
         error = di.load('error'),
         componentMock = {
             get: function (name) {
@@ -36,6 +39,8 @@ describe('core/request', function () {
                     return router;
                 } else if (name == "hooks/request") {
                     return hooks;
+                } else if (name == "core/view") {
+                    return view;
                 }
             }
         },
@@ -85,12 +90,14 @@ describe('core/request', function () {
 
 
     it('construct', function () {
+        spyOn(view, 'setPaths').and.callThrough();
         request = new Constructor(config, '/home/index');
         expect(request.request).toBe(config.request);
         expect(request.response).toBe(config.response);
         expect(request.url).toBe('/home/index');
         expect(request.statusCode).toBe(200);
         expect(request.parsedUrl.pathname).toBe('/home/index');
+        expect(view.setPaths).toHaveBeenCalled();
     });
 
 
@@ -493,20 +500,44 @@ describe('core/request', function () {
 
     it('_resolveRoute', function () {
         config.request.headers = {};
-        request = new Constructor(config, '/home/index');
+        request = new Constructor(config, '/user/home/index');
         var params = {id: 1};
 
         var ctx = {};
-        ctx._handleRoute = function () {
-        };
-        spyOn(ctx, '_handleRoute');
+        ctx._handleController = function () {};
+        ctx._handleModule = function () {};
+
+        spyOn(ctx, '_handleModule');
         request._resolveRoute.call(ctx, ['user/home/index', params]);
 
-        expect(ctx._handleRoute).toHaveBeenCalled();
+        expect(ctx._handleModule).toHaveBeenCalled();
         expect(ctx.statusCode).toBe(undefined);
         expect(ctx.route).toBe('user/home/index');
         expect(ctx.params).toBe(params);
         expect(ctx.module).toBe('user');
+        expect(ctx.controller).toBe('home');
+        expect(ctx.action).toBe('index');
+
+    });
+
+
+    it('_resolveRoute 2', function () {
+        config.request.headers = {};
+        request = new Constructor(config, '/home/index');
+        var params = {id: 1};
+
+        var ctx = {};
+        ctx._handleController = function () {};
+        ctx._handleModule = function () {};
+
+        spyOn(ctx, '_handleController');
+        request._resolveRoute.call(ctx, ['home/index', params]);
+
+        expect(ctx._handleController).toHaveBeenCalled();
+        expect(ctx.statusCode).toBe(undefined);
+        expect(ctx.route).toBe('home/index');
+        expect(ctx.params).toBe(params);
+        expect(ctx.module).toBe(undefined);
         expect(ctx.controller).toBe('home');
         expect(ctx.action).toBe('index');
 
@@ -934,14 +965,14 @@ describe('core/request', function () {
     });
 
 
-    it('_handleRoute', function (done) {
+    it('_handleController', function (done) {
         var cpath = path.normalize(__dirname + "/../tf/controllers");
         di.setAlias('controllersPath', cpath);
         var request = new Constructor(config, '/home/index');
         request.controller = 'core';
         request.action = 'index';
         request.params = {id: 1};
-        var promise = request._handleRoute();
+        var promise = request._handleController();
 
 
         promise.then(function (data) {
@@ -958,14 +989,14 @@ describe('core/request', function () {
     });
 
 
-    it('_handleRoute stopChain', function (done) {
+    it('_handleController stopChain', function (done) {
         var cpath = path.normalize(__dirname + "/../tf/controllers");
         di.setAlias('controllersPath', cpath);
         var request = new Constructor(config, '/home/stop');
         request.controller = 'core';
         request.action = 'stop';
         request.params = {id: 1};
-        var promise = request._handleRoute();
+        var promise = request._handleController();
 
 
         promise.then(function (data) {
@@ -983,14 +1014,14 @@ describe('core/request', function () {
         });
     });
 
-    it('_handleRoute stopChain 2', function (done) {
+    it('_handleController stopChain 2', function (done) {
         var cpath = path.normalize(__dirname + "/../tf/controllers");
         di.setAlias('controllersPath', cpath);
         var request = new Constructor(config, '/home/stop');
         request.controller = 'core';
         request.action = 'test';
         request.params = {id: 1};
-        var promise = request._handleRoute();
+        var promise = request._handleController();
 
 
         promise.then(function (data) {
@@ -1010,14 +1041,14 @@ describe('core/request', function () {
 
 
 
-    it('_handleRoute stopChain 3', function (done) {
+    it('_handleController stopChain 3', function (done) {
         var cpath = path.normalize(__dirname + "/../tf/controllers");
         di.setAlias('controllersPath', cpath);
         var request = new Constructor(config, '/home/stop');
         request.controller = 'core';
         request.action = 'test2';
         request.params = {id: 1};
-        var promise = request._handleRoute();
+        var promise = request._handleController();
 
 
         promise.then(function (data) {
@@ -1037,7 +1068,7 @@ describe('core/request', function () {
 
 
 
-    it('_handleRoute', function () {
+    it('_handleController', function () {
         var cpath = path.normalize(__dirname + "/../tf/controllers");
         di.setAlias('controllersPath', cpath);
         var request = new Constructor(config, '/home/index');
@@ -1045,7 +1076,7 @@ describe('core/request', function () {
         request.action = 'undefined';
 
         var message = tryCatch(function () {
-            return request._handleRoute();
+            return request._handleController();
         });
 
         expect(message.customMessage).toBe('Controller must be function type');
@@ -1053,7 +1084,7 @@ describe('core/request', function () {
 
 
 
-    it('_handleRoute', function () {
+    it('_handleController', function () {
         var cpath = path.normalize(__dirname + "/../tf/controllers");
         di.setAlias('controllersPath', cpath);
         var request = new Constructor(config, '/home/index');
@@ -1061,14 +1092,14 @@ describe('core/request', function () {
         request.action = 'undefined';
 
         var message = tryCatch(function () {
-            return request._handleRoute();
+            return request._handleController();
         });
 
         expect(message.customMessage).toBe('Missing action in controller');
     });
 
 
-    it('_handleRoute 2', function () {
+    it('_handleController 2', function () {
         var cpath = path.normalize(__dirname + "/../tf/controllers");
         di.setAlias('controllersPath', cpath);
         var request = new Constructor(config, '/home/index');
@@ -1076,13 +1107,13 @@ describe('core/request', function () {
         request.action = 'test';
 
         var message = tryCatch(function () {
-            return request._handleRoute();
+            return request._handleController();
         });
         expect(message.customMessage).toBe('Missing controller');
     });
 
 
-    it('_handleRoute 3', function () {
+    it('_handleController 3', function () {
         var cpath = path.normalize(__dirname + "/../tf/controllers");
         di.setAlias('controllersPath', cpath);
         var request = new Constructor(config, '/home/index');
@@ -1090,7 +1121,7 @@ describe('core/request', function () {
         request.action = 'test';
 
         var message = tryCatch(function () {
-            return request._handleRoute();
+            return request._handleController();
         });
         expect(message.customMessage).toBe('Controller must be instance of ControllerInterface "core/controller"');
     });
