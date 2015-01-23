@@ -15,6 +15,7 @@ Features
 8. Logger
 
 [Demo application](https://github.com/igorzg/mvcjs-testapp)
+[Docs and live app](http://mvcjs.igorivanovic.info)
 
 Getting started
 ====
