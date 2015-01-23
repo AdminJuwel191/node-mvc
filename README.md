@@ -16,6 +16,8 @@ Features
 
 [Demo application](https://github.com/igorzg/mvcjs-testapp)
 
+[Docs and live app](http://mvcjs.igorivanovic.info)
+
 Getting started
 ====
 npm install mvcjs

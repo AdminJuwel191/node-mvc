@@ -98,9 +98,11 @@ describe('core/request', function () {
         expect(request.statusCode).toBe(200);
         expect(request.parsedUrl.pathname).toBe('/home/index');
         expect(view.setPaths).toHaveBeenCalled();
+        expect(request.id.length).toBe(36);
     });
 
 
+    
     it('parse', function (done) {
         request = new Constructor(config, '/home/index');
 
@@ -623,9 +625,13 @@ describe('core/request', function () {
                 writeHead: function () {
 
                 }
+
             },
             isRendered: false,
             _checkContentType: function () {
+            },
+            getHeader: function () {
+
             }
         };
         var response = 'TEST';
@@ -637,8 +643,10 @@ describe('core/request', function () {
         };
         spyOn(ctx, '_checkContentType');
         spyOn(ctx, 'addHeader');
+        spyOn(ctx, 'getHeader');
         expect(request._render.call(ctx, response)).toBe(true);
         expect(ctx.addHeader).toHaveBeenCalled();
+        expect(ctx.getHeader).toHaveBeenCalled();
         expect(ctx._checkContentType).toHaveBeenCalled();
 
         ctx.isRendered = false;

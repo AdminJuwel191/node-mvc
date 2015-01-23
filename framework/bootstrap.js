@@ -89,6 +89,9 @@ Bootstrap = Type.create({
         if (Type.isNumber(env.port)) {
             this.setListenPort(env.port);
         }
+        if (Type.isString(env.host)) {
+            this.setListenHost(env.host);
+        }
         // set aliases
         if (Type.isArray(env.aliases)) {
             env.aliases.forEach(function setAlias(item) {

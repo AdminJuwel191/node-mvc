@@ -42,7 +42,8 @@ Request = Type.create({
     isPromiseChainStopped: Type.BOOLEAN,
     isForwarded: Type.BOOLEAN,
     encoding: Type.STRING,
-    body: Type.STRING
+    body: Type.STRING,
+    id: Type.STRING
 }, {
     _construct: function Request(config, url) {
         this.isForwarded = false;
@@ -57,6 +58,7 @@ Request = Type.create({
         this.isPromiseChainStopped = false;
         this.isERROR = false;
         this.isRendered = false;
+        this.id = this._uuid();
         view.setPaths();
     },
     /**
@@ -345,6 +347,20 @@ Request = Type.create({
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
+     * @method Request#_uuid
+     *
+     * @description
+     * Generate uuid
+     */
+    _uuid: function () {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
      * @method Request#_process
      *
      * @description
@@ -427,12 +443,8 @@ Request = Type.create({
     _render: function Request__render(response) {
 
         if (this.isRendered) {
-            logger.print('Request.render: data are rendered', response);
             return false;
         }
-
-
-        logger.print('Request.render', response);
 
         this._checkContentType('text/html');
 
@@ -448,6 +460,12 @@ Request = Type.create({
             throw new error.HttpError(500, {}, 'No data to render');
         } else {
             throw new error.HttpError(500, {}, 'Invalid response type, string or buffer is required!');
+        }
+
+        if ((response instanceof Error) || this.isERROR || this.statusCode === 500) {
+            logger.print('Request.error', this.statusCode, this.id, this.getHeader('content-type'), response);
+        } else {
+            logger.print('Request.render', this.statusCode, this.id, this.getHeader('content-type'));
         }
 
         this.isRendered = true;

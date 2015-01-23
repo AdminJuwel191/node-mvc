@@ -12,5 +12,6 @@
   "components": [],
   "assetsPath": "asset",
   "config": "bootstrap-config2.js",
-  "port": 1000
+  "port": 1000,
+  "host": "localhost"
 }
