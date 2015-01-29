@@ -153,4 +153,223 @@ describe("core", function () {
 
         expect(message).toBe("Core.match: String is not valid type");
     });
+
+
+
+    it("compare", function () {
+        var t1 = new Date;
+        var t2 = new Date(t1.getTime());
+        var re1 = /a/ig;
+        var re2 =  /a/ig;
+        var a = [];
+        var b = [];
+        expect(core.compare(a, b)).toBe(true);
+        a = {};
+        b = {};
+        expect(core.compare(a, b)).toBe(true);
+        a = 1;
+        b = 1;
+        expect(core.compare(a, b)).toBe(true);
+        a = NaN;
+        b = NaN;
+        expect(core.compare(a, b)).toBe(true);
+
+        a = [[{
+            id_voucher: 1,
+            affiliate_mode: 0,
+            exclusive_voucher: 1,
+            editors_pick: 1,
+            caption_1: [undefined, undefined, undefined, undefined, undefined, undefined, undefined],
+            end_time: '2015-12-17 03:24:00',
+            image: '/images/n/notebooksbilliger-de-gutscheincode_logo_2.png',
+            cssClass: ['code', 'exclusive', 'editor_pick', 'custom-text'],
+            captionCssClass: ['small'],
+            specialCssClass: ['special', 'editor-pick'],
+            verifiedDiff: false,
+            isAffiliate: true,
+            isExclusive: true,
+            isEditor: true,
+            specialTextKey: false,
+            expireDiff: 322,
+            n: NaN,
+            nu: null,
+            un: undefined,
+            t1: t1,
+            re1: re1
+        }, {
+            id_voucher: 1,
+            affiliate_mode: 0,
+            exclusive_voucher: 1,
+            editors_pick: 1,
+            caption_1: [undefined, undefined, undefined, undefined, undefined, undefined, undefined],
+            end_time: '2015-12-17 03:24:00',
+            image: '/images/n/notebooksbilliger-de-gutscheincode_logo_2.png',
+            cssClass: ['code', 'exclusive', 'editor_pick', 'custom-text'],
+            captionCssClass: ['small'],
+            specialCssClass: ['special', 'editor-pick'],
+            verifiedDiff: false,
+            isAffiliate: true,
+            isExclusive: true,
+            isEditor: true,
+            specialTextKey: false,
+            expireDiff: 322
+        }]];
+
+        b = [[{
+            id_voucher: 1,
+            affiliate_mode: 0,
+            exclusive_voucher: 1,
+            editors_pick: 1,
+            caption_1: [undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined],
+            end_time: '2015-12-17 03:24:00',
+            image: '/images/n/notebooksbilliger-de-gutscheincode_logo_2.png',
+            cssClass: ['code', 'exclusive', 'editor_pick', 'custom-text'],
+            captionCssClass: ['small'],
+            specialCssClass: ['special', 'editor-pick'],
+            verifiedDiff: false,
+            isAffiliate: true,
+            isExclusive: true,
+            isEditor: true,
+            specialTextKey: false,
+            expireDiff: 322,
+            n: NaN,
+            nu: null,
+            un: undefined,
+            t1: t2,
+            re1: re2
+        }, {
+            id_voucher: 1,
+            affiliate_mode: 0,
+            exclusive_voucher: 1,
+            editors_pick: 1,
+            caption_1: [undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined],
+            end_time: '2015-12-17 03:24:00',
+            image: '/images/n/notebooksbilliger-de-gutscheincode_logo_2.png',
+            cssClass: ['code', 'exclusive', 'editor_pick', 'custom-text'],
+            captionCssClass: ['small'],
+            specialCssClass: ['special', 'editor-pick'],
+            verifiedDiff: false,
+            isAffiliate: true,
+            isExclusive: true,
+            isEditor: true,
+            specialTextKey: false,
+            expireDiff: 322
+        }]];
+
+        expect(core.compare(a, b)).toBe(true);
+
+        a = {
+            id_voucher: 1,
+            affiliate_mode: 0,
+            exclusive_voucher: 1,
+            editors_pick: 1,
+            caption_1: [undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined],
+            end_time: '2015-12-17 03:24:00',
+            image: '/images/n/notebooksbilliger-de-gutscheincode_logo_2.png',
+            cssClass: ['code', 'exclusive', 'editor_pick', 'custom-text'],
+            captionCssClass: ['small'],
+            specialCssClass: ['special', 'editor-pick'],
+            verifiedDiff: false,
+            isAffiliate: true,
+            isExclusive: true,
+            isEditor: true,
+            specialTextKey: false,
+            expireDiff: 322,
+            n: NaN,
+            nu: null,
+            un: undefined,
+            t1: t2,
+            re1: re2
+        };
+
+        b = {
+            id_voucher: 1,
+            affiliate_mode: 0,
+            exclusive_voucher: 1,
+            editors_pick: 1,
+            caption_1: [undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined],
+            end_time: '2015-12-17 03:24:00',
+            image: '/images/n/notebooksbilliger-de-gutscheincode_logo_2.png',
+            cssClass: ['code', 'exclusive', 'editor_pick', 'custom-text'],
+            captionCssClass: ['small'],
+            specialCssClass: ['special', 'editor-pick'],
+            verifiedDiff: false,
+            isAffiliate: true,
+            isExclusive: true,
+            isEditor: true,
+            specialTextKey: false,
+            expireDiff: 322,
+            n: NaN,
+            nu: null,
+            un: undefined,
+            t1: t2,
+            re1: re2
+        };
+        expect(core.compare(a, b)).toBe(true);
+
+        a = ['code', 'exclusive', 'editor_pick', 'custom-text'];
+        b = ['code', 'exclusive', 'editor_pick', 'custom-text'];
+
+        expect(core.compare(a, b)).toBe(true);
+
+
+        a = {
+            id_voucher: 1,
+            affiliate_mode: 0,
+            exclusive_voucher: 1,
+            editors_pick: 1,
+            caption_1: [undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined],
+            end_time: '2015-12-17 03:24:00',
+            image: '/images/n/notebooksbilliger-de-gutscheincode_logo_2.png',
+            cssClass: ['code', 'exclusive', 'editor_pick', 'custom-text'],
+            captionCssClass: ['small'],
+            specialCssClass: ['special', 'editor-pick'],
+            verifiedDiff: false,
+            isAffiliate: true,
+            isExclusive: true,
+            isEditor: true,
+            specialTextKey: false,
+            expireDiff: 322,
+            n: NaN,
+            nu: null,
+            un: undefined,
+            t1: t2,
+            re1: re2,
+
+        };
+
+        var c = {a: 1,
+            b: a
+        };
+
+        a.z = c;
+
+
+        b = {
+            id_voucher: 1,
+            affiliate_mode: 0,
+            exclusive_voucher: 1,
+            editors_pick: 1,
+            caption_1: [undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined],
+            end_time: '2015-12-17 03:24:00',
+            image: '/images/n/notebooksbilliger-de-gutscheincode_logo_2.png',
+            cssClass: ['code', 'exclusive', 'editor_pick', 'custom-text'],
+            captionCssClass: ['small'],
+            specialCssClass: ['special', 'editor-pick'],
+            verifiedDiff: false,
+            isAffiliate: true,
+            isExclusive: true,
+            isEditor: true,
+            specialTextKey: false,
+            expireDiff: 322,
+            n: NaN,
+            nu: null,
+            un: undefined,
+            t1: t2,
+            re1: re2
+        };
+
+        b.z = c;
+        expect(core.compare(a, b)).toBe(true);
+    });
 });

@@ -129,6 +129,67 @@ function toObject(arr) {
     }
     throw new Error('Core.toObject: Value is not array');
 }
+
+/**
+ * @since 0.0.1
+ * @author Igor Ivanovic
+ * @function compare
+ *
+ * @description
+ * Compare object a with b
+ */
+function compare(a, b) {
+    if (Type.isString(a)) {
+        return a === b;
+    } else if (Type.isNumber(a)) {
+        if (isNaN(a) || isNaN(b)) {
+            return isNaN(a) === isNaN(b);
+        }
+        return a === b;
+    } else if (Type.isBoolean(a)) {
+        return a === b;
+    } else if (Type.isDate(a) && Type.isDate(b)) {
+        return a.getTime() === b.getTime();
+    } else if (Type.isRegExp(a) && Type.isRegExp(b)) {
+        return a.source === b.source;
+    } else if (Type.isArray(a) && Type.isArray(b)) {
+        // check references first
+        if (a === b) {
+            return true;
+        }
+        return a.every(function (item, index) {
+            try {
+                return compare(item, b[index]);
+            } catch (e) {
+                throw e;
+            }
+        });
+    } else if (Type.isObject(a) && Type.isObject(b)) {
+        var equal = [];
+        // check references first
+        if (a === b) {
+            return true;
+        }
+
+        try {
+            for (var key in a) {
+                equal.push(compare(a[key], b[key]));
+            }
+        } catch (e) {
+            throw e;
+        }
+        return equal.every(function (item) {
+            return item === true;
+        });
+        /// compare undefined and nulls and nans
+    } else if (a === b) {
+        return true;
+    }
+
+    return false;
+}
+
+
 /**
  * Export functions
  * @type {{isBoolean: isBoolean, isUndefined: isUndefined, isDefined: isDefined, isObject: isObject, isString: isString, isNumber: isNumber, isDate: isDate, isArray: isArray, isFunction: isFunction, isRegExp: isRegExp, isConstructor: isConstructor, copy: copy, trim: trim, throwError: throwError}}
@@ -140,5 +201,6 @@ module.exports = {
     trim: trim,
     match: match,
     createRegex: createRegex,
-    toObject: toObject
+    toObject: toObject,
+    compare: compare
 };
