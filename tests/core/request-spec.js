@@ -827,6 +827,9 @@ describe('core/request', function () {
             _render: function () {
                 return 'RENDERED';
             },
+            stopPromiseChain: function () {
+
+            },
             statusCode: 0,
             isERROR: false
         };
@@ -893,6 +896,9 @@ describe('core/request', function () {
             setStatusCode: function(code) {
                 this.statusCode = code;
             },
+            stopPromiseChain: function () {
+
+            },
             statusCode: 0,
             isERROR: false
         };
@@ -900,8 +906,11 @@ describe('core/request', function () {
             return 'core/error';
         };
 
-
-        spyOn(ctx, '_resolveRoute').and.callThrough();
+        Constructor.prototype.parse = function () {
+            return true;
+        };
+        spyOn(ctx, 'stopPromiseChain').and.callThrough();
+        spyOn(Constructor.prototype, 'parse').and.callThrough();
 
         var request = new Constructor(config, '/home/index');
         var cpath = path.normalize(__dirname + "/../tf/controllers");
@@ -918,7 +927,7 @@ describe('core/request', function () {
         var response = new Error('Message');
         response.code = 404;
         request._handleError.call(ctx, response);
-        expect(ctx._resolveRoute).toHaveBeenCalled();
+        expect(Constructor.prototype.parse).toHaveBeenCalled();
 
         expect(ctx.statusCode).toBe(404);
 
@@ -934,14 +943,11 @@ describe('core/request', function () {
             _render: function () {
                 return 'RENDERED';
             },
-            _resolveRoute: function(a) {
-                var a1 = a.shift(), a2 = a.shift();
-                expect(a1).toBe('core/error');
-                expect(a2 instanceof Error).toBe(true);
-                return Promise.reject('RESOLVED');
-            },
             setStatusCode: function(code) {
                 this.statusCode = code;
+            },
+            stopPromiseChain: function () {
+
             },
             statusCode: 0,
             isERROR: false
@@ -950,8 +956,13 @@ describe('core/request', function () {
             return 'core/error';
         };
 
+        Constructor.prototype.parse = function () {
+            return true;
+        };
 
-        spyOn(ctx, '_resolveRoute').and.callThrough();
+
+        spyOn(ctx, 'stopPromiseChain').and.callThrough();
+        spyOn(Constructor.prototype, 'parse').and.callThrough();
 
         var request = new Constructor(config, '/home/index');
         var cpath = path.normalize(__dirname + "/../tf/controllers");
@@ -967,7 +978,8 @@ describe('core/request', function () {
 
         var response = new Error('Message');
         request._handleError.call(ctx, response);
-        expect(ctx._resolveRoute).toHaveBeenCalled();
+        expect(Constructor.prototype.parse).toHaveBeenCalled();
+        expect(ctx.stopPromiseChain).toHaveBeenCalled();
         expect(ctx.statusCode).toBe(500);
 
     });

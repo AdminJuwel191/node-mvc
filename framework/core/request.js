@@ -48,6 +48,7 @@ Request = Type.create({
     _construct: function Request(config, url) {
         this.isForwarded = false;
         this.body = '';
+        this.isERROR = false;
         // body and isForwarded can be overriden
         core.extend(this, config);
 
@@ -56,7 +57,6 @@ Request = Type.create({
         this.url = url;
         this.parsedUrl = URLParser.parse(this.url, true);
         this.isPromiseChainStopped = false;
-        this.isERROR = false;
         this.isRendered = false;
         this.id = this._uuid();
         view.setPaths();
@@ -410,15 +410,30 @@ Request = Type.create({
      */
     _handleError: function Request_handleError(response) {
 
+        var request;
+
+        // stop current chain!!!
+        this.stopPromiseChain();
+
         if (response instanceof Error && !this.isERROR && !!router.getErrorRoute()) {
             if (response.code) {
                 this.setStatusCode(response.code);
             } else {
                 this.setStatusCode(500);
             }
-            this.isERROR = true;
-            this.module = null; // refresh module state because we are returning route
-            return this._resolveRoute([router.getErrorRoute(), response]);
+
+            // return new request
+            request = new Request({
+                request: this.request,
+                response: this.response,
+                isForwarded: true,
+                body: this.body,
+                isERROR: true
+            }, router.getErrorRoute());
+            // pass exception response over parsed url query as query parameter
+            request.parsedUrl.query.exception = response;
+            // return parsed request
+            return request.parse();
         } else if (response.trace) {
             this.addHeader('Content-Type', 'text/plain');
             return this._render(response.trace);

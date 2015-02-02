@@ -127,6 +127,22 @@ var DI = Type.create({
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
+     * @method DI#refereshNodeModuleCache
+     *
+     * @description
+     * Reset file cache
+     */
+    refereshNodeModuleCache: function DI_refereshNodeModuleCache(file) {
+        var path = this.getFilePath(file),
+            key = require.resolve(path + '.js');
+        // because all modules in node are cached while executing tests we want to delete cached version
+        delete require.cache[key];
+
+        return path;
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
      * @method DI#mockLoad
      *
      * @description
@@ -143,12 +159,8 @@ var DI = Type.create({
         try {
             // load module or exec if its function
             if (Type.isString(file)) {
-                // get file
-                path = this.getFilePath(file);
-                // because all modules in node are cached while executing tests we want to delete cached version
-                delete require.cache[require.resolve(path + '.js')];
                 // do require
-                return require(path);
+                return require(this.refereshNodeModuleCache(file));
 
             } else if (Type.isFunction(file)) {
                 return file();
