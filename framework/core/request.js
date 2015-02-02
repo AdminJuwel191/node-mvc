@@ -417,6 +417,7 @@ Request = Type.create({
                 this.setStatusCode(500);
             }
             this.isERROR = true;
+            this.module = null; // refresh module state because we are returning route
             return this._resolveRoute([router.getErrorRoute(), response]);
         } else if (response.trace) {
             this.addHeader('Content-Type', 'text/plain');
