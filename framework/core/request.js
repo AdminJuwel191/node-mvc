@@ -412,6 +412,11 @@ Request = Type.create({
 
         var request;
 
+        if (this.isRendered) {
+            // we have multiple recursion in parse for catching
+            return false;
+        }
+
         // stop current chain!!!
         this.stopPromiseChain();
 

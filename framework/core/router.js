@@ -27,8 +27,14 @@ Router = Type.create({
     _construct: function Router(config) {
         this.routes = [];
         this.config = core.extend({
-            errorRoute: false
+            errorRoute: false,
+            errorUrl: '/error'
         }, config);
+        // add error route so we can resolve it
+        this.add({
+            pattern: this.config.errorUrl,
+            route: this.config.errorRoute
+        });
     },
     /**
      * @since 0.0.1
