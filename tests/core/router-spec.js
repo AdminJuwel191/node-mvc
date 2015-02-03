@@ -59,17 +59,25 @@ describe('core/router', function () {
 
 
     it('getErrorRoute', function () {
-        router = new Constructor(config);
+        router = new Constructor({
+            errorRoute: "errorRoute/test"
+        });
         var error = router.getErrorRoute();
-        expect(error).toBe('core/error');
+        expect(error).toBe('errorRoute/test');
 
         router = new Constructor({});
         error = router.getErrorRoute();
+        expect(error).toBe(false);
+
+        router = new Constructor({});
+        error = router.getErrorRoute();
+        expect(router.routes.length).toBe(1);
         expect(error).toBe(false);
     });
 
 
     it('add', function () {
+        var Constructor = di.mock('core/router', mock);
         router = new Constructor(config);
         router.add({
             pattern: 'test/redirect',
@@ -88,7 +96,7 @@ describe('core/router', function () {
                 method: ['GET']
             }
         ]);
-        expect(router.routes.length).toBe(3);
+        expect(router.routes.length).toBe(4);
     });
 
     it('add RouteInterfaceError', function () {
@@ -97,8 +105,9 @@ describe('core/router', function () {
             "core/routeRule": function () {
             }
         }));
-        router = new Constructor(config);
+
         var message = tryCatch(function () {
+            router = new Constructor(config);
             router.add({
                 pattern: 'test/redirect',
                 route: 'test/redirect',
@@ -111,17 +120,14 @@ describe('core/router', function () {
 
     it('add dynamic', function () {
 
-        var Constructor = di.mock('core/router', core.extend(mock, {
-            "core/routeRule": function () {
-            }
-        }));
+        var Constructor =  di.mock('core/router', mock);
         router = new Constructor(config);
 
         router.add({
             dynamic: true,
             constructor: RouteRule
         });
-        expect(router.routes.length).toBe(1);
+        expect(router.routes.length).toBe(2);
 
         var message = tryCatch(function () {
             router.add({

@@ -202,6 +202,8 @@ describe('core/component', function () {
         component.set("core/router", {
             "name": "core/router",
             "errorRoute": "error/route"
+        }, function() {
+
         });
 
         expect(component.has("core/router")).toBe(true);

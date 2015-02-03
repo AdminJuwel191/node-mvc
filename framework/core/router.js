@@ -33,7 +33,7 @@ Router = Type.create({
         // add error route so we can resolve it
         this.add({
             pattern: this.config.errorUrl,
-            route: this.config.errorRoute
+            route: this.config.errorRoute ? this.config.errorRoute : 'core/error'
         });
     },
     /**
@@ -73,7 +73,7 @@ Router = Type.create({
         }
 
         if (!(rule instanceof RouteRuleInterface)) {
-            throw new error.HttpError(500, {rule: rule}, 'Router.add: rule must be instance of RouteRuleInterface');
+            throw new error.HttpError(500, {rule: rule, route: route}, 'Router.add: rule must be instance of RouteRuleInterface');
         }
 
         logger.print('Router.add: route', route);
