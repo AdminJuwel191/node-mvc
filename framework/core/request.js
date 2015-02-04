@@ -284,6 +284,7 @@ Request = Type.create({
         logger.print('Request.redirect', url, isTemp);
         this.addHeader('Location', url);
         this.stopPromiseChain();
+        this.isRendered = true;
         if (Type.isBoolean(isTemp) && !!isTemp) {
             this.response.writeHead(302, this.headers);
         } else {
