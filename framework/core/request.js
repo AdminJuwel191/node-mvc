@@ -416,7 +416,13 @@ Request = Type.create({
             return false;
         }
         // log error request
-        logger.log('Request.error', this.url, this.statusCode, this.id, this.getHeader('content-type'),  response);
+        logger.print('Request.error',{
+            url: this.url,
+            status: this.statusCode,
+            id: this.id,
+            isRendered: this.isRendered,
+            content_type: this.getHeader('content-type')
+        }, response);
         // set status codes
         if (response.code) {
             this.setStatusCode(response.code);
@@ -434,7 +440,7 @@ Request = Type.create({
                 isForwarded: true,
                 body: this.body,
                 isERROR: true
-            }, router.getErrorRoute());
+            }, router.createUrl(router.getErrorRoute()));
             // pass exception response over parsed url query as query parameter
             request.parsedUrl.query.exception = response;
             // set status codes for new request
@@ -489,7 +495,13 @@ Request = Type.create({
             throw new error.HttpError(500, {}, 'Invalid response type, string or buffer is required!');
         }
 
-        logger.print('Request.render', this.url, this.statusCode, this.id, this.getHeader('content-type'));
+        logger.print('Request.render', {
+            url: this.url,
+            status: this.statusCode,
+            id: this.id,
+            isRendered: this.isRendered,
+            content_type: this.getHeader('content-type')
+        });
 
         this.isRendered = true;
 
