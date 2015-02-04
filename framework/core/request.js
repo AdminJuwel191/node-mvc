@@ -415,6 +415,8 @@ Request = Type.create({
             // we have multiple recursion in parse for catching
             return false;
         }
+        // log error request
+        logger.log('Request.error', this.url, this.statusCode, this.id, this.getHeader('content-type'),  response);
         // set status codes
         if (response.code) {
             this.setStatusCode(response.code);
@@ -487,11 +489,7 @@ Request = Type.create({
             throw new error.HttpError(500, {}, 'Invalid response type, string or buffer is required!');
         }
 
-        if ((response instanceof Error) || this.isERROR || this.statusCode === 500) {
-            logger.print('Request.error', this.statusCode, this.id, this.getHeader('content-type'), response);
-        } else {
-            logger.print('Request.render', this.statusCode, this.id, this.getHeader('content-type'));
-        }
+        logger.print('Request.render', this.url, this.statusCode, this.id, this.getHeader('content-type'));
 
         this.isRendered = true;
 
