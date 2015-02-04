@@ -12,7 +12,10 @@ describe('core/request', function () {
         },
         router = {
             createUrl: function (a, params) {
-                return '/' + a + '?id=' + params.id;
+                if (params) {
+                    return '/' + a + '?id=' + params.id;
+                }
+                return '/' + a;
             },
             process: function () {
                 return Promise.resolve('handler');
@@ -830,6 +833,7 @@ describe('core/request', function () {
             stopPromiseChain: function () {
 
             },
+            getHeader: function () {},
             setStatusCode: function () {},
             statusCode: 0,
             isERROR: false
@@ -902,6 +906,7 @@ describe('core/request', function () {
             stopPromiseChain: function () {
 
             },
+            getHeader: function () {},
             statusCode: 0,
             isERROR: false
         };
@@ -952,7 +957,9 @@ describe('core/request', function () {
             stopPromiseChain: function () {
 
             },
+            getHeader: function () {},
             statusCode: 0,
+            id: 1,
             isERROR: false
         };
         router.getErrorRoute = function () {
