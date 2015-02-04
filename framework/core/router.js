@@ -90,7 +90,7 @@ Router = Type.create({
      * @return {string}
      */
     createUrl: function Router_createUrl(route, params) {
-        var i, len = this.routes.length, routeRule, url, anchor = '';
+        var routeRule, url, anchor = '', routes;
 
         if (!Type.isString(route)) {
             throw new error.HttpError(500, {route: route}, 'RouteRule.createUrl: route must be string type');
@@ -109,9 +109,10 @@ Router = Type.create({
         });
 
         params = core.copy(params);
+        routes = this.routes.slice();
 
-        for (i = len - 1; i > -1; --i) {
-            routeRule = this.routes[i];
+        while (routes.length) {
+            routeRule = routes.shift();
             url = routeRule.createUrl(route, params);
             if (url) {
                 return '/' + url + anchor;
