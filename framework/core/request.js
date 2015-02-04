@@ -409,24 +409,22 @@ Request = Type.create({
      * @return boolean
      */
     _handleError: function Request_handleError(response) {
-
         var request;
 
         if (this.isRendered) {
             // we have multiple recursion in parse for catching
             return false;
         }
-
+        // set status codes
+        if (response.code) {
+            this.setStatusCode(response.code);
+        } else {
+            this.setStatusCode(500);
+        }
         // stop current chain!!!
         this.stopPromiseChain();
 
         if (response instanceof Error && !this.isERROR && !!router.getErrorRoute()) {
-            if (response.code) {
-                this.setStatusCode(response.code);
-            } else {
-                this.setStatusCode(500);
-            }
-
             // return new request
             request = new Request({
                 request: this.request,
@@ -437,6 +435,12 @@ Request = Type.create({
             }, router.getErrorRoute());
             // pass exception response over parsed url query as query parameter
             request.parsedUrl.query.exception = response;
+            // set status codes for new request
+            if (response.code) {
+                request.setStatusCode(response.code);
+            } else {
+                request.setStatusCode(500);
+            }
             // return parsed request
             return request.parse();
         } else if (response.trace) {

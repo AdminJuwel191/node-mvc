@@ -830,6 +830,7 @@ describe('core/request', function () {
             stopPromiseChain: function () {
 
             },
+            setStatusCode: function () {},
             statusCode: 0,
             isERROR: false
         };
@@ -839,10 +840,12 @@ describe('core/request', function () {
         var response = {};
 
         spyOn(ctx, '_render').and.callThrough();
+        spyOn(ctx, 'setStatusCode').and.callThrough();
 
         var request = new Constructor(config, '/home/index');
         request._handleError.call(ctx, response);
         expect(ctx._render).toHaveBeenCalled();
+        expect(ctx.setStatusCode).toHaveBeenCalled();
 
         response = {};
         ctx.isERROR = true;
