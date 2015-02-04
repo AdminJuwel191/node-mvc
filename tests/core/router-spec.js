@@ -139,6 +139,29 @@ describe('core/router', function () {
     });
 
 
+    it('normalizeUrl', function () {
+        var RouteRule = RouteRuleInterface.inherit({}, {
+            parseRequest: function () {
+
+            },
+            createUrl: function (route, params) {
+                if (route === 'user/view') {
+                    return 'user/' + params.id;
+                }
+                return false;
+            }
+        });
+        var Constructor = di.mock('core/router', core.extend(mock, {
+            "core/routeRule": RouteRule
+        }));
+        router = new Constructor(config);
+
+        expect(router.normalizeUrl('/aaa//bcc')).toBe('/aaa/bcc');
+        expect(router.normalizeUrl('//')).toBe('/');
+        expect(router.normalizeUrl('/one/two//there///four////one')).toBe('/one/two/there/four/one');
+    });
+
+
     it('createUrl', function () {
         var RouteRule = RouteRuleInterface.inherit({}, {
             parseRequest: function () {

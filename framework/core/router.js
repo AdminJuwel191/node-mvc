@@ -22,10 +22,12 @@ var di = require('../di'),
  */
 Router = Type.create({
     routes: Type.ARRAY,
+    createUrlRgx: Type.REGEX,
     config: Type.OBJECT
 }, {
     _construct: function Router(config) {
         this.routes = [];
+        this.createUrlRgx = /\/\//g;
         this.config = core.extend({
             errorRoute: false,
             errorUrl: '/error'
@@ -79,7 +81,18 @@ Router = Type.create({
         logger.print('Router.add: route', route);
         this.routes.push(rule);
     },
-
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Router#normalizeUrl
+     *
+     * @description
+     * Create url
+     * @return {string}
+     */
+    normalizeUrl: function Router_normalizeUrl(url) {
+        return url.replace(this.createUrlRgx, '/').replace(this.createUrlRgx, '/');
+    },
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
@@ -115,7 +128,7 @@ Router = Type.create({
             routeRule = routes.shift();
             url = routeRule.createUrl(route, params);
             if (url) {
-                return '/' + url + anchor;
+                return this.normalizeUrl('/' + url + anchor);
             }
         }
 
@@ -124,7 +137,8 @@ Router = Type.create({
         if (Object.keys(params).length > 0) {
             url += '?' + this.buildQuery(params);
         }
-        return url + anchor;
+
+        return this.normalizeUrl(url + anchor);
     },
     /**
      * @since 0.0.1
