@@ -25,16 +25,19 @@ var di = require('../di'),
 Assets = Type.create({
     buffer: Type.OBJECT,
     config: Type.OBJECT,
-    cache: Type.OBJECT
+    cache: Type.OBJECT,
+    regex: Type.REGEX
 }, {
     _construct: function Favicon_construct(config) {
         this.config = core.extend({
             path: '@{basePath}/storage/',
+            skip: false,
             hook: '^\\/assets'
         }, config);
 
         logger.print('Assets.construct', config);
-        hook.set(new RegExp(this.config.hook), this.onRequest.bind(this));
+        this.regex = new RegExp(this.config.hook);
+        hook.set(this.regex, this.onRequest.bind(this));
     },
     /**
      * @since 0.0.1
@@ -47,10 +50,16 @@ Assets = Type.create({
      */
     onRequest: function Favicon_onRequest(api) {
 
-        var maxAge = 60 * 60 * 24 * 30 * 12,  // one year
-            filePath = di.normalizePath(this.config.path + api.parsedUrl.pathname),
+        var url = api.parsedUrl.pathname,
+            maxAge = 60 * 60 * 24 * 30 * 12,  // one year
+            filePath,
             mimeType;
 
+        if (this.config.skip) {
+            url = url.replace(this.regex, '');
+        }
+
+        filePath = di.normalizePath(this.config.path + url);
 
         mimeType = this.mimeType(filePath);
 

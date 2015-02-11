@@ -7,6 +7,11 @@ describe('core/assets', function () {
             }
         },
         source,
+        logger = {
+            print: function () {
+                //console.log(arguments);
+            }
+        },
         hook = function (key, val) {
             source = key.source;
         };
@@ -24,11 +29,7 @@ describe('core/assets', function () {
             "core/component": {
                 get: function (name) {
                     if (name === 'core/logger') {
-                        return {
-                            print: function () {
-                                //console.log(arguments);
-                            }
-                        };
+                        return logger;
 
                     } else if (name === 'hooks/request') {
                         return {
@@ -65,10 +66,10 @@ describe('core/assets', function () {
         mime.lookup = function () {
             return 'application/javascript';
         };
-        var headers = [], method = 'GET', headerModified = false, isSended = false;
+        var headers = [], method = 'GET', headerModified = false, isSended = false, filePath;
         var api = {
             parsedUrl: {
-                pathname: '/tf/di-test-load.js'
+                pathname: '/files/tf/di-test-load.js'
             },
             addHeader: function (key, value) {
                 headers.push({
@@ -86,6 +87,9 @@ describe('core/assets', function () {
                 isSended = true;
             }
         };
+        logger.print = function (a, b, c) {
+            filePath = c;
+        };
         spyOn(api, 'addHeader').and.callThrough();
         spyOn(api, 'getMethod').and.callThrough();
         spyOn(api, 'isHeaderCacheUnModified').and.callThrough();
@@ -93,13 +97,14 @@ describe('core/assets', function () {
 
         var instance = new Assets({
             path: path.normalize(__dirname + '/../'),
+            skip: true,
             hook: '^\\/files'
         });
 
         var promise = instance.onRequest(api);
 
         promise.then(function(data) {
-
+            expect(filePath).toBe(path.normalize(__dirname + '/../tf/di-test-load.js'));
             expect(data.toString()).toBe('module.exports = "CORRECT";');
             expect(api.addHeader).toHaveBeenCalled();
             expect(api.getMethod).toHaveBeenCalled();
@@ -117,6 +122,9 @@ describe('core/assets', function () {
             expect(ob.key).toBe('ETag');
             expect(ob.value).toBe('ETAG');
 
+            done();
+        }, function (error) {
+            console.log('error', error);
             done();
         });
     });
