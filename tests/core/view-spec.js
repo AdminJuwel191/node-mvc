@@ -3,6 +3,11 @@ describe('core/view', function () {
     var view,
         nPath,
         message,
+        swigApi = {
+            compileFile: function () {
+
+            }
+        },
         config = {
             cache: false,
             autoescape: true,
@@ -14,6 +19,7 @@ describe('core/view', function () {
             themes: '@{appPath}/themes/',
             views: '@{appPath}/views/',
             suffix: '.twig',
+            extensions: false,
             theme: false,
             loader: {}
         },
@@ -60,7 +66,7 @@ describe('core/view', function () {
     });
     it('construct|nocache', function () {
         swig.Swig = function () {
-
+            return swigApi;
         };
         nPath = path.normalize(__dirname + '/../tf/');
         config.cache = false;
@@ -72,9 +78,12 @@ describe('core/view', function () {
         expect(Object.keys(view.preloaded).length).toBe(0);
     });
 
-    it('construct|cache|getPreloaded', function () {
+    it('construct|cache', function () {
+        swigApi.compileFile = function (a) {
+            return di.readFileSync(a);
+        }
         swig.Swig = function () {
-
+            return swigApi;
         };
         nPath = path.normalize(__dirname + '/../tf/');
         config.cache = true;
@@ -100,11 +109,9 @@ describe('core/view', function () {
         expect(view.getPreloaded(nPath + 'templates/view/view.twig')).toBe('view');
         expect(view.getPreloaded(nPath + 'templates/theme/index/theme.twig')).toBe('theme');
 
-        message = tryCatch(function () {
-            view.getPreloaded(nPath + 'templates/theme/theme.twig1');
-        });
-        expect(message.data.key).toBe(nPath + 'templates/theme/theme.twig1');
-        expect(message.customMessage).toBe('ENOENT, no such file or directory');
+
+        expect(view.getPreloaded(nPath + 'templates/theme/theme.twig1')).toBe(false);
+
 
         view.config.cache = false;
         expect(view.getPreloaded(nPath + 'templates/theme/theme.twig1')).toBe(false);
@@ -116,7 +123,7 @@ describe('core/view', function () {
 
     it('setTheme', function () {
         swig.Swig = function () {
-
+            return swigApi;
         };
         nPath = path.normalize(__dirname + '/../tf/');
         config.suffix = '.twig';
@@ -144,7 +151,7 @@ describe('core/view', function () {
 
     it('getPath', function () {
         swig.Swig = function () {
-
+            return swigApi;
         };
         nPath = path.normalize(__dirname + '/../tf/');
         config.suffix = '.twig';
@@ -163,7 +170,7 @@ describe('core/view', function () {
 
     it('normalizeResolveValue', function () {
         swig.Swig = function () {
-
+            return swigApi;
         };
         nPath = path.normalize(__dirname + '/../tf/');
         config.suffix = '.twig';
@@ -187,7 +194,7 @@ describe('core/view', function () {
 
     it('resolve', function () {
         swig.Swig = function () {
-
+            return swigApi;
         };
         nPath = path.normalize(__dirname + '/../tf/');
         config.suffix = '.twig';
@@ -212,7 +219,7 @@ describe('core/view', function () {
 
     it('load', function () {
         swig.Swig = function () {
-
+            return swigApi;
         };
         nPath = path.normalize(__dirname + '/../tf/');
         config.suffix = '.twig';
@@ -235,7 +242,7 @@ describe('core/view', function () {
 
     it('resolve', function () {
         swig.Swig = function () {
-
+            return swigApi;
         };
         nPath = path.normalize(__dirname + '/../tf/');
         config.suffix = '.twig';
@@ -247,17 +254,17 @@ describe('core/view', function () {
         expect(swig.Swig).toHaveBeenCalled();
 
         view.setTheme('index');
-        expect(view.readTemplate(view.resolve('theme'))).toBe('theme');
+        expect(di.readFileSync(view.resolve('theme'))).toBe('theme');
         view.preloaded = {};
         view.config.cache = false;
-        expect(view.readTemplate(view.resolve('theme'))).toBe('theme');
+        expect(di.readFileSync(view.resolve('theme'))).toBe('theme');
     });
 
 
 
     it('setPaths', function () {
         swig.Swig = function () {
-
+            return swigApi;
         };
         nPath = path.normalize(__dirname + '/../tf/');
         config.suffix = '.twig';
@@ -290,7 +297,8 @@ describe('core/view', function () {
                 setTag: function() {},
                 setExtension: function() {},
                 render: function() {},
-                renderFile: function() {}
+                renderFile: function() {},
+                compileFile: function () {}
             };
         };
 

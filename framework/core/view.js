@@ -41,6 +41,7 @@ View = ViewInterface.inherit(
                 themes: '@{appPath}/themes/',
                 views: '@{appPath}/views/',
                 suffix: '.twig',
+                extensions: false,
                 theme: false
             }, config);
 
@@ -60,14 +61,24 @@ View = ViewInterface.inherit(
                 load: this.load.bind(this)
             };
 
+            defaults = core.extend({}, this.config);
+            // don't use swig cache!
+            if (this.config.cache) {
+                defaults.cache = {
+                    get: this.getPreloaded.bind(this),
+                    set: this.setPreloaded.bind(this)
+                };
+            }
+
+            this.swig = new swig.Swig(defaults);
+
+            if (this.config.extensions) {
+                di.load(this.config.extensions)(this, di);
+            }
+
             if (this.config.cache) {
                 this.preloadTemplates(di.getAlias('appPath'));
             }
-
-            defaults = core.extend({}, this.config);
-            // don't use swig cache!
-            defaults.cache = false;
-            this.swig = new swig.Swig(defaults);
 
             logger.print("View.construct", this.config);
         },
@@ -92,25 +103,10 @@ View = ViewInterface.inherit(
          * Get preloaded template
          */
         getPreloaded: function (key) {
-            if (this.hasPreloaded(key)) {
+            if (this.preloaded.hasOwnProperty(key)) {
                 return this.preloaded[key];
             }
             return false;
-        },
-        /**
-         * @since 0.0.1
-         * @author Igor Ivanovic
-         * @method View#hasPreloaded
-         *
-         * @description
-         * Check if have preloaded
-         */
-        hasPreloaded: function (key) {
-            var isPreloaded = this.preloaded.hasOwnProperty(key);
-            if (!!this.config.cache && !isPreloaded) {
-                throw new error.DataError({key: key}, "ENOENT, no such file or directory");
-            }
-            return isPreloaded;
         },
         /**
          * @since 0.0.1
@@ -133,7 +129,7 @@ View = ViewInterface.inherit(
                 }
 
             } else if (isFile(dir) && this.suffix.test(dir)) {
-                this.setPreloaded(dir, di.readFileSync(dir));
+                this.setPreloaded(dir, this.swig.compileFile(dir));
             }
 
             function readDir(path) {
@@ -213,22 +209,6 @@ View = ViewInterface.inherit(
         /**
          * @since 0.0.1
          * @author Igor Ivanovic
-         * @method View#readTemplate
-         *
-         * @description
-         * Read template
-         * @return {string};
-         */
-        readTemplate: function View_readTemplate(path) {
-            if (this.hasPreloaded(path)) {
-                return this.getPreloaded(path);
-            } else {
-                return di.readFileSync(path);
-            }
-        },
-        /**
-         * @since 0.0.1
-         * @author Igor Ivanovic
          * @method View#load
          *
          * @description
@@ -238,11 +218,11 @@ View = ViewInterface.inherit(
         load: function View_load(identifier, cb) {
             var template = '';
             try {
-                template = this.readTemplate(identifier);
+                template = di.readFileSync(identifier);
             } catch (e) {
                 identifier = this.normalizeResolveValue(identifier);
                 identifier = this.getPath(true) + identifier + this.config.suffix;
-                template = this.readTemplate(identifier);
+                template = di.readFileSync(identifier);
             } finally {
                 logger.print('ViewLoader.load', {
                     identifier: identifier,
