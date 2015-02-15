@@ -49,7 +49,7 @@ describe('interface/controller', function () {
 
         expect(message instanceof IFace).toBe(true);
 
-        expect(Type.isObject(message._request)).toBe(true);
+        expect(Type.isObject(message._requestApi)).toBe(true);
     });
 
 

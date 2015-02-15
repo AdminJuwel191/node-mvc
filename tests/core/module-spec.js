@@ -17,7 +17,7 @@ describe('core/module', function () {
     it('_construct', function () {
 
         expect(module.moduleName).toBe('menu');
-        expect(di.getAlias('currentModulePath')).toBe('@{modulesPath}/menu');
+        expect(di.getAlias('module_menu')).toBe('@{modulesPath}/menu');
     });
 
 
@@ -30,43 +30,15 @@ describe('core/module', function () {
     });
 
     it('getControllersPath', function () {
-        expect(module.getControllersPath()).toBe('@{currentModulePath}/controllers/');
+        expect(module.getControllersPath()).toBe('@{modulesPath}/menu/controllers/');
     });
 
     it('getViewsPath', function () {
-        expect(module.getViewsPath()).toBe('@{currentModulePath}/views/');
+        expect(module.getViewsPath()).toBe('@{modulesPath}/menu/views/');
     });
 
     it('getThemesPath', function () {
-        expect(module.getThemesPath()).toBe('@{currentModulePath}/themes/');
-    });
-
-
-    it('setControllersPath', function () {
-        var ctx = {
-            getControllersPath: function () {return '';}
-        };
-        spyOn(ctx, 'getControllersPath').and.callThrough();
-        module.setControllersPath.call(ctx);
-        expect(ctx.getControllersPath).toHaveBeenCalled();
-    });
-
-    it('setViewsPath', function () {
-        var ctx = {
-            getViewsPath: function () {return '';}
-        };
-        spyOn(ctx, 'getViewsPath').and.callThrough();
-        module.setViewsPath.call(ctx);
-        expect(ctx.getViewsPath).toHaveBeenCalled();
-    });
-
-    it('setThemesPath', function () {
-        var ctx = {
-            getThemesPath: function () {return '';}
-        };
-        spyOn(ctx, 'getThemesPath').and.callThrough();
-        module.setThemesPath.call(ctx);
-        expect(ctx.getThemesPath).toHaveBeenCalled();
+        expect(module.getThemesPath()).toBe('@{modulesPath}/menu/themes/');
     });
 
 });

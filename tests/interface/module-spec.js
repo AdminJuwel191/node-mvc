@@ -18,10 +18,7 @@ describe('interface/module', function () {
             getModulePath: n,
             getControllersPath: n,
             getViewsPath: n,
-            getThemesPath: n,
-            setControllersPath: n,
-            setViewsPath: n,
-            setThemesPath: n
+            getThemesPath: n
         });
 
         new Module();
@@ -46,32 +43,6 @@ describe('interface/module', function () {
         getControllersPath: n,
         getViewsPath: n
     });
-    createMethodTest('setControllersPath', {
-        getModuleName: n,
-        getModulePath: n,
-        getControllersPath: n,
-        getViewsPath: n,
-        getThemesPath: n
-    });
-    createMethodTest('setViewsPath', {
-        getModuleName: n,
-        getModulePath: n,
-        getControllersPath: n,
-        getViewsPath: n,
-        getThemesPath: n,
-        setControllersPath: n
-    });
-
-    createMethodTest('setThemesPath', {
-        getModuleName: n,
-        getModulePath: n,
-        getControllersPath: n,
-        getViewsPath: n,
-        getThemesPath: n,
-        setControllersPath: n,
-        setViewsPath: n
-    });
-
     function createMethodTest(method, extend, callback) {
         it('should have ' + method + ' method', function () {
 

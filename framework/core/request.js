@@ -579,8 +579,8 @@ Request = Type.create({
      * @description
      * Load response
      */
-    _handleController: function Request_handleController() {
-        var controllerToLoad = '@{controllersPath}/' + this.controller,
+    _handleController: function Request_handleController(controllersPath, viewsPath, themesPath) {
+        var controllerToLoad = controllersPath + this.controller,
             LoadedController,
             controller,
             action,
@@ -599,7 +599,9 @@ Request = Type.create({
         controller = new LoadedController(this._getApi(), {
             controller: this.controller,
             action: this.action,
-            module: this.module
+            module: this.module,
+            viewsPath: viewsPath,
+            themesPath: themesPath
         });
 
         if (!(controller instanceof  ControllerInterface)) {
@@ -662,8 +664,8 @@ Request = Type.create({
      * Handle module
      * @return {object} Promise
      */
-    _handleModule: function Request__handleModule() {
-        var moduleToLoad = '@{modulesPath}/' + this.module,
+    _handleModule: function Request__handleModule(path) {
+        var moduleToLoad = path + this.module,
             LoadedModule,
             module;
 
@@ -683,11 +685,8 @@ Request = Type.create({
             throw new error.HttpError(500, module, 'Module must be instance of ModuleInterface "core/module"');
         }
 
-        module.setControllersPath();
-        module.setViewsPath();
-        module.setThemesPath();
 
-        return this._handleController();
+        return this._handleController(module.getControllersPath() + '/', module.getViewsPath(), module.getThemesPath());
     },
     /**
      * @since 0.0.1
@@ -710,10 +709,10 @@ Request = Type.create({
         this.action = route.shift();
 
         if (!!this.module) {
-            return this._handleModule();
+            return this._handleModule(di.getAlias('modulesPath') + '/');
         }
 
-        return this._handleController();
+        return this._handleController(di.getAlias('controllersPath') + '/');
     }
 
 });

@@ -505,12 +505,14 @@ describe('core/request', function () {
 
     it('_resolveRoute', function () {
         config.request.headers = {};
+        di.setAlias('modulesPath', __dirname + '/../tf/modules/');
         request = new Constructor(config, '/user/home/index');
         var params = {id: 1};
 
         var ctx = {};
         ctx._handleController = function () {};
         ctx._handleModule = function () {};
+
 
         spyOn(ctx, '_handleModule');
         request._resolveRoute.call(ctx, ['user/home/index', params]);
@@ -528,6 +530,8 @@ describe('core/request', function () {
 
     it('_resolveRoute 2', function () {
         config.request.headers = {};
+        di.setAlias('modulesPath', __dirname + '/../tf/modules/');
+        di.setAlias('controllersPath', di.getAlias('modulesPath') + 'controllers/');
         request = new Constructor(config, '/home/index');
         var params = {id: 1};
 
@@ -1004,7 +1008,7 @@ describe('core/request', function () {
         request.action = 'index';
         request.module = 'admin';
         request.params = {id: 1};
-        var promise = request._handleModule();
+        var promise = request._handleModule('@{modulesPath}/');
 
 
         promise.then(function (data) {
@@ -1031,7 +1035,7 @@ describe('core/request', function () {
         request.module = 'test';
         request.params = {id: 1};
         var message = tryCatch(function () {
-            request._handleModule();
+            request._handleModule('@{modulesPath}/');
         });
 
         expect(message.customMessage).toBe('Missing module');
@@ -1039,7 +1043,7 @@ describe('core/request', function () {
 
         request.module = 'invalid2';
         message = tryCatch(function () {
-            request._handleModule();
+            request._handleModule('@{modulesPath}/');
         });
 
         expect(message.customMessage).toBe('Module must be function type');
@@ -1057,7 +1061,7 @@ describe('core/request', function () {
         request.params = {id: 1};
         var message;
         message = tryCatch(function () {
-            request._handleModule();
+            request._handleModule('@{modulesPath}/');
         });
 
         expect(message.customMessage).toBe('Module must be instance of ModuleInterface "core/module"');
@@ -1072,7 +1076,7 @@ describe('core/request', function () {
         request.controller = 'core';
         request.action = 'index';
         request.params = {id: 1};
-        var promise = request._handleController();
+        var promise = request._handleController('@{controllersPath}/');
 
 
         promise.then(function (data) {
@@ -1096,7 +1100,7 @@ describe('core/request', function () {
         request.controller = 'core';
         request.action = 'stop';
         request.params = {id: 1};
-        var promise = request._handleController();
+        var promise = request._handleController('@{controllersPath}/');
 
 
         promise.then(function (data) {
@@ -1121,7 +1125,7 @@ describe('core/request', function () {
         request.controller = 'core';
         request.action = 'test';
         request.params = {id: 1};
-        var promise = request._handleController();
+        var promise = request._handleController('@{controllersPath}/');
 
 
         promise.then(function (data) {
@@ -1148,7 +1152,7 @@ describe('core/request', function () {
         request.controller = 'core';
         request.action = 'test2';
         request.params = {id: 1};
-        var promise = request._handleController();
+        var promise = request._handleController('@{controllersPath}/');
 
 
         promise.then(function (data) {
@@ -1176,7 +1180,7 @@ describe('core/request', function () {
         request.action = 'undefined';
 
         var message = tryCatch(function () {
-            return request._handleController();
+            return request._handleController('@{controllersPath}/');
         });
 
         expect(message.customMessage).toBe('Controller must be function type');
@@ -1192,7 +1196,7 @@ describe('core/request', function () {
         request.action = 'undefined';
 
         var message = tryCatch(function () {
-            return request._handleController();
+            return request._handleController('@{controllersPath}/');
         });
 
         expect(message.customMessage).toBe('Missing action in controller');
@@ -1207,7 +1211,7 @@ describe('core/request', function () {
         request.action = 'test';
 
         var message = tryCatch(function () {
-            return request._handleController();
+            return request._handleController('@{controllersPath}/');
         });
         expect(message.customMessage).toBe('Missing controller');
     });
@@ -1221,7 +1225,7 @@ describe('core/request', function () {
         request.action = 'test';
 
         var message = tryCatch(function () {
-            return request._handleController();
+            return request._handleController('@{controllersPath}/');
         });
         expect(message.customMessage).toBe('Controller must be instance of ControllerInterface "core/controller"');
     });

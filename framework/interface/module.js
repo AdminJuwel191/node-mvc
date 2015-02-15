@@ -23,10 +23,7 @@ ModuleInterface = Type.create({},
                 "getModulePath",
                 "getControllersPath",
                 "getViewsPath",
-                "getThemesPath",
-                "setControllersPath",
-                "setViewsPath",
-                "setThemesPath"
+                "getThemesPath"
             ].forEach(function (method) {
                     if (!(method in this)) {
                         throw new error.DataError({

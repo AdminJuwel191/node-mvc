@@ -26,7 +26,7 @@ Controller = ControllerInterface.inherit({}, {
      * Set status code
      */
     setStatusCode: function Controller_setStatusCode(code) {
-        this._request.setStatusCode(code);
+        this._requestApi.setStatusCode(code);
     },
     /**
      * @since 0.0.1
@@ -37,7 +37,7 @@ Controller = ControllerInterface.inherit({}, {
      * Stop promise chain
      */
     stopChain: function Controller_stopChain() {
-        return this._request.stopPromiseChain();
+        return this._requestApi.stopPromiseChain();
     },
     /**
      * @since 0.0.1
@@ -48,7 +48,7 @@ Controller = ControllerInterface.inherit({}, {
      * has response header
      */
     hasHeader: function Controller_hasHeader(key) {
-        return this._request.hasHeader(key);
+        return this._requestApi.hasHeader(key);
     },
     /**
      * @since 0.0.1
@@ -59,7 +59,7 @@ Controller = ControllerInterface.inherit({}, {
      * Get request body
      */
     getRequestBody: function Controller_getRequestBody() {
-        return this._request.getRequestBody();
+        return this._requestApi.getRequestBody();
     },
     /**
      * @since 0.0.1
@@ -70,7 +70,7 @@ Controller = ControllerInterface.inherit({}, {
      * Get request header
      */
     getRequestHeader: function Controller_getRequestHeader(key) {
-        return this._request.getRequestHeader(key);
+        return this._requestApi.getRequestHeader(key);
     },
     /**
      * @since 0.0.1
@@ -81,7 +81,7 @@ Controller = ControllerInterface.inherit({}, {
      * Return response headers
      */
     getHeaders: function Controller_getHeaders() {
-        return this._request.getHeaders();
+        return this._requestApi.getHeaders();
     },
     /**
      * @since 0.0.1
@@ -92,7 +92,7 @@ Controller = ControllerInterface.inherit({}, {
      * Return request method
      */
     getMethod: function Controller_getMethod() {
-        return this._request.getMethod();
+        return this._requestApi.getMethod();
     },
     /**
      * @since 0.0.1
@@ -103,7 +103,7 @@ Controller = ControllerInterface.inherit({}, {
      * Return request headers
      */
     getRequestHeaders: function Controller_getRequestHeaders() {
-        return this._request.getRequestHeaders();
+        return this._requestApi.getRequestHeaders();
     },
     /**
      * @since 0.0.1
@@ -114,7 +114,7 @@ Controller = ControllerInterface.inherit({}, {
      * Check if cache is unmodified
      */
     isHeaderCacheUnModified: function Controller_isHeaderCacheUnModified() {
-        return this._request.isHeaderCacheUnModified();
+        return this._requestApi.isHeaderCacheUnModified();
     },
     /**
      * @since 0.0.1
@@ -125,7 +125,7 @@ Controller = ControllerInterface.inherit({}, {
      * Send no change 304 response
      */
     sendNoChange: function Controller_sendNoChange() {
-        return this._request.sendNoChange();
+        return this._requestApi.sendNoChange();
     },
     /**
      * @since 0.0.1
@@ -136,7 +136,7 @@ Controller = ControllerInterface.inherit({}, {
      * Return parsed url
      */
     getParsedUrl: function Controller_getParsedUrl() {
-        return this._request.parsedUrl;
+        return this._requestApi.parsedUrl;
     },
     /**
      * @since 0.0.1
@@ -147,7 +147,7 @@ Controller = ControllerInterface.inherit({}, {
      * On end
      */
     createUrl: function Controller_createUrl(route, params) {
-        return this._request.createUrl(route, params);
+        return this._requestApi.createUrl(route, params);
     },
     /**
      * @since 0.0.1
@@ -158,7 +158,7 @@ Controller = ControllerInterface.inherit({}, {
      * On end
      */
     onEnd: function Controller_onEnd(callback) {
-        return this._request.onEnd(callback);
+        return this._requestApi.onEnd(callback);
     },
     /**
      * @since 0.0.1
@@ -169,7 +169,7 @@ Controller = ControllerInterface.inherit({}, {
      * Add header to request
      */
     addHeader: function Controller_addHeader(key, value) {
-        return this._request.addHeader(key, value);
+        return this._requestApi.addHeader(key, value);
     },
     /**
      * @since 0.0.1
@@ -180,7 +180,7 @@ Controller = ControllerInterface.inherit({}, {
      * Redirect to some url
      */
     forward: function Controller_forward(route, params) {
-        return this._request.forward(route, params);
+        return this._requestApi.forward(route, params);
     },
     /**
      * @since 0.0.1
@@ -191,7 +191,7 @@ Controller = ControllerInterface.inherit({}, {
      * Redirect to some url
      */
     redirect: function Controller_redirect(url, isTemp) {
-        return this._request.redirect(url, isTemp);
+        return this._requestApi.redirect(url, isTemp);
     },
     /**
      * @since 0.0.1
@@ -202,7 +202,7 @@ Controller = ControllerInterface.inherit({}, {
      * Render file
      */
     renderFile: function Controller_renderFile(pathName, locals) {
-        return view.renderFile(pathName, locals);
+        return view.renderFile(pathName, locals, this._config.themesPath,  this._config.viewsPath);
     },
     /**
      * @since 0.0.1
@@ -225,7 +225,7 @@ Controller = ControllerInterface.inherit({}, {
      * @return {string}
      */
     getActionName: function Controller_getActionName() {
-        return this._routeInfo.action;
+        return this._config.action;
     },
     /**
      * @since 0.0.1
@@ -237,7 +237,7 @@ Controller = ControllerInterface.inherit({}, {
      * @return {string}
      */
     getControllerName: function Controller_getControllerName() {
-        return this._routeInfo.controller;
+        return this._config.controller;
     },
     /**
      * @since 0.0.1
@@ -249,7 +249,7 @@ Controller = ControllerInterface.inherit({}, {
      * @return {string}
      */
     getModuleName: function Controller_getModuleName() {
-        return this._routeInfo.module;
+        return this._config.module;
     },
     /**
      * @since 0.0.1

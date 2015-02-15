@@ -347,7 +347,8 @@ View = ViewInterface.inherit(
          * Render file
          *  @return {string}
          */
-        renderFile: function View_renderFile(pathName, locals) {
+        renderFile: function View_renderFile(pathName, locals, themesPath, viewsPath) {
+            this.setPaths(themesPath, viewsPath);
             return this.swig.renderFile(pathName, locals);
         }
     }

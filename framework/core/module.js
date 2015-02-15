@@ -27,7 +27,7 @@ Module = ModuleInterface.inherit({
      */
     _invoke: function (name) {
         this.moduleName = name;
-        di.setAlias('currentModulePath', this.getModulePath());
+        di.setAlias('module_' + name, this.getModulePath());
     },
     /**
      * @since 0.0.1
@@ -61,7 +61,7 @@ Module = ModuleInterface.inherit({
      * @return {string}
      */
     getControllersPath: function  Module_getControllersPath() {
-        return '@{currentModulePath}/controllers/';
+        return this.getModulePath() + '/controllers/';
     },
     /**
      * @since 0.0.1
@@ -73,7 +73,7 @@ Module = ModuleInterface.inherit({
      * @return {string}
      */
     getViewsPath: function  Module_getViewsPath() {
-        return '@{currentModulePath}/views/';
+        return  this.getModulePath() + '/views/';
     },
     /**
      * @since 0.0.1
@@ -85,40 +85,7 @@ Module = ModuleInterface.inherit({
      * @return {string}
      */
     getThemesPath: function  Module_getThemesPath() {
-        return '@{currentModulePath}/themes/';
-    },
-    /**
-     * @since 0.0.1
-     * @author Igor Ivanovic
-     * @method Module#setControllersPath
-     *
-     * @description
-     * Set controller path
-     */
-    setControllersPath: function Module_setControllersPath() {
-        di.setAlias('controllersPath', this.getControllersPath());
-    },
-    /**
-     * @since 0.0.1
-     * @author Igor Ivanovic
-     * @method Module#setViewsPath
-     *
-     * @description
-     * Set views path
-     */
-    setViewsPath: function Module_setViewsPath() {
-        di.setAlias('viewsPath', this.getViewsPath());
-    },
-    /**
-     * @since 0.0.1
-     * @author Igor Ivanovic
-     * @method Module#setThemesPath
-     *
-     * @description
-     * Set themes path
-     */
-    setThemesPath: function Module_setThemesPath() {
-        di.setAlias('themesPath', this.getThemesPath());
+        return  this.getModulePath() + '/themes/';
     }
 });
 
