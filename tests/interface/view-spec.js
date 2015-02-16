@@ -26,10 +26,9 @@ describe('interface/view', function () {
             render: n,
             renderFile: n,
             setTheme: n,
-            getPath: n,
-            normalizeResolveValue: n,
             resolve: n,
-            load: n
+            load: n,
+            getPath: n
         });
         var message = tryCatch(function () {
             return new IFace(config);
@@ -80,16 +79,7 @@ describe('interface/view', function () {
         render: n,
         renderFile: n
     });
-    createMethodTest('getPath', {
-        setLoader: n,
-        setFilter: n,
-        setTag: n,
-        setExtension: n,
-        render: n,
-        renderFile: n,
-        setTheme: n
-    });
-    createMethodTest('normalizeResolveValue', {
+    createMethodTest('resolve', {
         setLoader: n,
         setFilter: n,
         setTag: n,
@@ -99,17 +89,6 @@ describe('interface/view', function () {
         setTheme: n,
         getPath: n
     });
-    createMethodTest('resolve', {
-        setLoader: n,
-        setFilter: n,
-        setTag: n,
-        setExtension: n,
-        render: n,
-        renderFile: n,
-        setTheme: n,
-        getPath: n,
-        normalizeResolveValue: n
-    });
     createMethodTest('load', {
         setLoader: n,
         setFilter: n,
@@ -118,9 +97,18 @@ describe('interface/view', function () {
         render: n,
         renderFile: n,
         setTheme: n,
-        getPath: n,
-        normalizeResolveValue: n,
         resolve: n
+    });
+    createMethodTest('getPath', {
+        setLoader: n,
+        setFilter: n,
+        setTag: n,
+        setExtension: n,
+        render: n,
+        renderFile: n,
+        setTheme: n,
+        resolve: n,
+        load: n
     });
 
 

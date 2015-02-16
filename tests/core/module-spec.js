@@ -37,8 +37,4 @@ describe('core/module', function () {
         expect(module.getViewsPath()).toBe('@{modulesPath}/menu/views/');
     });
 
-    it('getThemesPath', function () {
-        expect(module.getThemesPath()).toBe('@{modulesPath}/menu/themes/');
-    });
-
 });

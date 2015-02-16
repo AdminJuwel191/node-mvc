@@ -74,18 +74,6 @@ Module = ModuleInterface.inherit({
      */
     getViewsPath: function  Module_getViewsPath() {
         return  this.getModulePath() + '/views/';
-    },
-    /**
-     * @since 0.0.1
-     * @author Igor Ivanovic
-     * @method Module#getThemesPath
-     *
-     * @description
-     * Get themes path
-     * @return {string}
-     */
-    getThemesPath: function  Module_getThemesPath() {
-        return  this.getModulePath() + '/themes/';
     }
 });
 

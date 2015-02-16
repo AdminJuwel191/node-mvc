@@ -16,7 +16,6 @@ describe('core/view', function () {
             cmtControls: ['{#', '#}'],
             locals: {},
             cacheComponent: false,
-            themes: '@{appPath}/themes/',
             views: '@{appPath}/views/',
             suffix: '.twig',
             extensions: false,
@@ -45,6 +44,7 @@ describe('core/view', function () {
             error: di.load('error'),
             fs: di.load('fs'),
             'interface/view': di.load('interface/view'),
+            'interface/module' : di.load('interface/module'),
             'core/component': {
                 get: function (name) {
                     if (name === "core/logger") {
@@ -62,6 +62,7 @@ describe('core/view', function () {
             swig: swig
         });
         nPath = path.normalize(__dirname + '/../tf/');
+        di.setAlias('modulesPath', '@{appPath}/modules_valid');
         di.setAlias('appPath', nPath);
     });
     it('construct|nocache', function () {
@@ -70,52 +71,12 @@ describe('core/view', function () {
         };
         nPath = path.normalize(__dirname + '/../tf/');
         config.cache = false;
-        config.themes = nPath + 'templates/theme/';
-        config.views = nPath + 'templates/view/';
+       
+        config.views = nPath + 'templates/theme/';
         spyOn(swig, 'Swig').and.callThrough();
         view = new ViewConstructor(config);
         expect(swig.Swig).toHaveBeenCalled();
         expect(Object.keys(view.preloaded).length).toBe(0);
-    });
-
-    it('construct|cache', function () {
-        swigApi.compileFile = function (a) {
-            return di.readFileSync(a);
-        }
-        swig.Swig = function () {
-            return swigApi;
-        };
-        nPath = path.normalize(__dirname + '/../tf/');
-        config.cache = true;
-        config.themes = nPath + 'templates/theme/';
-        config.views = nPath + 'templates/view/';
-        spyOn(swig, 'Swig').and.callThrough();
-        view = new ViewConstructor(config);
-        expect(swig.Swig).toHaveBeenCalled();
-        expect(Object.keys(view.preloaded).length).toBe(3);
-        Object.keys(view.config).forEach(function (key) {
-            expect(key + ':' + JSON.stringify(view.config[key])).toBe(key + ':' + JSON.stringify(config[key]));
-        });
-
-
-        message = tryCatch(function () {
-            config.suffix = 1;
-            new ViewConstructor(config);
-        });
-
-        expect(message.customMessage).toBe('View.construct: view suffix must be string type');
-
-
-        expect(view.getPreloaded(nPath + 'templates/view/view.twig')).toBe('view');
-        expect(view.getPreloaded(nPath + 'templates/theme/index/theme.twig')).toBe('theme');
-
-
-        expect(view.getPreloaded(nPath + 'templates/theme/theme.twig1')).toBe(false);
-
-
-        view.config.cache = false;
-        expect(view.getPreloaded(nPath + 'templates/theme/theme.twig1')).toBe(false);
-
     });
 
 
@@ -128,8 +89,8 @@ describe('core/view', function () {
         nPath = path.normalize(__dirname + '/../tf/');
         config.suffix = '.twig';
         config.cache = true;
-        config.themes = nPath + 'templates/theme/';
-        config.views = nPath + 'templates/view/';
+       
+        config.views = nPath + 'templates/theme/';
         spyOn(swig, 'Swig').and.callThrough();
         view = new ViewConstructor(config);
         expect(swig.Swig).toHaveBeenCalled();
@@ -156,40 +117,18 @@ describe('core/view', function () {
         nPath = path.normalize(__dirname + '/../tf/');
         config.suffix = '.twig';
         config.cache = true;
-        config.themes = nPath + 'templates/theme/';
-        config.views = nPath + 'templates/view/';
+       
+        config.views = nPath + 'templates/theme/';
+        di.setAlias('viewsPath', config.views);
         spyOn(swig, 'Swig').and.callThrough();
         view = new ViewConstructor(config);
         expect(swig.Swig).toHaveBeenCalled();
 
         view.setTheme('index');
 
-        expect(view.getPath()).toBe(nPath + 'templates/theme/index/');
-        expect(view.getPath(true)).toBe(nPath + 'templates/view/');
+        expect(view.getPath(di.normalizePath('@{viewsPath}/'))).toBe(nPath + 'templates/theme/');
+        expect(view.getPath(di.normalizePath('@{modulesPath}/user/views/'))).toBe(nPath + 'modules_valid/user/views/');
      });
-
-    it('normalizeResolveValue', function () {
-        swig.Swig = function () {
-            return swigApi;
-        };
-        nPath = path.normalize(__dirname + '/../tf/');
-        config.suffix = '.twig';
-        config.cache = true;
-        config.themes = nPath + 'templates/theme/';
-        config.views = nPath + 'templates/view/';
-        spyOn(swig, 'Swig').and.callThrough();
-        view = new ViewConstructor(config);
-        expect(swig.Swig).toHaveBeenCalled();
-
-        view.setTheme('index');
-
-        //fail
-        expect(view.normalizeResolveValue(nPath + 'templates/theme/test/user/index.twig')).toBe(nPath + 'templates/theme/test/user/index.twig');
-        //success
-        expect(view.normalizeResolveValue(nPath + 'templates/theme/index/user/index.twig')).toBe('user/index');
-        //success
-        expect(view.normalizeResolveValue(nPath + 'templates/view/user/index.twig')).toBe('user/index');
-    });
 
 
     it('resolve', function () {
@@ -199,8 +138,8 @@ describe('core/view', function () {
         nPath = path.normalize(__dirname + '/../tf/');
         config.suffix = '.twig';
         config.cache = true;
-        config.themes = nPath + 'templates/theme/';
-        config.views = nPath + 'templates/view/';
+       
+        config.views = nPath + 'templates/theme/';
         spyOn(swig, 'Swig').and.callThrough();
         view = new ViewConstructor(config);
         expect(swig.Swig).toHaveBeenCalled();
@@ -208,12 +147,14 @@ describe('core/view', function () {
         view.setTheme('index');
 
         //success
-        expect(view.resolve(nPath + 'templates/theme/index/user/index.twig')).toBe(nPath + 'templates/theme/index/user/index.twig');
+        expect(view.resolve('@{viewsPath}/theme')).toBe(nPath + 'templates/theme/index/theme.twig');
         //success
-        expect(view.resolve(nPath + 'templates/view/user/index.twig')).toBe(nPath + 'templates/theme/index/user/index.twig');
+        expect(view.resolve('@{viewsPath}/view')).toBe(nPath + 'templates/theme/default/view.twig');
 
-        expect(view.resolve('user/index')).toBe(nPath + 'templates/theme/index/user/index.twig');
-
+        //success
+        expect(view.resolve('@{modulesPath}/user/views/theme')).toBe(nPath + 'modules_valid/user/views/index/theme.twig');
+        //success
+        expect(view.resolve('@{modulesPath}/user/views/view')).toBe(nPath + 'modules_valid/user/views/default/view.twig');
     });
 
 
@@ -224,66 +165,19 @@ describe('core/view', function () {
         nPath = path.normalize(__dirname + '/../tf/');
         config.suffix = '.twig';
         config.cache = true;
-        config.themes = nPath + 'templates/theme/';
-        config.views = nPath + 'templates/view/';
+       
+        config.views = nPath + 'templates/theme/';
         spyOn(swig, 'Swig').and.callThrough();
         view = new ViewConstructor(config);
         expect(swig.Swig).toHaveBeenCalled();
 
         view.setTheme('index');
-        expect(view.load(view.resolve('theme'))).toBe('theme');
+        expect(view.load(view.resolve('@{viewsPath}/theme'))).toBe('theme');
         view.setTheme(null);
-        expect(view.load(view.resolve('theme'))).toBe('viewtheme');
+        expect(view.load(view.resolve('@{viewsPath}/theme'))).toBe('viewtheme');
         view.setTheme('index');
-        expect(view.load(view.resolve('view'))).toBe('view');
+        expect(view.load(view.resolve('@{viewsPath}/view'))).toBe('view');
 
-    });
-
-
-    it('resolve', function () {
-        swig.Swig = function () {
-            return swigApi;
-        };
-        nPath = path.normalize(__dirname + '/../tf/');
-        config.suffix = '.twig';
-        config.cache = true;
-        config.themes = nPath + 'templates/theme/';
-        config.views = nPath + 'templates/view/';
-        spyOn(swig, 'Swig').and.callThrough();
-        view = new ViewConstructor(config);
-        expect(swig.Swig).toHaveBeenCalled();
-
-        view.setTheme('index');
-        expect(di.readFileSync(view.resolve('theme'))).toBe('theme');
-        view.preloaded = {};
-        view.config.cache = false;
-        expect(di.readFileSync(view.resolve('theme'))).toBe('theme');
-    });
-
-
-
-    it('setPaths', function () {
-        swig.Swig = function () {
-            return swigApi;
-        };
-        nPath = path.normalize(__dirname + '/../tf/');
-        config.suffix = '.twig';
-        config.cache = true;
-        config.themes = nPath + 'templates/theme/';
-        config.views = nPath + 'templates/view/';
-        spyOn(swig, 'Swig').and.callThrough();
-        view = new ViewConstructor(config);
-        expect(swig.Swig).toHaveBeenCalled();
-
-        view.setPaths('a', 'b');
-
-        expect(di.getAlias('themesPath')).toBe('a');
-        expect(di.getAlias('viewsPath')).toBe('b');
-
-        view.setPaths();
-
-        expect(di.getAlias('themesPath')).toBe( nPath + 'templates/theme/');
-        expect(di.getAlias('viewsPath')).toBe(nPath + 'templates/view/');
     });
 
 
@@ -305,8 +199,8 @@ describe('core/view', function () {
         nPath = path.normalize(__dirname + '/../tf/');
         config.suffix = '.twig';
         config.cache = true;
-        config.themes = nPath + 'templates/theme/';
-        config.views = nPath + 'templates/view/';
+       
+        config.views = nPath + 'templates/theme/';
         spyOn(swig, 'Swig').and.callThrough();
         view = new ViewConstructor(config);
 

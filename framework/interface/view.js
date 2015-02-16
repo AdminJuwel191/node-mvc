@@ -22,8 +22,8 @@ ViewInterface = Type.create({
         _invoke: function ViewInterface() {
             [
                 "setLoader", "setFilter", "setTag", "setExtension",
-                "render", "renderFile", "setTheme", "getPath",
-                "normalizeResolveValue", "resolve", "load"
+                "render", "renderFile", "setTheme",
+                "resolve", "load", "getPath"
             ].forEach(
                 function (method) {
                     if (!(method in this)) {

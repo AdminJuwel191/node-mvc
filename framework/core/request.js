@@ -7,7 +7,6 @@ var di = require('../di'),
     router = component.get('core/router'),
     hooks = component.get('hooks/request'),
     logger = component.get('core/logger'),
-    view = component.get('core/view'),
     URLParser = di.load('url'),
     Type = di.load('typejs'),
     core = di.load('core'),
@@ -59,7 +58,6 @@ Request = Type.create({
         this.isPromiseChainStopped = false;
         this.isRendered = false;
         this.id = this._uuid();
-        view.setPaths();
     },
     /**
      * @since 0.0.1
@@ -579,7 +577,7 @@ Request = Type.create({
      * @description
      * Load response
      */
-    _handleController: function Request_handleController(controllersPath, viewsPath, themesPath) {
+    _handleController: function Request_handleController(controllersPath, viewsPath) {
         var controllerToLoad = controllersPath + this.controller,
             LoadedController,
             controller,
@@ -600,8 +598,7 @@ Request = Type.create({
             controller: this.controller,
             action: this.action,
             module: this.module,
-            viewsPath: viewsPath,
-            themesPath: themesPath
+            viewsPath: viewsPath
         });
 
         if (!(controller instanceof  ControllerInterface)) {
@@ -686,7 +683,7 @@ Request = Type.create({
         }
 
 
-        return this._handleController(module.getControllersPath() + '/', module.getViewsPath(), module.getThemesPath());
+        return this._handleController(module.getControllersPath(), module.getViewsPath());
     },
     /**
      * @since 0.0.1
@@ -709,10 +706,10 @@ Request = Type.create({
         this.action = route.shift();
 
         if (!!this.module) {
-            return this._handleModule(di.getAlias('modulesPath') + '/');
+            return this._handleModule(di.getAlias('modulesPath'));
         }
 
-        return this._handleController(di.getAlias('controllersPath') + '/');
+        return this._handleController(di.getAlias('controllersPath'));
     }
 
 });

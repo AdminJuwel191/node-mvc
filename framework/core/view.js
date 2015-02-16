@@ -3,6 +3,7 @@ var di = require('../di'),
     core = di.load('core'),
     Type = di.load('typejs'),
     ViewInterface = di.load('interface/view'),
+    ModuleInterface = di.load('interface/module'),
     swig = di.load('swig'),
     error = di.load('error'),
     fs = di.load('fs'),
@@ -23,13 +24,19 @@ var di = require('../di'),
 View = ViewInterface.inherit(
     {
         swig: Type.OBJECT,
-        preloaded: Type.OBJECT
+        preloaded: Type.OBJECT,
+        paths: Type.ARRAY,
+        aliasRegex: Type.REGEX,
+        defaultThemeRegex: Type.REGEX,
+        themeRegex: Type.REGEX
     },
     {
         _construct: function View_construct(config) {
             var defaults;
             // extend
+            this.aliasRegex = /@{.*}/g;
             this.preloaded = {};
+            this.paths = [];
             this.config = core.extend({
                 cache: false,
                 autoescape: true,
@@ -38,16 +45,21 @@ View = ViewInterface.inherit(
                 cmtControls: ['{#', '#}'],
                 locals: {},
                 cacheComponent: false,
-                themes: '@{appPath}/themes/',
                 views: '@{appPath}/views/',
                 suffix: '.twig',
                 extensions: false,
+                defaultTheme: 'default',
                 theme: false
             }, config);
 
+            this.defaultThemeRegex = new RegExp('^' + this.config.defaultTheme);
+            this.themeRegex = new RegExp('^' + this.config.theme);
 
             di.setAlias('viewsPath', this.config.views);
-            di.setAlias('themesPath', this.config.themes);
+
+            this.paths.push(this.config.views);
+
+            this.setModulesViewsPath(di.getAlias('modulesPath'));
 
             if (Type.assert(Type.STRING, this.config.suffix)) {
                 this.suffix = new RegExp(this.config.suffix + '$');
@@ -85,12 +97,54 @@ View = ViewInterface.inherit(
         /**
          * @since 0.0.1
          * @author Igor Ivanovic
+         * @method View#setModulesViewsPath
+         *
+         * @description
+         * Set modules path
+         */
+        setModulesViewsPath: function View_setModulesViewsPath(dir) {
+            var list, name, moduleToLoad, LoadedModule, module;
+            if (this.isDir(dir)) {
+                list = this.readDir(dir);
+                while (true) {
+                    name = list.shift();
+
+                    if (!name) {
+                        break;
+                    }
+
+                    moduleToLoad = dir + '/' + name;
+
+                    try {
+                        LoadedModule = di.load(moduleToLoad);
+                    } catch (e) {
+                        throw new error.HttpError(500, {path: moduleToLoad}, 'Missing module', e);
+                    }
+
+                    if (!Type.assert(Type.FUNCTION, LoadedModule)) {
+                        throw new error.HttpError(500, {path: moduleToLoad}, 'Module must be function type');
+                    }
+
+                    module = new LoadedModule(name);
+
+                    if (!(module instanceof  ModuleInterface)) {
+                        throw new error.HttpError(500, module, 'Module must be instance of ModuleInterface "core/module"');
+                    }
+
+                    this.paths.push(module.getViewsPath());
+                }
+
+            }
+        },
+        /**
+         * @since 0.0.1
+         * @author Igor Ivanovic
          * @method View#setPreloaded
          *
          * @description
          * Set preloaded template
          */
-        setPreloaded: function (key, value) {
+        setPreloaded: function View_setPreloaded(key, value) {
             logger.log('View.setPreloaded: ', key + '\n' + value);
             this.preloaded[key] = value;
         },
@@ -101,12 +155,61 @@ View = ViewInterface.inherit(
          *
          * @description
          * Get preloaded template
+         * @return {string|boolean}
          */
-        getPreloaded: function (key) {
+        getPreloaded: function View_getPreloaded(key) {
             if (this.preloaded.hasOwnProperty(key)) {
                 return this.preloaded[key];
             }
             return false;
+        },
+        /**
+         * @since 0.0.1
+         * @author Igor Ivanovic
+         * @method View#isFile
+         *
+         * @description
+         * Is file
+         * @return {string|boolean}
+         */
+        isFile: function View_isFile(path) {
+            try {
+                path = di.normalizePath(path);
+                return fs.statSync(path).isFile();
+            } catch (e) {
+                logger.print('View.isFile path is not valid file', {path: path});
+            }
+            return false;
+        },
+        /**
+         * @since 0.0.1
+         * @author Igor Ivanovic
+         * @method View#isDir
+         *
+         * @description
+         * Is directory
+         * @return {string|boolean}
+         */
+        isDir: function View_isDir(path) {
+            try {
+                path = di.normalizePath(path);
+                return fs.statSync(path).isDirectory();
+            } catch (e) {
+                logger.print('View.isDir path is not valid path', {path: path});
+            }
+            return false;
+        },
+        /**
+         * @since 0.0.1
+         * @author Igor Ivanovic
+         * @method View#readDir
+         *
+         * @description
+         * Read directory
+         */
+        readDir: function View_readDir(path) {
+            path = di.normalizePath(path);
+            return fs.readdirSync(path);
         },
         /**
          * @since 0.0.1
@@ -118,8 +221,8 @@ View = ViewInterface.inherit(
          */
         preloadTemplates: function View_preloadTemplates(dir) {
             var list, name;
-            if (isDir(dir)) {
-                list = readDir(dir);
+            if (this.isDir(dir)) {
+                list = this.readDir(dir);
                 while (true) {
                     name = list.shift();
                     if (!name) {
@@ -128,20 +231,8 @@ View = ViewInterface.inherit(
                     this.preloadTemplates(di.normalizePath(dir + '/' + name));
                 }
 
-            } else if (isFile(dir) && this.suffix.test(dir)) {
+            } else if (this.isFile(dir) && this.suffix.test(dir)) {
                 this.setPreloaded(dir, this.swig.compileFile(dir));
-            }
-
-            function readDir(path) {
-                return fs.readdirSync(path);
-            }
-
-            function isDir(path) {
-                return fs.statSync(path).isDirectory();
-            }
-
-            function isFile(path) {
-                return fs.statSync(path).isFile();
             }
         },
         /**
@@ -155,7 +246,7 @@ View = ViewInterface.inherit(
         setTheme: function View_setTheme(name) {
             if (Type.assert(Type.STRING, name)) {
                 this.config.theme = name;
-            } else if(Type.isNull(name)) {
+            } else if (Type.isNull(name)) {
                 this.config.theme = null;
             } else {
                 throw new error.HttpError(500, {name: name}, "ViewLoader.setTheme: name must be string type");
@@ -167,32 +258,19 @@ View = ViewInterface.inherit(
          * @method View#getPath
          *
          * @description
-         * Get path
-         */
-        getPath: function View_getPath(skipTheme) {
-            var path = '@{viewsPath}/';
-            if (Type.isString(this.config.theme) && !skipTheme) {
-                path = '@{themesPath}/' + this.config.theme + '/';
-            }
-            return di.normalizePath(path);
-        },
-        /**
-         * @since 0.0.1
-         * @author Igor Ivanovic
-         * @method View#normalizeResolveValue
-         *
-         * @description
-         * Normalize resolve value
+         * Get the path
          * @return {string}
          */
-        normalizeResolveValue: function View_normalizeResolveValue(value) {
-            var theme = this.getPath(), view = this.getPath(true);
-            if (Type.isString(value) && value.match(theme)) {
-                return value.replace(theme, "").replace(this.suffix, "");
-            } else if (Type.isString(value) && value.match(view)) {
-                return value.replace(view, "").replace(this.suffix, "");
+        getPath: function View_getPath(path) {
+            var paths = this.paths.slice(),
+                item;
+            while (paths.length) {
+                item = di.normalizePath(paths.pop());
+                if (path && path.indexOf(item) === 0) {
+                    return item;
+                }
             }
-            return value;
+            return '';
         },
         /**
          * @since 0.0.1
@@ -204,7 +282,44 @@ View = ViewInterface.inherit(
          * @return {string}
          */
         resolve: function View_resolve(to, from) {
-            return this.getPath() + this.normalizeResolveValue(to) + this.config.suffix;
+            var path, file;
+
+            to = di.normalizePath(to);
+
+            path = this.getPath(to);
+            file = to.replace(path, '');
+
+            file = file.replace(this.suffix, '');
+
+            if (!path) {
+                path = this.getPath(from);
+            }
+
+            file = file.replace(this.defaultThemeRegex, '');
+
+
+            if (!!this.config.theme) {
+                file = file.replace(this.themeRegex, '');
+                if (this.isFile(path + this.config.theme + '/' + file + this.config.suffix)) {
+                    return path + this.config.theme + '/' + file + this.config.suffix;
+                }
+            }
+
+            if (this.isFile(path + this.config.defaultTheme + '/' + file + this.config.suffix)) {
+                return path + this.config.defaultTheme + '/' + file + this.config.suffix;
+            }
+
+            if (this.config.theme) {
+                throw new error.HttpError(500, {
+                    themeFile: path + this.config.theme + '/' + file + this.config.suffix,
+                    defaultFile: path + this.config.defaultTheme + '/' + file + this.config.suffix
+                }, "View.resolve: template don't exists");
+            } else {
+                throw new error.HttpError(500, {
+                    defaultFile: path + this.config.defaultTheme + '/' + file + this.config.suffix
+                }, "View.resolve: template don't exists");
+            }
+
         },
         /**
          * @since 0.0.1
@@ -215,17 +330,19 @@ View = ViewInterface.inherit(
          * Set load view
          * @return {string};
          */
-        load: function View_load(identifier, cb) {
+        load: function View_load(path, cb) {
             var template = '';
             try {
-                template = di.readFileSync(identifier);
+                template = di.readFileSync(path);
             } catch (e) {
-                identifier = this.normalizeResolveValue(identifier);
-                identifier = this.getPath(true) + identifier + this.config.suffix;
-                template = di.readFileSync(identifier);
+                logger.print('ViewLoader.load.error', {
+                    path: path,
+                    cb: cb,
+                    e: e
+                });
             } finally {
                 logger.print('ViewLoader.load', {
-                    identifier: identifier,
+                    path: path,
                     template: template,
                     cb: cb
                 });
@@ -299,37 +416,17 @@ View = ViewInterface.inherit(
         /**
          * @since 0.0.1
          * @author Igor Ivanovic
-         * @method View#setPaths
-         *
-         * @description
-         * Set default paths
-         *  @return {string}
-         */
-        setPaths: function View_setPaths(themesPath, viewsPath) {
-            if (Type.isString(themesPath) && !!themesPath) {
-                di.setAlias('themesPath', themesPath);
-            } else {
-                di.setAlias('themesPath', this.config.themes);
-            }
-
-            if (Type.isString(viewsPath) && !!viewsPath) {
-                di.setAlias('viewsPath', viewsPath);
-            } else {
-                di.setAlias('viewsPath', this.config.views);
-            }
-        },
-        /**
-         * @since 0.0.1
-         * @author Igor Ivanovic
          * @method View#renderFile
          *
          * @description
          * Render file
          *  @return {string}
          */
-        renderFile: function View_renderFile(pathName, locals, themesPath, viewsPath) {
-            this.setPaths(themesPath, viewsPath);
-            return this.swig.renderFile(pathName, locals);
+        renderFile: function View_renderFile(templateName, locals, viewsPath) {
+            if (!viewsPath) {
+                viewsPath = this.config.views;
+            }
+            return this.swig.renderFile(viewsPath + templateName, locals);
         }
     }
 );

@@ -94,14 +94,12 @@ describe('core/request', function () {
 
 
     it('construct', function () {
-        spyOn(view, 'setPaths').and.callThrough();
         request = new Constructor(config, '/home/index');
         expect(request.request).toBe(config.request);
         expect(request.response).toBe(config.response);
         expect(request.url).toBe('/home/index');
         expect(request.statusCode).toBe(200);
         expect(request.parsedUrl.pathname).toBe('/home/index');
-        expect(view.setPaths).toHaveBeenCalled();
         expect(request.id.length).toBe(36);
     });
 

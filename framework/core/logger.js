@@ -140,12 +140,12 @@ Logger = Type.create({
             }
 
             date = new Date().toISOString();
-            logs += date + '\n';
+            logs += date + "\n";
             try {
                 throw new Error();
             } catch (e) {
                 url = core.trim(e.stack.split('\n').slice(3, 4).shift());
-                logs += url + '\n';
+                logs += url + "\n";
             }
             args.forEach(function (item) {
                 logs += core.trim(item);
@@ -160,7 +160,7 @@ Logger = Type.create({
                     logs = logs.replace(value, '');
                 });
                 logs = logs.replace(/\\'/g, "'");
-                logs = logs.replace(/\\n/g, '\n');
+                logs = logs.replace(/\\n/g, "\n");
                 logs = logs.replace(/\\u001b/g, '\u001b');
 
             } catch (e) {

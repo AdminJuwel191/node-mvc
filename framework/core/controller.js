@@ -202,7 +202,7 @@ Controller = ControllerInterface.inherit({}, {
      * Render file
      */
     renderFile: function Controller_renderFile(pathName, locals) {
-        return view.renderFile(pathName, locals, this._config.themesPath,  this._config.viewsPath);
+        return view.renderFile(pathName, locals, this._config.viewsPath);
     },
     /**
      * @since 0.0.1
