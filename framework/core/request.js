@@ -709,7 +709,7 @@ Request = Type.create({
             return this._handleModule(di.getAlias('modulesPath'));
         }
 
-        return this._handleController(di.getAlias('controllersPath'));
+        return this._handleController(di.getAlias('controllersPath'), di.getAlias('viewsPath'));
     }
 
 });

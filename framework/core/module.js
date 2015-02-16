@@ -73,7 +73,7 @@ Module = ModuleInterface.inherit({
      * @return {string}
      */
     getViewsPath: function  Module_getViewsPath() {
-        return  this.getModulePath() + '/views/';
+        return  this.getModulePath() + '/themes/';
     }
 });
 

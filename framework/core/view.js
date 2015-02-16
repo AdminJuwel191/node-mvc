@@ -52,8 +52,8 @@ View = ViewInterface.inherit(
                 theme: false
             }, config);
 
-            this.defaultThemeRegex = new RegExp('^' + this.config.defaultTheme);
-            this.themeRegex = new RegExp('^' + this.config.theme);
+            this.defaultThemeRegex = new RegExp('^' + this.config.defaultTheme + '/');
+            this.themeRegex = new RegExp('^' + this.config.theme + '/');
 
             di.setAlias('viewsPath', this.config.views);
 
@@ -270,7 +270,7 @@ View = ViewInterface.inherit(
                     return item;
                 }
             }
-            return '';
+            return false;
         },
         /**
          * @since 0.0.1
@@ -282,7 +282,7 @@ View = ViewInterface.inherit(
          * @return {string}
          */
         resolve: function View_resolve(to, from) {
-            var path, file;
+            var path, file, dPath, themePath;
 
             to = di.normalizePath(to);
 
@@ -295,28 +295,42 @@ View = ViewInterface.inherit(
                 path = this.getPath(from);
             }
 
-            file = file.replace(this.defaultThemeRegex, '');
+            if (!path) {
+                throw new error.HttpError(500, {
+                    path: path,
+                    to: to,
+                    from: from,
+                    file: file,
+                    paths: this.paths
+                }, "View.resolve: view path is not registered in system and mvc was not able to detect path, please check your path configs");
+            }
 
+            file = file.replace(this.defaultThemeRegex, '');
 
             if (!!this.config.theme) {
                 file = file.replace(this.themeRegex, '');
-                if (this.isFile(path + this.config.theme + '/' + file + this.config.suffix)) {
-                    return path + this.config.theme + '/' + file + this.config.suffix;
+
+                themePath = di.normalizePath(path + this.config.theme + '/' + file + this.config.suffix);
+
+                if (this.isFile(themePath)) {
+                    return themePath;
                 }
             }
 
-            if (this.isFile(path + this.config.defaultTheme + '/' + file + this.config.suffix)) {
-                return path + this.config.defaultTheme + '/' + file + this.config.suffix;
+            dPath = di.normalizePath(path + this.config.defaultTheme + '/' + file + this.config.suffix);
+
+            if (this.isFile(dPath)) {
+                return dPath;
             }
 
             if (this.config.theme) {
                 throw new error.HttpError(500, {
-                    themeFile: path + this.config.theme + '/' + file + this.config.suffix,
-                    defaultFile: path + this.config.defaultTheme + '/' + file + this.config.suffix
+                    themeFile: themePath,
+                    defaultFile: dPath
                 }, "View.resolve: template don't exists");
             } else {
                 throw new error.HttpError(500, {
-                    defaultFile: path + this.config.defaultTheme + '/' + file + this.config.suffix
+                    defaultFile: dPath
                 }, "View.resolve: template don't exists");
             }
 
@@ -424,7 +438,7 @@ View = ViewInterface.inherit(
          */
         renderFile: function View_renderFile(templateName, locals, viewsPath) {
             if (!viewsPath) {
-                viewsPath = this.config.views;
+                viewsPath = di.getAlias('viewsPath');
             }
             return this.swig.renderFile(viewsPath + templateName, locals);
         }

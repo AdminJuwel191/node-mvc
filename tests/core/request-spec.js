@@ -530,6 +530,7 @@ describe('core/request', function () {
         config.request.headers = {};
         di.setAlias('modulesPath', __dirname + '/../tf/modules/');
         di.setAlias('controllersPath', di.getAlias('modulesPath') + 'controllers/');
+        di.setAlias('viewsPath', __dirname + '/../tf/templates/theme/');
         request = new Constructor(config, '/home/index');
         var params = {id: 1};
 

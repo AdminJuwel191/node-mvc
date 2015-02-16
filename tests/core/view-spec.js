@@ -127,7 +127,7 @@ describe('core/view', function () {
         view.setTheme('index');
 
         expect(view.getPath(di.normalizePath('@{viewsPath}/'))).toBe(nPath + 'templates/theme/');
-        expect(view.getPath(di.normalizePath('@{modulesPath}/user/views/'))).toBe(nPath + 'modules_valid/user/views/');
+        expect(view.getPath(di.normalizePath('@{modulesPath}/user/themes/'))).toBe(nPath + 'modules_valid/user/themes/');
      });
 
 
@@ -152,9 +152,14 @@ describe('core/view', function () {
         expect(view.resolve('@{viewsPath}/view')).toBe(nPath + 'templates/theme/default/view.twig');
 
         //success
-        expect(view.resolve('@{modulesPath}/user/views/theme')).toBe(nPath + 'modules_valid/user/views/index/theme.twig');
+        expect(view.resolve('@{modulesPath}/user/themes/theme')).toBe(nPath + 'modules_valid/user/themes/index/theme.twig');
         //success
-        expect(view.resolve('@{modulesPath}/user/views/view')).toBe(nPath + 'modules_valid/user/views/default/view.twig');
+        expect(view.resolve('@{modulesPath}/user/themes/view')).toBe(nPath + 'modules_valid/user/themes/default/view.twig');
+
+        var message = tryCatch(function () {
+            view.resolve('@{modulesPath}/user/abc/theme');
+        });
+        expect(message.customMessage).toBe('View.resolve: view path is not registered in system and mvc was not able to detect path, please check your path configs');
     });
 
 

@@ -34,7 +34,7 @@ describe('core/module', function () {
     });
 
     it('getViewsPath', function () {
-        expect(module.getViewsPath()).toBe('@{modulesPath}/menu/views/');
+        expect(module.getViewsPath()).toBe('@{modulesPath}/menu/themes/');
     });
 
 });
