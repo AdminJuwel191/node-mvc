@@ -89,7 +89,7 @@ View = ViewInterface.inherit(
             }
 
             if (this.config.cache) {
-                this.preloadTemplates(di.getAlias('appPath'));
+                this.paths.forEach(this.preloadTemplates.bind(this));
             }
 
             logger.print("View.construct", this.config);
