@@ -325,11 +325,15 @@ View = ViewInterface.inherit(
 
             if (this.config.theme) {
                 throw new error.HttpError(500, {
+                    from: from,
+                    load: to,
                     themeFile: themePath,
                     defaultFile: dPath
                 }, "View.resolve: template don't exists");
             } else {
                 throw new error.HttpError(500, {
+                    from: from,
+                    load: to,
                     defaultFile: dPath
                 }, "View.resolve: template don't exists");
             }
