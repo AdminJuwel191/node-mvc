@@ -1,5 +1,5 @@
 
-MVC JS  [![Build Status](https://api.travis-ci.org/igorzg/node-mvc.svg?branch=master)](https://travis-ci.org/igorzg/node-mvc) beta 
+MVC JS  [![Build Status](https://api.travis-ci.org/AdminJuwel191/node-mvc.svg?branch=master)](https://travis-ci.org/igorzg/node-mvc) beta 
 =====
 
 Powerful lightweight mvc framework for nodejs inspired by [Yii](http://www.yiiframework.com/)
