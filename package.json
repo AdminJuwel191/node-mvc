@@ -19,13 +19,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/igorzg/node-mvc.git"
+    "url": "git://github.com/AdminJuwel191/node-mvc.git"
   },
   "bugs": {
-    "url": "https://github.com/igorzg/node-mvc/issues",
+    "url": "https://github.com/AdminJuwel191/node-mvc/issues",
     "email": "igor.zg1987@gmail.com"
   },
-  "homepage": "https://github.com/igorzg/node-mvc",
+  "homepage": "https://github.com/AdminJuwel191/node-mvc",
   "author": {
     "name": "Igor Ivanovic",
     "email": "igor.zg1987@gmail.com"
