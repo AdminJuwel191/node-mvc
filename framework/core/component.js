@@ -63,44 +63,57 @@ Component = ComponentInterface.inherit({}, {
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
+     * @method Initialize#initOne
+     *
+     * @description
+     * Initialize
+     */
+    checkDependency: function(component, components) {
+        var deps, depsName, depsConfig;
+        if (Type.assert(Type.STRING, component.name)) {
+            deps = this.getDependency(component.name);
+            if (Type.isArray(deps)) {
+                while (true) {
+                    depsName = deps.shift();
+                    if (!depsName) {
+                        break;
+                    }
+                    if (!this.has(depsName)) {
+                        if (!!components) {
+                            depsConfig = this.find(depsName, components);
+                            if (depsConfig) {
+                                this.set(depsName, depsConfig);
+                                break;
+                            }
+                        }
+                        this.set(depsName, {});
+                    }
+                }
+            }
+        }
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
      * @method Initialize#components
      *
      * @description
      * Initialize
      */
     init: function Component_init(components) {
-        var component, data, deps, depsName, depsConfig;
+        var component, data;
         if (!Type.isArray(components)) {
             throw new error.Exception('Component.init: components argument must be array type');
         }
         data = core.copy(components); // copy
-
         while (true) {
             component = data.shift();
             if (!component) {
                 break;
             }
-            if (Type.assert(Type.STRING, component.name)) {
-                deps = this.getDependency(component.name);
-                if (Type.isArray(deps)) {
-                    while (true) {
-                        depsName = deps.shift();
-                        if (!depsName) {
-                            break;
-                        }
-                        if (!this.has(depsName)) {
-                            depsConfig = this.find(depsName, components);
-                            if (depsConfig) {
-                                this.set(depsName, depsConfig);
-                            } else {
-                                this.set(depsName, {});
-                            }
-                        }
-                    }
-                }
-                if (!this.has(component.name)) {
-                    this.set(component.name, component);
-                }
+            this.checkDependency(component, components);
+            if (!this.has(component.name)) {
+                this.set(component.name, component);
             }
         }
     },
@@ -115,7 +128,9 @@ Component = ComponentInterface.inherit({}, {
      */
     set: function Component_set(name, config, Func) {
         if (!this.has(name)) {
+            config.name = name;
             try {
+                this.checkDependency(config);
                 if (!Type.isFunction(Func)) {
                     if (config.filePath) {
                         Func = di.load(config.filePath);
