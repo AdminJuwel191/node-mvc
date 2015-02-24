@@ -128,13 +128,22 @@ Bootstrap = Type.create({
         if (Type.isArray(env.components)) {
             component.init(env.components);
         }
+        // load config
+        if (Type.isString(env.config)) {
+            try {
+                di.load(envPath + '/' + env.config)(component, di, this);
+            } catch (e) {
+                throw new error.Exception('Initialize config: ' + envPath + '/' + env.config, e);
+            }
+        } else {
+            throw new error.DataError(env.config, 'Config file is not defined');
+        }
         // if there is no logger init logger
         if (!component.has('core/logger')) {
             logger = component.set('core/logger', {});
         } else {
             logger = component.get('core/logger');
         }
-
         // add memory cache
         if (!component.has('cache/memory')) {
             component.set('cache/memory', {});
@@ -147,20 +156,9 @@ Bootstrap = Type.create({
         if (!component.has('hooks/request')) {
             component.set('hooks/request', {});
         }
-
         // set view component
         if (!component.has('core/view')) {
             component.set('core/view', {});
-        }
-        // load config
-        if (Type.isString(env.config)) {
-            try {
-                di.load(envPath + '/' + env.config)(component, di, this);
-            } catch (e) {
-                throw new error.Exception('Initialize config: ' + envPath + '/' + env.config, e);
-            }
-        } else {
-            throw new error.DataError(env.config, 'Config file is not defined');
         }
         // http
         if (!component.has('core/http')) {
