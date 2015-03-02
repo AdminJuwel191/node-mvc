@@ -400,7 +400,7 @@ RouteRule = RouteRuleInterface.inherit({
             return str;
         }
         str = str.trim();
-        if (strip) {
+        if (strip && str !== strip) {
             str = str.replace(core.createRegex('^' + strip), '');
             str = str.replace(core.createRegex(strip + '$'), '');
         }

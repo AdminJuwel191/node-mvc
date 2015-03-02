@@ -158,6 +158,7 @@ describe('core/router', function () {
 
         expect(router.normalizeUrl('/aaa//bcc')).toBe('/aaa/bcc');
         expect(router.normalizeUrl('//')).toBe('/');
+        expect(router.normalizeUrl('/')).toBe('/');
         expect(router.normalizeUrl('/one/two//there///four////one')).toBe('/one/two/there/four/one');
     });
 

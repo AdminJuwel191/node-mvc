@@ -70,7 +70,16 @@ describe('core/routeRule', function () {
         expect(routeRule.createUrl('posts/test', {id: 'A'})).toBe(false);
     });
 
+    it('construct case 1', function () {
+        var params;
+        routeRule = new Constructor({
+            pattern: '/',
+            route: 'home/index',
+            method: ['GET', 'POST']
+        });
 
+        expect(routeRule.createUrl('home/index', {})).toBe('/');
+    });
     it('construct case 1', function () {
         var params;
         routeRule = new Constructor({
