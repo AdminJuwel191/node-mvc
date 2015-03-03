@@ -185,6 +185,17 @@ Controller = ControllerInterface.inherit({}, {
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
+     * @method Controller#forwardUrl
+     *
+     * @description
+     * Redirect to some url
+     */
+    forwardUrl:  function Controller_forwardUrl(route, params) {
+        return this._requestApi.forwardUrl(route, params);
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
      * @method Controller#redirect
      *
      * @description

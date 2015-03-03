@@ -560,7 +560,8 @@ Request = Type.create({
             stopPromiseChain: this.stopPromiseChain.bind(this),
             setStatusCode: this.setStatusCode.bind(this),
             createUrl: router.createUrl.bind(router),
-            parsedUrl: core.copy(this.parsedUrl)
+            parsedUrl: core.copy(this.parsedUrl),
+            forwardUrl: this.forward.bind(this)
         };
     },
     /**
