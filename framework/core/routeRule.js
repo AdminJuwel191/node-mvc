@@ -9,8 +9,9 @@ var di = require('../di'),
     logger = component.get('core/logger'),
     PATTERN_MATCH = /<(\w+):?([^>]+)?>/ig,
     ROUTE_MATCH = /<(\w+)>/ig,
-    PATTERN_CAPTURE_REGEX = /\(((\?P?<(\w+)>)((:?(\(([^\/]+)\)))?|([^\)]+))|([^\)]+))\)/g,
-    IS_NAMED = /\(\?P?<(\w+)>([^\)]+)\)/,
+    PATTERN_CAPTURE_REGEX = /\(\??P?(<(\w+)>)?([^\)]+\)?)\)?\)/g,
+    IS_NAMED = /<(\w+)>/,
+    IS_GROUP = /^\(([^\)]+)\)$/,
     RouteRule;
 /**
  * @license Mit Licence 2014
@@ -38,6 +39,7 @@ RouteRule = RouteRuleInterface.inherit({
         this.paramRules = [];
         this.template = null;
         this.routeRule = null;
+
 
         if (!config.pattern) {
             throw new error.HttpError(500, config, 'RouteRule: rule object must have an pattern property');
@@ -70,21 +72,24 @@ RouteRule = RouteRuleInterface.inherit({
 
 
         if (Array.isArray(matches) && matches.length) {
+
             matches.forEach(function (item) {
                 var esc, nPattern;
                 name = item[1];
-                nPattern = Type.isString(item[2]) ? item[2] : '[^\/]+';
+                nPattern = Type.isString(item[2]) ? item[2] : '([^\/]+)';
+
                 esc = {
                     key: '<' + name + '>',
                     value: '(?P<' + name + '>' + nPattern + ')'
                 };
                 escapePattern.push(esc);
+
                 if (this.find(this.routeParams, name)) {
                     escapeRule.push(esc);
                 } else {
                     this.paramRules.push({
                         key: name,
-                        value: nPattern === '[^\/]+' ? '' : core.createRegex('^' + nPattern + '$')
+                        value: nPattern === '([^\/]+)' ? '' : core.createRegex('^' + nPattern + '$')
                     });
                 }
 
@@ -307,17 +312,27 @@ RouteRule = RouteRuleInterface.inherit({
      */
     toRegex: function RouteRule_toRegex(re) {
         var matches = core.match(PATTERN_CAPTURE_REGEX, re), newRegex = re;
+
         if (matches.length) {
             matches = matches.map(this.toObject);
             matches.forEach(function (item, mIndex) {
                 var index = Object.keys(item).length - 3;
-                item.isNamed = IS_NAMED.test(item[0]);
+                item.isNamed = IS_NAMED.test(item[1]);
                 if (item.isNamed) {
-                    item.pattern = '(' + item[index] + ')';
-                    item.key = item[3];
+                    if (IS_GROUP.test(item[index])) {
+                        item.pattern = item[index];
+                    } else {
+                        item.pattern = '(' + item[index] + ')';
+                    }
+
+                    item.key = item[2];
                     newRegex = newRegex.replace(item[0], item.pattern);
                 } else {
-                    item.pattern = item[0];
+                    if (IS_GROUP.test(item[index])) {
+                        item.pattern = item[index];
+                    } else {
+                        item.pattern = '(' + item[index] + ')';
+                    }
                     item.key = null;
                 }
                 item.index = mIndex;
@@ -344,7 +359,6 @@ RouteRule = RouteRuleInterface.inherit({
         var group, matched, data = [];
         if (Type.isString(rgx)) {
             rgx = this.toRegex(rgx);
-
         }
         if (Type.isObject(rgx) && Type.isRegExp(rgx.regex)) {
             if (rgx.group && rgx.group.length) {
@@ -400,7 +414,7 @@ RouteRule = RouteRuleInterface.inherit({
             return str;
         }
         str = str.trim();
-        if (strip) {
+        if (strip && str !== strip) {
             str = str.replace(core.createRegex('^' + strip), '');
             str = str.replace(core.createRegex(strip + '$'), '');
         }

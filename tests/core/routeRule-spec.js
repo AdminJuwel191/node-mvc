@@ -38,6 +38,111 @@ describe('core/routeRule', function () {
     });
 
 
+    it('construct case 3', function () {
+
+        var params;
+        routeRule = new Constructor({
+            pattern: 'posts/<action>',
+            route: 'posts/view',
+            method: ['GET', 'POST']
+        });
+
+
+        expect(routeRule.routeParams.length).toBe(0);
+        expect(routeRule.paramRules.length).toBe(1);
+
+        params = routeRule.paramRules[0];
+
+
+        expect(params.key).toBe('action');
+        expect(params.value).toBe('');
+
+        expect(routeRule.template).toBe('posts/<action>');
+        expect(routeRule.routeRule).toBe(null);
+        expect(routeRule.route).toBe('posts/view');
+
+        expect(routeRule.pattern.regex.source).toBe('^posts/([^/]+)$');
+
+        expect(routeRule.methods[0]).toBe('GET');
+        expect(routeRule.methods[1]).toBe('POST');
+
+        var result = routeRule.parseRequest('GET', {pathname: '/posts/test', query: {}});
+        expect(result[0]).toBe('posts/view');
+        expect(Object.keys(result[1]).length).toBe(1);
+        /// this is valid since routeRule is null in this case
+        expect(routeRule.createUrl('posts/test', {})).toBe(false);
+
+        expect(routeRule.createUrl('posts/view', {})).toBe(false);
+    });
+
+
+    it('construct case 7', function () {
+        routeRule = new Constructor({
+            pattern: '/p-<action:([a-z]+)>-<id:(\\d+)>',
+            route: 'home/index',
+            method: ['GET', 'POST']
+        });
+        var result = routeRule.parseRequest('GET', {pathname: '/p-one-2', query: {}});
+
+        expect(result[0]).toBe('home/index');
+        expect(result.length).toBe(2);
+        expect(routeRule.createUrl('home/index', {action: 'one', id: 2})).toBe('p-one-2');
+    });
+
+    it('construct case 8', function () {
+
+        routeRule = new Constructor({
+            pattern: '/p-<action:([a-z]+)>-<id:(\\d+)>/<be:(\\d+)>',
+            route: 'home/index',
+            method: ['GET', 'POST']
+        });
+        var result = routeRule.parseRequest('GET', {pathname: '/p-one-2/1', query: {}});
+
+        expect(result[0]).toBe('home/index');
+        expect(result.length).toBe(2);
+        expect(routeRule.createUrl('home/index', {action: 'one', id: 2, be: 1})).toBe('p-one-2/1');
+    });
+
+    it('construct case 9', function () {
+        routeRule = new Constructor({
+            pattern: '/p-<action:(\\w+)>-<id:(\\d+)>/<be:(\\d+)>',
+            route: 'home/index',
+            method: ['GET', 'POST']
+        });
+        var result = routeRule.parseRequest('GET', {pathname: '/p-one-2/1', query: {}});
+
+        expect(result[0]).toBe('home/index');
+        expect(result.length).toBe(2);
+        expect(routeRule.createUrl('home/index', {action: 'one', id: 2, be: 1})).toBe('p-one-2/1');
+    });
+
+    it('construct case 10', function () {
+        routeRule = new Constructor({
+            pattern: '/p-<action:(\\w+)>-<id:(\\d+)>/<be:(\\d+)>-<d:([a-z]+)>',
+            route: 'home/index',
+            method: ['GET', 'POST']
+        });
+        var result = routeRule.parseRequest('GET', {pathname: '/p-one-2/1-abc', query: {}});
+
+        expect(result[0]).toBe('home/index');
+        expect(result.length).toBe(2);
+        expect(routeRule.createUrl('home/index', {action: 'one', id: 2, be: 1, d:'abc'})).toBe('p-one-2/1-abc');
+    });
+
+    it('construct case 11', function () {
+        routeRule = new Constructor({
+            pattern: '/p-<action:(\\w+)>-<id:(\\d+)>/<be:(\\d+)>-([a-z]+)',
+            route: 'home/index',
+            method: ['GET', 'POST']
+        });
+
+        var result = routeRule.parseRequest('GET', {pathname: '/p-one-2/1-abc', query: {}});
+
+        expect(result[0]).toBe('home/index');
+        expect(result.length).toBe(2);
+        expect(routeRule.createUrl('home/index', {action: 'one', id: 2, be: 1, d:'abc'})).toBe(false);
+    });
+
     it('construct case', function () {
         var params;
         routeRule = new Constructor({
@@ -70,7 +175,18 @@ describe('core/routeRule', function () {
         expect(routeRule.createUrl('posts/test', {id: 'A'})).toBe(false);
     });
 
-
+    it('construct case 6', function () {
+        var params;
+        routeRule = new Constructor({
+            pattern: '/',
+            route: 'home/index',
+            method: ['GET', 'POST']
+        });
+        var result = routeRule.parseRequest('GET', {pathname: '/', query: {}});
+        expect(result[0]).toBe('home/index');
+        expect(result.length).toBe(2);
+        expect(routeRule.createUrl('home/index', {})).toBe('/');
+    });
     it('construct case 1', function () {
         var params;
         routeRule = new Constructor({
@@ -159,42 +275,6 @@ describe('core/routeRule', function () {
     });
 
 
-    it('construct case 3', function () {
-
-        var params;
-        routeRule = new Constructor({
-            pattern: 'posts/<action>',
-            route: 'posts/view',
-            method: ['GET', 'POST']
-        });
-
-        
-        expect(routeRule.routeParams.length).toBe(0);
-        expect(routeRule.paramRules.length).toBe(1);
-
-        params = routeRule.paramRules[0];
-
-
-        expect(params.key).toBe('action');
-        expect(params.value).toBe('');
-
-        expect(routeRule.template).toBe('posts/<action>');
-        expect(routeRule.routeRule).toBe(null);
-        expect(routeRule.route).toBe('posts/view');
-
-        expect(routeRule.pattern.regex.source).toBe('^posts/([^/]+)$');
-
-        expect(routeRule.methods[0]).toBe('GET');
-        expect(routeRule.methods[1]).toBe('POST');
-
-        var result = routeRule.parseRequest('GET', {pathname: '/posts/test', query: {}});
-        expect(result[0]).toBe('posts/view');
-        expect(Object.keys(result[1]).length).toBe(1);
-        /// this is valid since routeRule is null in this case
-        expect(routeRule.createUrl('posts/test', {})).toBe(false);
-
-        expect(routeRule.createUrl('posts/view', {})).toBe(false);
-    });
 
 
     it('construct case 4', function () {
