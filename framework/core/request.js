@@ -240,6 +240,34 @@ Request = Type.create({
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
+     * @method Request#forwardUrl
+     *
+     * @description
+     * Forward to route
+     */
+    forwardUrl: function Request_forwardUrl(url) {
+        var request;
+        if (this.url === url) {
+            throw new error.HttpError(500, {
+                url: url
+            }, 'Cannot forward to same url');
+        } else {
+            this.stopPromiseChain();
+            request = new Request({
+                request: this.request,
+                response: this.response,
+                isForwarded: true,
+                body: this.body
+            }, url);
+
+            logger.print('Request.forward.url', url);
+
+            return request.parse();
+        }
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
      * @method Request#forward
      *
      * @description
@@ -265,7 +293,7 @@ Request = Type.create({
                 body: this.body
             }, router.createUrl(route, params));
 
-            logger.print('Request.forward', route, params);
+            logger.print('Request.forward.route', route, params);
 
             return request.parse();
         }
@@ -415,7 +443,7 @@ Request = Type.create({
             return false;
         }
         // log error request
-        logger.print('Request.error',{
+        logger.print('Request.error', {
             url: this.url,
             status: this.statusCode,
             id: this.id,

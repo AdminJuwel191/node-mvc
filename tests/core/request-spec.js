@@ -1239,8 +1239,22 @@ describe('core/request', function () {
         var route = request.forward('test/index', {id: 1});
         expect(route.url).toBe('/test/index?id=1');
         expect(request.isPromiseChainStopped).toBe(true);
+
     });
 
+
+    it('forwardUrl', function () {
+        var cpath = path.normalize(__dirname + "/../tf/controllers");
+        di.setAlias('controllersPath', cpath);
+        Constructor.prototype.parse = function () {
+            return this;
+        };
+        var request = new Constructor(config, '/core/index');
+        var route = request.forwardUrl('/test/index?id=1');
+        expect(route.url).toBe('/test/index?id=1');
+        expect(request.isPromiseChainStopped).toBe(true);
+
+    });
 
     it('forward error', function () {
         var cpath = path.normalize(__dirname + "/../tf/controllers");
