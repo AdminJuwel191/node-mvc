@@ -35,7 +35,8 @@ Router = Type.create({
         // add error route so we can resolve it
         this.add({
             pattern: this.config.errorUrl,
-            route: this.config.errorRoute ? this.config.errorRoute : 'core/error'
+            route: this.config.errorRoute ? this.config.errorRoute : 'core/error',
+            method: ['GET',  'HEAD', 'POST',  'PUT', 'DELETE', 'TRACE', 'OPTIONS', 'CONNECT', 'PATCH']
         });
     },
     /**
