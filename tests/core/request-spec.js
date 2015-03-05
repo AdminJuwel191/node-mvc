@@ -213,10 +213,12 @@ describe('core/request', function () {
 
         request.addHeader('Content-Type', 'text/html');
         request.addHeader('Content-Length', 180);
+        request.addHeader('Set-cookie', "one=1");
+        request.addHeader('Set-cookie', "three=3");
         var headers = request.getHeaders();
         expect(headers['content-type']).toBe('text/html');
         expect(headers['content-length']).toBe('180');
-
+        expect(headers['set-cookie']).toEqual([ 'one=1', 'three=3' ]);
         var message = tryCatch(function () {
             request.addHeader(1, '180');
         });

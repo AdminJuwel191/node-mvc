@@ -228,8 +228,21 @@ Request = Type.create({
      * Write header
      */
     addHeader: function Request_addHeader(key, value) {
+        var item;
         if (Type.isString(key)) {
-            this.headers[key.toLowerCase()] = Type.isString(value) ? value : value.toString();
+            key = key.toLowerCase();
+            value = Type.isString(value) ? value : value.toString();
+
+            if (this.hasHeader(key) && !Type.isArray(this.headers[key])) {
+                item = this.getHeader(key);
+                this.headers[key] = [];
+                this.headers[key].push(item);
+                this.headers[key].push(value);
+            } else if (this.hasHeader(key) && Type.isArray(this.headers[key])) {
+                this.headers[key].push(value);
+            } else {
+                this.headers[key] = value;
+            }
         } else {
             throw new error.HttpError(500, {
                 key: key,
