@@ -27,8 +27,7 @@ View = ViewInterface.inherit(
         preloaded: Type.OBJECT,
         paths: Type.ARRAY,
         aliasRegex: Type.REGEX,
-        defaultThemeRegex: Type.REGEX,
-        themeRegex: Type.REGEX
+        defaultThemeRegex: Type.REGEX
     },
     {
         _construct: function View_construct(config) {
@@ -49,11 +48,10 @@ View = ViewInterface.inherit(
                 suffix: '.twig',
                 extensions: false,
                 defaultTheme: 'default',
-                theme: false
+                themes: []
             }, config);
 
             this.defaultThemeRegex = new RegExp('^' + this.config.defaultTheme + '/');
-            this.themeRegex = new RegExp('^' + this.config.theme + '/');
 
             di.setAlias('viewsPath', this.config.views);
 
@@ -238,23 +236,6 @@ View = ViewInterface.inherit(
         /**
          * @since 0.0.1
          * @author Igor Ivanovic
-         * @method View#setThemesPath
-         *
-         * @description
-         * Set theme path
-         */
-        setTheme: function View_setTheme(name) {
-            if (Type.assert(Type.STRING, name)) {
-                this.config.theme = name;
-            } else if (Type.isNull(name)) {
-                this.config.theme = null;
-            } else {
-                throw new error.HttpError(500, {name: name}, "ViewLoader.setTheme: name must be string type");
-            }
-        },
-        /**
-         * @since 0.0.1
-         * @author Igor Ivanovic
          * @method View#getPath
          *
          * @description
@@ -272,6 +253,50 @@ View = ViewInterface.inherit(
             }
             return false;
         },
+
+        /**
+         * @since 0.0.1
+         * @author Igor Ivanovic
+         * @method View#lookUpFile
+         *
+         * @description
+         * Look up file
+         * @return {string}
+         */
+        lookUpFile: function View_lookUpFile(path, file, to, from) {
+            var themes = this.config.themes.slice(),
+                theme,
+                re,
+                filePath,
+                trace = [];
+
+            while (themes.length) {
+                theme = themes.shift();
+                re = new RegExp('^' + theme + '/');
+                file = file.replace(re, '');
+                filePath = di.normalizePath(path + theme + '/' + file + this.config.suffix);
+                if (this.isFile(filePath)) {
+                    return filePath;
+                }
+                trace.push({
+                    theme: theme,
+                    path: path,
+                    filePath: filePath
+                });
+            }
+
+            filePath = di.normalizePath(path + this.config.defaultTheme + '/' + file + this.config.suffix);
+
+            if (this.isFile(filePath)) {
+                return filePath;
+            }
+
+            throw new error.HttpError(500, {
+                from: from,
+                load: to,
+                trace: trace
+            }, "View.resolve: template don't exists");
+        },
         /**
          * @since 0.0.1
          * @author Igor Ivanovic
@@ -282,7 +307,7 @@ View = ViewInterface.inherit(
          * @return {string}
          */
         resolve: function View_resolve(to, from) {
-            var path, file, dPath, themePath;
+            var path, file;
 
             to = di.normalizePath(to);
 
@@ -307,37 +332,7 @@ View = ViewInterface.inherit(
 
             file = file.replace(this.defaultThemeRegex, '');
 
-            if (!!this.config.theme) {
-                file = file.replace(this.themeRegex, '');
-
-                themePath = di.normalizePath(path + this.config.theme + '/' + file + this.config.suffix);
-
-                if (this.isFile(themePath)) {
-                    return themePath;
-                }
-            }
-
-            dPath = di.normalizePath(path + this.config.defaultTheme + '/' + file + this.config.suffix);
-
-            if (this.isFile(dPath)) {
-                return dPath;
-            }
-
-            if (this.config.theme) {
-                throw new error.HttpError(500, {
-                    from: from,
-                    load: to,
-                    themeFile: themePath,
-                    defaultFile: dPath
-                }, "View.resolve: template don't exists");
-            } else {
-                throw new error.HttpError(500, {
-                    from: from,
-                    load: to,
-                    defaultFile: dPath
-                }, "View.resolve: template don't exists");
-            }
-
+            return this.lookUpFile(path, file, to, from);
         },
         /**
          * @since 0.0.1

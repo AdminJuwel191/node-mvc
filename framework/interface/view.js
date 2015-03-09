@@ -22,7 +22,7 @@ ViewInterface = Type.create({
         _invoke: function ViewInterface() {
             [
                 "setLoader", "setFilter", "setTag", "setExtension",
-                "render", "renderFile", "setTheme",
+                "render", "renderFile",
                 "resolve", "load", "getPath"
             ].forEach(
                 function (method) {

@@ -82,34 +82,6 @@ describe('core/view', function () {
 
 
 
-    it('setTheme', function () {
-        swig.Swig = function () {
-            return swigApi;
-        };
-        nPath = path.normalize(__dirname + '/../tf/');
-        config.suffix = '.twig';
-        config.cache = true;
-       
-        config.views = nPath + 'templates/theme/';
-        spyOn(swig, 'Swig').and.callThrough();
-        view = new ViewConstructor(config);
-        expect(swig.Swig).toHaveBeenCalled();
-
-        view.setTheme('index');
-
-        expect(view.config.theme).toBe('index');
-
-        var message = tryCatch(function() {
-            view.setTheme(1);
-        });
-
-        expect(message.customMessage).toBe('ViewLoader.setTheme: name must be string type');
-
-
-        view.setTheme(null);
-        expect(view.config.theme).toBe(null);
-    });
-
     it('getPath', function () {
         swig.Swig = function () {
             return swigApi;
@@ -121,10 +93,11 @@ describe('core/view', function () {
         config.views = nPath + 'templates/theme/';
         di.setAlias('viewsPath', config.views);
         spyOn(swig, 'Swig').and.callThrough();
+        view.config.themes = ['index'];
         view = new ViewConstructor(config);
         expect(swig.Swig).toHaveBeenCalled();
 
-        view.setTheme('index');
+
 
         expect(view.getPath(di.normalizePath('@{viewsPath}/'))).toBe(nPath + 'templates/theme/');
         expect(view.getPath(di.normalizePath('@{modulesPath}/user/themes/'))).toBe(nPath + 'modules_valid/user/themes/');
@@ -144,7 +117,7 @@ describe('core/view', function () {
         view = new ViewConstructor(config);
         expect(swig.Swig).toHaveBeenCalled();
 
-        view.setTheme('index');
+        view.config.themes = ['index'];
 
         //success
         expect(view.resolve('@{viewsPath}/theme')).toBe(nPath + 'templates/theme/index/theme.twig');
@@ -163,6 +136,37 @@ describe('core/view', function () {
     });
 
 
+
+    it('resolve lookup', function () {
+        swig.Swig = function () {
+            return swigApi;
+        };
+        nPath = path.normalize(__dirname + '/../tf/');
+        config.suffix = '.twig';
+        config.cache = true;
+
+        config.views = nPath + 'templates/theme/';
+        spyOn(swig, 'Swig').and.callThrough();
+        view = new ViewConstructor(config);
+        expect(swig.Swig).toHaveBeenCalled();
+
+        view.config.themes = ['c', 'index'];
+
+        //success
+        expect(view.resolve('@{viewsPath}/theme1')).toBe(nPath + 'templates/theme/index/theme1.twig');
+        expect(view.resolve('@{viewsPath}/theme')).toBe(nPath + 'templates/theme/c/theme.twig');
+        //success
+        expect(view.resolve('@{viewsPath}/view')).toBe(nPath + 'templates/theme/default/view.twig');
+
+        //success
+        expect(view.resolve('@{modulesPath}/user/themes/theme1')).toBe(nPath + 'modules_valid/user/themes/c/theme1.twig');
+        expect(view.resolve('@{modulesPath}/user/themes/theme')).toBe(nPath + 'modules_valid/user/themes/index/theme.twig');
+        //success
+        expect(view.resolve('@{modulesPath}/user/themes/view')).toBe(nPath + 'modules_valid/user/themes/default/view.twig');
+
+
+    });
+
     it('load', function () {
         swig.Swig = function () {
             return swigApi;
@@ -176,11 +180,11 @@ describe('core/view', function () {
         view = new ViewConstructor(config);
         expect(swig.Swig).toHaveBeenCalled();
 
-        view.setTheme('index');
+        view.config.themes = ['index'];
         expect(view.load(view.resolve('@{viewsPath}/theme'))).toBe('theme');
-        view.setTheme(null);
+        view.config.themes = [];
         expect(view.load(view.resolve('@{viewsPath}/theme'))).toBe('viewtheme');
-        view.setTheme('index');
+        view.config.themes = ['index'];
         expect(view.load(view.resolve('@{viewsPath}/view'))).toBe('view');
 
     });

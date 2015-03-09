@@ -25,7 +25,6 @@ describe('interface/view', function () {
             setExtension: n,
             render: n,
             renderFile: n,
-            setTheme: n,
             resolve: n,
             load: n,
             getPath: n
@@ -71,14 +70,6 @@ describe('interface/view', function () {
         render: n
     });
 
-    createMethodTest('setTheme', {
-        setLoader: n,
-        setFilter: n,
-        setTag: n,
-        setExtension: n,
-        render: n,
-        renderFile: n
-    });
     createMethodTest('resolve', {
         setLoader: n,
         setFilter: n,
@@ -86,7 +77,6 @@ describe('interface/view', function () {
         setExtension: n,
         render: n,
         renderFile: n,
-        setTheme: n,
         getPath: n
     });
     createMethodTest('load', {
@@ -96,7 +86,6 @@ describe('interface/view', function () {
         setExtension: n,
         render: n,
         renderFile: n,
-        setTheme: n,
         resolve: n
     });
     createMethodTest('getPath', {
@@ -106,7 +95,6 @@ describe('interface/view', function () {
         setExtension: n,
         render: n,
         renderFile: n,
-        setTheme: n,
         resolve: n,
         load: n
     });
