@@ -19,7 +19,10 @@ describe('core/view', function () {
             views: '@{appPath}/views/',
             suffix: '.twig',
             extensions: false,
-            theme: false,
+            themes: [
+                'c',
+                'index'
+            ],
             loader: {}
         },
         server = {
@@ -82,27 +85,6 @@ describe('core/view', function () {
 
 
 
-    it('getPath', function () {
-        swig.Swig = function () {
-            return swigApi;
-        };
-        nPath = path.normalize(__dirname + '/../tf/');
-        config.suffix = '.twig';
-        config.cache = true;
-       
-        config.views = nPath + 'templates/theme/';
-        di.setAlias('viewsPath', config.views);
-        spyOn(swig, 'Swig').and.callThrough();
-        view.config.themes = ['index'];
-        view = new ViewConstructor(config);
-        expect(swig.Swig).toHaveBeenCalled();
-
-
-
-        expect(view.getPath(di.normalizePath('@{viewsPath}/'))).toBe(nPath + 'templates/theme/');
-        expect(view.getPath(di.normalizePath('@{modulesPath}/user/themes/'))).toBe(nPath + 'modules_valid/user/themes/');
-     });
-
 
     it('resolve', function () {
         swig.Swig = function () {
@@ -117,22 +99,24 @@ describe('core/view', function () {
         view = new ViewConstructor(config);
         expect(swig.Swig).toHaveBeenCalled();
 
-        view.config.themes = ['index'];
+        view.config.themes = ['index', 'default'];
 
         //success
         expect(view.resolve('@{viewsPath}/theme')).toBe(nPath + 'templates/theme/index/theme.twig');
+
         //success
         expect(view.resolve('@{viewsPath}/view')).toBe(nPath + 'templates/theme/default/view.twig');
 
         //success
         expect(view.resolve('@{modulesPath}/user/themes/theme')).toBe(nPath + 'modules_valid/user/themes/index/theme.twig');
+
         //success
         expect(view.resolve('@{modulesPath}/user/themes/view')).toBe(nPath + 'modules_valid/user/themes/default/view.twig');
 
         var message = tryCatch(function () {
             view.resolve('@{modulesPath}/user/abc/theme');
         });
-        expect(message.customMessage).toBe('View.resolve: view path is not registered in system and mvc was not able to detect path, please check your path configs');
+        expect(message.customMessage).toBe("View.resolve: template don't exists");
     });
 
 
@@ -150,10 +134,11 @@ describe('core/view', function () {
         view = new ViewConstructor(config);
         expect(swig.Swig).toHaveBeenCalled();
 
-        view.config.themes = ['c', 'index'];
+        view.config.themes = ['c', 'index', 'default'];
 
         //success
         expect(view.resolve('@{viewsPath}/theme1')).toBe(nPath + 'templates/theme/index/theme1.twig');
+
         expect(view.resolve('@{viewsPath}/theme')).toBe(nPath + 'templates/theme/c/theme.twig');
         //success
         expect(view.resolve('@{viewsPath}/view')).toBe(nPath + 'templates/theme/default/view.twig');
@@ -180,11 +165,11 @@ describe('core/view', function () {
         view = new ViewConstructor(config);
         expect(swig.Swig).toHaveBeenCalled();
 
-        view.config.themes = ['index'];
+        view.config.themes = ['index', 'default'];
         expect(view.load(view.resolve('@{viewsPath}/theme'))).toBe('theme');
-        view.config.themes = [];
+        view.config.themes = ['default'];
         expect(view.load(view.resolve('@{viewsPath}/theme'))).toBe('viewtheme');
-        view.config.themes = ['index'];
+        view.config.themes = ['index', 'default'];
         expect(view.load(view.resolve('@{viewsPath}/view'))).toBe('view');
 
     });

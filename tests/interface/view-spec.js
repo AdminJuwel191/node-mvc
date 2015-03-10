@@ -26,8 +26,7 @@ describe('interface/view', function () {
             render: n,
             renderFile: n,
             resolve: n,
-            load: n,
-            getPath: n
+            load: n
         });
         var message = tryCatch(function () {
             return new IFace(config);
@@ -87,16 +86,6 @@ describe('interface/view', function () {
         render: n,
         renderFile: n,
         resolve: n
-    });
-    createMethodTest('getPath', {
-        setLoader: n,
-        setFilter: n,
-        setTag: n,
-        setExtension: n,
-        render: n,
-        renderFile: n,
-        resolve: n,
-        load: n
     });
 
 

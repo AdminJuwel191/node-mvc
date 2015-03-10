@@ -23,7 +23,7 @@ ViewInterface = Type.create({
             [
                 "setLoader", "setFilter", "setTag", "setExtension",
                 "render", "renderFile",
-                "resolve", "load", "getPath"
+                "resolve", "load"
             ].forEach(
                 function (method) {
                     if (!(method in this)) {

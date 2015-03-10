@@ -27,7 +27,7 @@ View = ViewInterface.inherit(
         preloaded: Type.OBJECT,
         paths: Type.ARRAY,
         aliasRegex: Type.REGEX,
-        defaultThemeRegex: Type.REGEX
+        normalizers: Type.ARRAY
     },
     {
         _construct: function View_construct(config) {
@@ -36,6 +36,7 @@ View = ViewInterface.inherit(
             this.aliasRegex = /@{.*}/g;
             this.preloaded = {};
             this.paths = [];
+            this.normalizers = [];
             this.config = core.extend({
                 cache: false,
                 autoescape: true,
@@ -51,11 +52,21 @@ View = ViewInterface.inherit(
                 themes: []
             }, config);
 
-            this.defaultThemeRegex = new RegExp('^' + this.config.defaultTheme + '/');
+
+            this.normalizers.push(this.config.views);
 
             di.setAlias('viewsPath', this.config.views);
 
-            this.paths.push(this.config.views);
+            if (Type.isArray(this.config.themes)) {
+                if (this.config.themes.indexOf(this.config.defaultTheme) === -1) {
+                    this.config.themes.push(this.config.defaultTheme);
+                }
+                this.config.themes.forEach(function (name) {
+                    this.paths.push(this.config.views + name + '/');
+                }.bind(this));
+            } else {
+                throw new error.HttpError(500, this.config, 'View.construct: themes are not array type');
+            }
 
             this.setModulesViewsPath(di.getAlias('modulesPath'));
 
@@ -101,7 +112,7 @@ View = ViewInterface.inherit(
          * Set modules path
          */
         setModulesViewsPath: function View_setModulesViewsPath(dir) {
-            var list, name, moduleToLoad, LoadedModule, module;
+            var list, name, moduleToLoad, LoadedModule, moduleInstance;
             if (this.isDir(dir)) {
                 list = this.readDir(dir);
                 while (true) {
@@ -123,13 +134,17 @@ View = ViewInterface.inherit(
                         throw new error.HttpError(500, {path: moduleToLoad}, 'Module must be function type');
                     }
 
-                    module = new LoadedModule(name);
+                    moduleInstance = new LoadedModule(name);
 
-                    if (!(module instanceof  ModuleInterface)) {
-                        throw new error.HttpError(500, module, 'Module must be instance of ModuleInterface "core/module"');
+                    if (!(moduleInstance instanceof  ModuleInterface)) {
+                        throw new error.HttpError(500, moduleInstance, 'Module must be instance of ModuleInterface "core/module"');
                     }
 
-                    this.paths.push(module.getViewsPath());
+                    this.normalizers.push(moduleInstance.getViewsPath());
+
+                    this.config.themes.forEach(function (name) {
+                        this.paths.push(moduleInstance.getViewsPath() + name + '/');
+                    }.bind(this));
                 }
 
             }
@@ -257,82 +272,78 @@ View = ViewInterface.inherit(
         /**
          * @since 0.0.1
          * @author Igor Ivanovic
-         * @method View#lookUpFile
-         *
-         * @description
-         * Look up file
-         * @return {string}
-         */
-        lookUpFile: function View_lookUpFile(path, file, to, from) {
-            var themes = this.config.themes.slice(),
-                theme,
-                re,
-                filePath,
-                trace = [];
-
-            while (themes.length) {
-                theme = themes.shift();
-                re = new RegExp('^' + theme + '/');
-                file = file.replace(re, '');
-                filePath = di.normalizePath(path + theme + '/' + file + this.config.suffix);
-                if (this.isFile(filePath)) {
-                    return filePath;
-                }
-                trace.push({
-                    theme: theme,
-                    path: path,
-                    filePath: filePath
-                });
-            }
-
-            filePath = di.normalizePath(path + this.config.defaultTheme + '/' + file + this.config.suffix);
-
-            if (this.isFile(filePath)) {
-                return filePath;
-            }
-
-            throw new error.HttpError(500, {
-                from: from,
-                load: to,
-                trace: trace
-            }, "View.resolve: template don't exists");
-        },
-        /**
-         * @since 0.0.1
-         * @author Igor Ivanovic
          * @method View#resolve
          *
          * @description
          * Resolve view
          * @return {string}
          */
-        resolve: function View_resolve(to, from) {
-            var path, file;
+        resolve: function View_resolve(toPath, fromPath) {
+            var file = di.normalizePath(toPath),
+                themes = this.config.themes.slice(),
+                theme,
+                re,
+                filePath,
+                normalizers = this.normalizers.slice(),
+                isNormalized = false,
+                path,
+                trace = [];
 
-            to = di.normalizePath(to);
-
-            path = this.getPath(to);
-            file = to.replace(path, '');
-
-            file = file.replace(this.suffix, '');
-
-            if (!path) {
-                path = this.getPath(from);
+            // file name normalizers
+            while (normalizers.length) {
+                path = di.normalizePath(normalizers.shift());
+                if (file.match(path)) {
+                    file = file.replace(path, '').replace(this.suffix, '');
+                    isNormalized = true;
+                    break;
+                }
+            }
+            // try normalize fromPath
+            if (!isNormalized && !!fromPath) {
+                normalizers = this.normalizers.slice();
+                fromPath = di.normalizePath(fromPath);
+                // file name normalizers
+                while (normalizers.length) {
+                    path = di.normalizePath(normalizers.shift());
+                    if (fromPath.match(path)) {
+                        isNormalized = true;
+                        break;
+                    }
+                }
             }
 
-            if (!path) {
-                throw new error.HttpError(500, {
-                    path: path,
-                    to: to,
-                    from: from,
-                    file: file,
-                    paths: this.paths
-                }, "View.resolve: view path is not registered in system and mvc was not able to detect path, please check your path configs");
+            // check themes
+            if (isNormalized) {
+                while (themes.length) {
+                    theme = themes.shift();
+                    re = new RegExp('^' + theme + '/');
+                    file = file.replace(re, '');
+
+                    filePath = di.normalizePath(path + theme + '/' + file + this.config.suffix);
+                    if (this.isFile(filePath)) {
+                        return filePath;
+                    }
+                    trace.push({
+                        theme: theme,
+                        path: path,
+                        filePath: filePath
+                    });
+                }
             }
 
-            file = file.replace(this.defaultThemeRegex, '');
 
-            return this.lookUpFile(path, file, to, from);
+
+            throw new error.HttpError(500, {
+                from: fromPath,
+                load: toPath,
+                filePath: filePath,
+                paths: this.paths,
+                isNormalized: isNormalized,
+                file: file,
+                path: path,
+                trace: trace,
+                themes: this.config.themes
+            }, "View.resolve: template don't exists");
         },
         /**
          * @since 0.0.1
