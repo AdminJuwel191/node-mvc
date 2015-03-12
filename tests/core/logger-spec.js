@@ -119,7 +119,6 @@ describe('core/logger', function () {
         });
 
         setTimeout(function () {
-            expect(_e.errno).toBe(34);
             expect(_e.path).toBe(nPath + 'server.log');
             done();
         }, 100);
