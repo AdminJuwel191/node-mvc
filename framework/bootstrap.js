@@ -31,7 +31,7 @@ Bootstrap = Type.create({
     _construct: function Bootstrap() {
         this.initalized = false;
         this.listenPort = 8080;
-        this.listenHost = "127.0.0.1";
+        this.listenHost = null;
         this.controllersPath = '@{appPath}/controllers/';
         this.modulesPath = '@{appPath}/modules/';
         this.modelsPath = '@{appPath}/models/';
@@ -195,8 +195,14 @@ Bootstrap = Type.create({
             logger.close();
             logger.destroy();
         });
+
         // this must be last !
-        server.listen(this.listenPort, this.listenHost);
+        if (!!this.listenHost) {
+            server.listen(this.listenPort, this.listenHost);
+        } else {
+            server.listen(this.listenPort);
+        }
+
         // logger
         logger.print(env);
         logger.print(this.__dynamic__);
