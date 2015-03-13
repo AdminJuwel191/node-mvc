@@ -307,6 +307,25 @@ Controller = ControllerInterface.inherit({
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
+     * @method Controller#removeSession
+     *
+     * @description
+     * Remove session key
+     * @return {string}
+     */
+    removeSession: function (key) {
+        var session = component.get('storage/session'),
+            session_id = this.getCookie(session.getCookieKey());
+
+        if (Type.isString(key)) {
+            return session.remove(session_id + key);
+        }
+
+        throw new error.HttpError(500, {key: key, session_id: session_id}, 'Controller.removeSession: key must be string type');
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
      * @method Controller#setCookie
      *
      * @description

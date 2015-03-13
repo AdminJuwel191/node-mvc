@@ -374,6 +374,27 @@ describe('core/controller', function () {
     });
 
 
+    it('removeSession', function () {
+        var ctx = {
+            getCookie: function () {
+                return '1234123234567';
+            }
+        };
+        session.remove = function (key) {};
+        spyOn(session, 'remove');
+        controller.removeSession.call(ctx, "id");
+        expect(session.remove).toHaveBeenCalledWith('1234123234567id');
+
+
+        var message = tryCatch(function () {
+            controller.removeSession.call(ctx, 1);
+        });
+
+        expect(message.customMessage).toBe('Controller.removeSession: key must be string type');
+    });
+
+
+
     it('setSession', function () {
         var ctx = {
             getCookie: function () {
