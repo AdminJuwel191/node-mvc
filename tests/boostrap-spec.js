@@ -139,7 +139,7 @@ describe('bootstrap', function () {
         expect(logs.length).toBe(2);
         // required components
         ['core/logger',
-            'cache/memory',
+            'storage/memory',
             'core/router',
             'hooks/request',
             //'core/favicon',

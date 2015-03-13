@@ -1,13 +1,13 @@
 var di = require('../../framework/di');
 
-describe('cache/memory', function () {
+describe('storage/memory', function () {
 
     var Instance,
         MemoryCache,
         Type = di.load('typejs');
 
     beforeEach(function () {
-        MemoryCache = di.mock('cache/memory', {
+        MemoryCache = di.mock('storage/memory', {
             typejs: Type,
             "interface/cache": di.load('interface/cache'),
             error: di.load('error'),

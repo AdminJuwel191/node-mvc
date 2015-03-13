@@ -9,12 +9,12 @@
   ],
   "core/favicon": [
     "core/logger",
-    "cache/memory",
+    "storage/memory",
     "hooks/request"
   ],
   "core/assets": [
     "core/logger",
-    "cache/memory",
+    "storage/memory",
     "hooks/request"
   ],
   "core/view": [
@@ -22,5 +22,8 @@
   ],
   "hooks/request": [
     "core/logger"
+  ],
+  "storage/session": [
+    "storage/memory"
   ]
 }

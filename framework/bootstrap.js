@@ -145,8 +145,8 @@ Bootstrap = Type.create({
             logger = component.get('core/logger');
         }
         // add memory cache
-        if (!component.has('cache/memory')) {
-            component.set('cache/memory', {});
+        if (!component.has('storage/memory')) {
+            component.set('storage/memory', {});
         }
         // register router
         if (!component.has('core/router')) {

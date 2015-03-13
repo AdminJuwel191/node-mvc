@@ -43,12 +43,12 @@ describe('core/component', function () {
             ],
             "core/favicon": [
                 "core/logger",
-                "cache/memory",
+                "storage/memory",
                 "hooks/request"
             ],
             "core/assets": [
                 "core/logger",
-                "cache/memory",
+                "storage/memory",
                 "hooks/request"
             ],
             "core/view": [

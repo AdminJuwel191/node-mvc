@@ -23,7 +23,6 @@
 
   "interface/requestHooks": "@{framework}/interface/requestHooks",
   "interface/cache": "@{framework}/interface/storage",
-  "interface/storage": "@{framework}/interface/storage",
 
   "interface/controller": "@{framework}/interface/controller",
   "interface/routeRule": "@{framework}/interface/routeRule",
@@ -32,7 +31,6 @@
   "interface/view": "@{framework}/interface/view",
   "interface/module": "@{framework}/interface/module",
 
-  "cache/memory": "@{framework}/storage/memory",
   "storage/memory": "@{framework}/storage/memory",
   "storage/session": "@{framework}/storage/session",
 
