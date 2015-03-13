@@ -44,12 +44,13 @@ describe('interface/controller', function () {
             getModuleName: n
         });
         var message = tryCatch(function () {
-            return new IFace(config);
+            return new IFace(config, {});
         });
 
         expect(message instanceof IFace).toBe(true);
 
-        expect(Type.isObject(message._requestApi)).toBe(true);
+        expect(Type.isObject(message.__requestApi__)).toBe(true);
+        expect(Type.isObject(message.__config__)).toBe(true);
     });
 
 

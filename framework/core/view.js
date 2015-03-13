@@ -248,26 +248,7 @@ View = ViewInterface.inherit(
                 this.setPreloaded(dir, this.swig.compileFile(dir));
             }
         },
-        /**
-         * @since 0.0.1
-         * @author Igor Ivanovic
-         * @method View#getPath
-         *
-         * @description
-         * Get the path
-         * @return {string}
-         */
-        getPath: function View_getPath(path) {
-            var paths = this.paths.slice(),
-                item;
-            while (paths.length) {
-                item = di.normalizePath(paths.pop());
-                if (path && path.indexOf(item) === 0) {
-                    return item;
-                }
-            }
-            return false;
-        },
+
 
         /**
          * @since 0.0.1

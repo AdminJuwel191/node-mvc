@@ -16,16 +16,14 @@ describe('interface/cache', function () {
         var Cache = Interface.inherit({}, {
             set: n,
             get: n,
-            remove: n
+            remove: n,
+            has: n
         });
         var message = tryCatch(function () {
             return new Cache(config);
         });
         expect(message instanceof Cache).toBe(true);
-        expect(message.ttl).toBe(1000 * 60 * 60);
 
-        expect(message.config).toBe(config);
-        expect(Type.isObject(message.cache)).toBe(true);
     });
 
 
@@ -38,6 +36,11 @@ describe('interface/cache', function () {
         get: n
     });
 
+    createMethodTest('has', {
+        set: n,
+        get: n,
+        remove: n
+    });
 
     function createMethodTest(method, extend, callback) {
         it('should have ' + method + ' method', function () {

@@ -10,7 +10,8 @@ describe('cache/memory', function () {
         MemoryCache = di.mock('cache/memory', {
             typejs: Type,
             "interface/cache": di.load('interface/cache'),
-            error: di.load('error')
+            error: di.load('error'),
+            core: di.load('core')
         });
 
 
@@ -21,10 +22,15 @@ describe('cache/memory', function () {
     });
 
 
-    it('set', function () {
+    it('set', function (done) {
         Instance = new MemoryCache;
         expect(Instance.set('KEY', 'CACHED')).toBe(true);
         expect(Instance.set('KEY', 'CACHED')).toBe(false);
+        expect(Instance.set('KEY2', 'CACHED', 100)).toBe(true);
+        setTimeout(function() {
+            expect(Instance.get('KEY2')).toBe(null);
+            done();
+        }, 200);
     });
 
 

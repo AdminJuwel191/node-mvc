@@ -4,6 +4,7 @@ var di = require('../di'),
     Type = di.load('typejs'),
     CacheInterface = di.load('interface/cache'),
     error = di.load('error'),
+    core = di.load('core'),
     MemoryCache;
 /**
  * @license Mit Licence 2014
@@ -15,7 +16,29 @@ var di = require('../di'),
  * @description
  * Memory cache
  */
-MemoryCache = CacheInterface.inherit({}, {
+MemoryCache = CacheInterface.inherit({
+    cache: Type.OBJECT,
+    config: Type.OBJECT
+}, {
+    _construct: function (config) {
+        this.cache = {};
+        this.config = core.extend({
+            ttl:  1000 * 60 * 60,
+            timeKeyPrefix: 'CACHE_CLEAR_TIME_ID_'
+        }, config);
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method MemoryCache#has
+     *
+     * @description
+     * Has cached value
+     * @return {object}
+     */
+    has: function (key) {
+        return this.cache.hasOwnProperty(key) && this.cache[key] !== null;
+    },
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
@@ -26,17 +49,20 @@ MemoryCache = CacheInterface.inherit({}, {
      * @return {object}
      */
     set: function MemoryCache_setValue(key, value, ttl) {
-        if (!this.cache.hasOwnProperty(key) || this.cache[key] === null) {
+        var id;
+        if (!this.has(key)) {
             this.cache[key] = value;
         } else {
             return false;
         }
 
         if (Type.isNumber(ttl) && !isNaN(ttl) && ttl > 0) {
-            setTimeout(clearCache.bind(this), ttl);
+            id = setTimeout(clearCache.bind(this), ttl);
         } else {
-            setTimeout(clearCache.bind(this), this.ttl);
+            id = setTimeout(clearCache.bind(this), this.config.ttl);
         }
+
+        this.cache[this.config.timeKeyPrefix + key] = id;
 
         function clearCache() {
             this.remove(key);
@@ -53,7 +79,7 @@ MemoryCache = CacheInterface.inherit({}, {
      * Get cache value
      */
     get: function MemoryCache_getValue(key, def) {
-        if (this.cache.hasOwnProperty(key)) {
+        if (this.has(key)) {
             return this.cache[key];
         } else if (def) {
             return def;
@@ -69,8 +95,10 @@ MemoryCache = CacheInterface.inherit({}, {
      * Remove key from cache
      */
     remove: function MemoryCache_remove(key) {
-        if (this.cache.hasOwnProperty(key)) {
+        if (this.has(key)) {
             this.cache[key] = null;
+            clearTimeout(this.cache[this.config.timeKeyPrefix + key]);
+            this.cache[this.config.timeKeyPrefix + key] = null;
         }
     }
 });

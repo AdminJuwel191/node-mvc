@@ -16,12 +16,12 @@ var di = require('../di'),
  * Controller interface
  */
 ControllerInterface = Type.create({
-    _requestApi: Type.OBJECT,
-    _config: Type.OBJECT
+    __requestApi__: Type.OBJECT,
+    __config__: Type.OBJECT
 }, {
     _invoke: function ControllerInterface(requestApi, config) {
-        this._requestApi = requestApi;
-        this._config = config;
+        this.__requestApi__ = requestApi;
+        this.__config__ = config;
         [
             "has", "get", "redirect",
             "forward", "addHeader", "onEnd",

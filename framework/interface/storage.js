@@ -3,27 +3,20 @@
 var di = require('../di'),
     Type = di.load('typejs'),
     error = di.load('error'),
-    CacheInterface;
+    StorageInterface;
 /**
  * @license Mit Licence 2014
  * @since 0.0.1
  * @author Igor Ivanovic
- * @name Cache
+ * @name StorageInterface
  *
  * @constructor
  * @description
- * Cache object
+ * Storage object
  */
-CacheInterface = Type.create({
-    cache: Type.OBJECT,
-    config: Type.OBJECT,
-    ttl: Type.NUMBER
-}, {
-    _invoke: function CacheInterface(config) {
-        this.cache = {};
-        this.config = config;
-        this.ttl = 1000 * 60 * 60; // one hour
-        ["set", "get", "remove"].forEach(function (method) {
+StorageInterface = Type.create({}, {
+    _invoke: function StorageInterface() {
+        ["set", "get", "remove", "has"].forEach(function (method) {
             if (!(method in this)) {
                 throw new error.DataError({method: method}, 'CacheInterface: missing method in cache object');
             }
@@ -31,4 +24,4 @@ CacheInterface = Type.create({
     }
 });
 
-module.exports = CacheInterface;
+module.exports = StorageInterface;

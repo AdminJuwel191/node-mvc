@@ -2,6 +2,7 @@
 /* global loader: true, Type: true, Controller: true */
 var di = require('../di'),
     Type = di.load('typejs'),
+    error = di.load('error'),
     component = di.load('core/component'),
     ControllerInterface = di.load('interface/controller'),
     view = component.get('core/view'),
@@ -16,7 +17,9 @@ var di = require('../di'),
  * @description
  * Controller is a collection of Controller
  */
-Controller = ControllerInterface.inherit({}, {
+Controller = ControllerInterface.inherit({
+    __cookies__: Type.OBJECT
+}, {
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
@@ -26,7 +29,7 @@ Controller = ControllerInterface.inherit({}, {
      * Set status code
      */
     setStatusCode: function Controller_setStatusCode(code) {
-        this._requestApi.setStatusCode(code);
+        this.__requestApi__.setStatusCode(code);
     },
     /**
      * @since 0.0.1
@@ -37,7 +40,7 @@ Controller = ControllerInterface.inherit({}, {
      * Stop promise chain
      */
     stopChain: function Controller_stopChain() {
-        return this._requestApi.stopPromiseChain();
+        return this.__requestApi__.stopPromiseChain();
     },
     /**
      * @since 0.0.1
@@ -48,7 +51,7 @@ Controller = ControllerInterface.inherit({}, {
      * has response header
      */
     hasHeader: function Controller_hasHeader(key) {
-        return this._requestApi.hasHeader(key);
+        return this.__requestApi__.hasHeader(key);
     },
     /**
      * @since 0.0.1
@@ -59,7 +62,7 @@ Controller = ControllerInterface.inherit({}, {
      * Get request body
      */
     getRequestBody: function Controller_getRequestBody() {
-        return this._requestApi.getRequestBody();
+        return this.__requestApi__.getRequestBody();
     },
     /**
      * @since 0.0.1
@@ -70,7 +73,7 @@ Controller = ControllerInterface.inherit({}, {
      * Get request header
      */
     getRequestHeader: function Controller_getRequestHeader(key) {
-        return this._requestApi.getRequestHeader(key);
+        return this.__requestApi__.getRequestHeader(key);
     },
     /**
      * @since 0.0.1
@@ -81,7 +84,7 @@ Controller = ControllerInterface.inherit({}, {
      * Return response headers
      */
     getHeaders: function Controller_getHeaders() {
-        return this._requestApi.getHeaders();
+        return this.__requestApi__.getHeaders();
     },
     /**
      * @since 0.0.1
@@ -92,7 +95,7 @@ Controller = ControllerInterface.inherit({}, {
      * Return request method
      */
     getMethod: function Controller_getMethod() {
-        return this._requestApi.getMethod();
+        return this.__requestApi__.getMethod();
     },
     /**
      * @since 0.0.1
@@ -103,7 +106,7 @@ Controller = ControllerInterface.inherit({}, {
      * Return request headers
      */
     getRequestHeaders: function Controller_getRequestHeaders() {
-        return this._requestApi.getRequestHeaders();
+        return this.__requestApi__.getRequestHeaders();
     },
     /**
      * @since 0.0.1
@@ -114,7 +117,7 @@ Controller = ControllerInterface.inherit({}, {
      * Check if cache is unmodified
      */
     isHeaderCacheUnModified: function Controller_isHeaderCacheUnModified() {
-        return this._requestApi.isHeaderCacheUnModified();
+        return this.__requestApi__.isHeaderCacheUnModified();
     },
     /**
      * @since 0.0.1
@@ -125,7 +128,7 @@ Controller = ControllerInterface.inherit({}, {
      * Send no change 304 response
      */
     sendNoChange: function Controller_sendNoChange() {
-        return this._requestApi.sendNoChange();
+        return this.__requestApi__.sendNoChange();
     },
     /**
      * @since 0.0.1
@@ -136,7 +139,7 @@ Controller = ControllerInterface.inherit({}, {
      * Return parsed url
      */
     getParsedUrl: function Controller_getParsedUrl() {
-        return this._requestApi.parsedUrl;
+        return this.__requestApi__.parsedUrl;
     },
     /**
      * @since 0.0.1
@@ -147,7 +150,7 @@ Controller = ControllerInterface.inherit({}, {
      * On end
      */
     createUrl: function Controller_createUrl(route, params) {
-        return this._requestApi.createUrl(route, params);
+        return this.__requestApi__.createUrl(route, params);
     },
     /**
      * @since 0.0.1
@@ -158,7 +161,7 @@ Controller = ControllerInterface.inherit({}, {
      * On end
      */
     onEnd: function Controller_onEnd(callback) {
-        return this._requestApi.onEnd(callback);
+        return this.__requestApi__.onEnd(callback);
     },
     /**
      * @since 0.0.1
@@ -169,7 +172,7 @@ Controller = ControllerInterface.inherit({}, {
      * Add header to request
      */
     addHeader: function Controller_addHeader(key, value) {
-        return this._requestApi.addHeader(key, value);
+        return this.__requestApi__.addHeader(key, value);
     },
     /**
      * @since 0.0.1
@@ -180,7 +183,7 @@ Controller = ControllerInterface.inherit({}, {
      * Redirect to some url
      */
     forward: function Controller_forward(route, params) {
-        return this._requestApi.forward(route, params);
+        return this.__requestApi__.forward(route, params);
     },
     /**
      * @since 0.0.1
@@ -190,8 +193,8 @@ Controller = ControllerInterface.inherit({}, {
      * @description
      * Redirect to some url
      */
-    forwardUrl:  function Controller_forwardUrl(route, params) {
-        return this._requestApi.forwardUrl(route, params);
+    forwardUrl: function Controller_forwardUrl(route, params) {
+        return this.__requestApi__.forwardUrl(route, params);
     },
     /**
      * @since 0.0.1
@@ -202,7 +205,7 @@ Controller = ControllerInterface.inherit({}, {
      * Redirect to some url
      */
     redirect: function Controller_redirect(url, isTemp) {
-        return this._requestApi.redirect(url, isTemp);
+        return this.__requestApi__.redirect(url, isTemp);
     },
     /**
      * @since 0.0.1
@@ -213,7 +216,7 @@ Controller = ControllerInterface.inherit({}, {
      * Render file
      */
     renderFile: function Controller_renderFile(pathName, locals) {
-        return view.renderFile(pathName, locals, this._config.viewsPath);
+        return view.renderFile(pathName, locals, this.__config__.viewsPath);
     },
     /**
      * @since 0.0.1
@@ -236,7 +239,7 @@ Controller = ControllerInterface.inherit({}, {
      * @return {string}
      */
     getActionName: function Controller_getActionName() {
-        return this._config.action;
+        return this.__config__.action;
     },
     /**
      * @since 0.0.1
@@ -248,7 +251,7 @@ Controller = ControllerInterface.inherit({}, {
      * @return {string}
      */
     getControllerName: function Controller_getControllerName() {
-        return this._config.controller;
+        return this.__config__.controller;
     },
     /**
      * @since 0.0.1
@@ -260,7 +263,132 @@ Controller = ControllerInterface.inherit({}, {
      * @return {string}
      */
     getModuleName: function Controller_getModuleName() {
-        return this._config.module;
+        return this.__config__.module;
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Controller#getSession
+     *
+     * @description
+     * Get session key
+     * @return {string}
+     */
+    getSession: function (key) {
+        var session = component.get('storage/session'),
+            session_id = this.getCookie(session.getCookieKey());
+
+        if (Type.isString(key)) {
+            return session.get(session_id + key);
+        }
+
+        throw new error.HttpError(500, {key: key, session_id: session_id}, 'Controller.getSession: key must be string type');
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Controller#setSession key value
+     *
+     * @description
+     * Set session
+     * @return {string}
+     */
+    setSession: function (key, value) {
+        var session = component.get('storage/session'),
+            session_id = this.getCookie(session.getCookieKey());
+        if (!Type.isString(key)) {
+            throw new error.HttpError(500, {key: key, session_id: session_id}, 'Controller.getSession: key must be string type');
+        } else if (!session_id) {
+            session_id = new Buffer(this.__requestApi__.uuid() + '_' + (new Date).toString() + '_' + Math.random()).toString("base64");
+            this.setCookie(session.getCookieKey(), session_id, session.getExpiredTime());
+        }
+        session.set(session_id + key, value);
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Controller#setCookie
+     *
+     * @description
+     * Decode string
+     */
+    setCookie: function (key, value, expires, path, domain, isHttpOnly) {
+        var cookie, date;
+
+        if (Type.isUndefined(key) || Type.isUndefined(value)) {
+            throw new error.HttpError(500, {
+                key: key,
+                value: value,
+                expires: expires,
+                path: path,
+                domain: domain,
+                isHttpOnly: isHttpOnly
+            }, 'Controller.setCookie: Key and Value must be provided!');
+        }
+
+        cookie = key + "=" + value;
+
+        if (!!expires) {
+            if (Type.isNumber(expires)) {
+                date = new Date();
+                date.setTime(date.getTime() + expires);
+                cookie += "; Expires=" + date.toGMTString();
+            } else if (Type.isString(expires)) {
+                cookie += "; Expires=" + expires;
+            } else if (Type.isDate(expires)) {
+                cookie += "; Expires=" + expires.toGMTString();
+            }
+        }
+
+        if (!!path) {
+            cookie += "; Path=" + path;
+        }
+
+        if (!!domain) {
+            cookie += "; Domain=" + domain;
+        }
+
+        if (!!isHttpOnly) {
+            cookie += "; HttpOnly";
+        }
+        this.addHeader('Set-cookie', cookie);
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Controller#getCookies
+     *
+     * @description
+     * Parse cookies
+     */
+    getCookies: function Controller_getCookies() {
+        var data;
+        if (!!this.__cookies__) {
+            return this.__cookies__;
+        }
+        this.__cookies__ = {};
+        data = this.getRequestHeader('Cookie');
+        if (!!data) {
+            data.replace(/(\w+[^=]+)=([^;]+)/g, function (cookie, key, value) {
+                this.__cookies__[key] = value;
+            }.bind(this));
+        }
+        return this.__cookies__;
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Controller#getCookie
+     *
+     * @description
+     * Get all cookies
+     */
+    getCookie: function (key) {
+        var cookies = this.getCookies();
+        if (cookies.hasOwnProperty(key)) {
+            return cookies[key];
+        }
+        return null;
     },
     /**
      * @since 0.0.1

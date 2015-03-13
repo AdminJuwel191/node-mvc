@@ -574,7 +574,8 @@ Request = Type.create({
             setStatusCode: this.setStatusCode.bind(this),
             createUrl: router.createUrl.bind(router),
             parsedUrl: core.copy(this.parsedUrl),
-            forwardUrl: this.forward.bind(this)
+            forwardUrl: this.forward.bind(this),
+            uuid: this._uuid.bind(this)
         };
     },
     /**
