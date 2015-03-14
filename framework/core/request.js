@@ -592,7 +592,11 @@ Request = Type.create({
                 try {
                     resolve(next.apply(next, arguments));
                 } catch (e) {
-                    reject(new error.HttpError(500, arguments, "Error on executing action", e));
+                    if (e instanceof error.HttpError) {
+                        reject(e);
+                    } else {
+                        reject(new error.HttpError(500, {}, "Error on executing action", e));
+                    }
                 }
             });
         }
@@ -608,7 +612,11 @@ Request = Type.create({
             try {
                 return next.apply(next, arguments);
             } catch (e) {
-                throw new error.HttpError(500, arguments, "Error on executing action", e);
+                if (e instanceof error.HttpError) {
+                    throw e;
+                } else {
+                    throw new error.HttpError(500, {}, "Error on executing action", e);
+                }
             }
         }
     },

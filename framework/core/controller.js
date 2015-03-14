@@ -5,6 +5,7 @@ var di = require('../di'),
     error = di.load('error'),
     component = di.load('core/component'),
     ControllerInterface = di.load('interface/controller'),
+    BodyParser = di.load('core/bodyParser'),
     view = component.get('core/view'),
     Controller;
 /**
@@ -24,7 +25,7 @@ Controller = ControllerInterface.inherit({
      * @since 0.0.1
      * @author Igor Ivanovic
      * @method Controller#setStatusCode
-     *
+     * @param code {number}
      * @description
      * Set status code
      */
@@ -46,7 +47,7 @@ Controller = ControllerInterface.inherit({
      * @since 0.0.1
      * @author Igor Ivanovic
      * @method Controller#hasHeader
-     *
+     * @param key {string}
      * @description
      * has response header
      */
@@ -68,7 +69,7 @@ Controller = ControllerInterface.inherit({
      * @since 0.0.1
      * @author Igor Ivanovic
      * @method Controller#getRequestHeader
-     *
+     * @param key {string}
      * @description
      * Get request header
      */
@@ -145,9 +146,10 @@ Controller = ControllerInterface.inherit({
      * @since 0.0.1
      * @author Igor Ivanovic
      * @method Controller#onEnd
-     *
+     * @param route {string}
+     * @param params {object}
      * @description
-     * On end
+     * Create an url depends on route an parameters to router service
      */
     createUrl: function Controller_createUrl(route, params) {
         return this.__requestApi__.createUrl(route, params);
@@ -156,9 +158,9 @@ Controller = ControllerInterface.inherit({
      * @since 0.0.1
      * @author Igor Ivanovic
      * @method Controller#onEnd
-     *
+     * @param callback {function}
      * @description
-     * On end
+     * On end exec callback
      */
     onEnd: function Controller_onEnd(callback) {
         return this.__requestApi__.onEnd(callback);
@@ -167,7 +169,8 @@ Controller = ControllerInterface.inherit({
      * @since 0.0.1
      * @author Igor Ivanovic
      * @method Controller#addHeader
-     *
+     * @param key {string}
+     * @param value {string}
      * @description
      * Add header to request
      */
@@ -178,7 +181,8 @@ Controller = ControllerInterface.inherit({
      * @since 0.0.1
      * @author Igor Ivanovic
      * @method Controller#forward
-     *
+     * @param route {string}
+     * @param params {object}
      * @description
      * Redirect to some url
      */
@@ -189,18 +193,19 @@ Controller = ControllerInterface.inherit({
      * @since 0.0.1
      * @author Igor Ivanovic
      * @method Controller#forwardUrl
-     *
+     * @param url {string}
      * @description
      * Redirect to some url
      */
-    forwardUrl: function Controller_forwardUrl(route, params) {
-        return this.__requestApi__.forwardUrl(route, params);
+    forwardUrl: function Controller_forwardUrl(url) {
+        return this.__requestApi__.forwardUrl(url);
     },
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
      * @method Controller#redirect
-     *
+     * @param url {string}
+     * @param isTemp {boolean}
      * @description
      * Redirect to some url
      */
@@ -211,7 +216,8 @@ Controller = ControllerInterface.inherit({
      * @since 0.0.1
      * @author Igor Ivanovic
      * @method Controller#renderFile
-     *
+     * @param pathName {string}
+     * @param locals {object}
      * @description
      * Render file
      */
@@ -222,7 +228,9 @@ Controller = ControllerInterface.inherit({
      * @since 0.0.1
      * @author Igor Ivanovic
      * @method Controller#render
-     *
+     * @param source {string}
+     * @param locals {object}
+     * @param escape {boolean}
      * @description
      * Render view
      */
@@ -269,12 +277,12 @@ Controller = ControllerInterface.inherit({
      * @since 0.0.1
      * @author Igor Ivanovic
      * @method Controller#getSession
-     *
+     * @param key {string}
      * @description
      * Get session key
      * @return {string}
      */
-    getSession: function (key) {
+    getSession: function Controller_getSession(key) {
         var session = component.get('storage/session'),
             session_id = this.getCookie(session.getCookieKey());
 
@@ -288,12 +296,13 @@ Controller = ControllerInterface.inherit({
      * @since 0.0.1
      * @author Igor Ivanovic
      * @method Controller#setSession key value
-     *
+     * @param key {string}
+     * @param value {object|mixed}
      * @description
      * Set session
      * @return {string}
      */
-    setSession: function (key, value) {
+    setSession: function Controller_setSession(key, value) {
         var session = component.get('storage/session'),
             session_id = this.getCookie(session.getCookieKey());
         if (!Type.isString(key)) {
@@ -308,12 +317,12 @@ Controller = ControllerInterface.inherit({
      * @since 0.0.1
      * @author Igor Ivanovic
      * @method Controller#removeSession
-     *
+     * @param key {string}
      * @description
      * Remove session key
      * @return {string}
      */
-    removeSession: function (key) {
+    removeSession: function Controller_removeSession(key) {
         var session = component.get('storage/session'),
             session_id = this.getCookie(session.getCookieKey());
 
@@ -327,11 +336,16 @@ Controller = ControllerInterface.inherit({
      * @since 0.0.1
      * @author Igor Ivanovic
      * @method Controller#setCookie
-     *
+     * @param key {string}
+     * @param value {string}
+     * @param expires {string|object|number}
+     * @param path {string}
+     * @param domain {string}
+     * @param isHttpOnly {boolean}
      * @description
-     * Decode string
+     * Set cookie header
      */
-    setCookie: function (key, value, expires, path, domain, isHttpOnly) {
+    setCookie: function Controller_setCookie(key, value, expires, path, domain, isHttpOnly) {
         var cookie, date;
 
         if (Type.isUndefined(key) || Type.isUndefined(value)) {
@@ -379,6 +393,7 @@ Controller = ControllerInterface.inherit({
      *
      * @description
      * Parse cookies
+     * @return {object}
      */
     getCookies: function Controller_getCookies() {
         var data;
@@ -398,11 +413,12 @@ Controller = ControllerInterface.inherit({
      * @since 0.0.1
      * @author Igor Ivanovic
      * @method Controller#getCookie
-     *
+     * @param key {string}
      * @description
      * Get all cookies
+     * @return {null|string}
      */
-    getCookie: function (key) {
+    getCookie: function Controller_getCookie(key) {
         var cookies = this.getCookies();
         if (cookies.hasOwnProperty(key)) {
             return cookies[key];
@@ -412,8 +428,25 @@ Controller = ControllerInterface.inherit({
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
-     * @method Controller#hasAction
+     * @method Controller#getParsedBody
      *
+     * @description
+     * Parse body and return parsed object
+     * @return {object}
+     */
+    getParsedBody: function Controller_getParsedBody() {
+        var parser = new BodyParser(
+            this.getRequestHeader('content-type'),
+            this.getRequestBody()
+        );
+        parser.parse();
+        return parser.getBody();
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Controller#hasAction
+     * @param name {string}
      * @description
      * Check if controller have action
      * @return {boolean}
@@ -425,7 +458,7 @@ Controller = ControllerInterface.inherit({
      * @since 0.0.1
      * @author Igor Ivanovic
      * @method Controller#getAction
-     *
+     * @param name {string}
      * @description
      * Get controller action
      * @return {object}

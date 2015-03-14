@@ -8,6 +8,9 @@ describe('core/controller', function () {
                 return 'session_id';
             }
         },
+        BodyParser = function () {
+
+        },
         controller,
         core = di.load('core'),
         Type = di.load('typejs');
@@ -18,6 +21,7 @@ describe('core/controller', function () {
             core: core,
             error: di.load('error'),
             'interface/controller': di.load('interface/controller'),
+            'core/bodyParser': BodyParser,
             'core/component': {
                 get: function(name) {
                     if (name === "core/view") {
@@ -56,6 +60,27 @@ describe('core/controller', function () {
         expect(request.stopPromiseChain).toHaveBeenCalled();
     });
 
+    it('getParsedBody', function () {
+        BodyParser.prototype.parse = function () {}
+        BodyParser.prototype.getBody = function () {}
+
+        var ctx = {
+            getRequestHeader: function () {},
+            getRequestBody: function () {}
+        };
+        spyOn(BodyParser.prototype, 'parse');
+        spyOn(BodyParser.prototype, 'getBody');
+        spyOn(ctx, 'getRequestHeader');
+        spyOn(ctx, 'getRequestBody');
+
+        controller.getParsedBody.call(ctx);
+
+        expect(ctx.getRequestHeader).toHaveBeenCalled();
+        expect(ctx.getRequestBody).toHaveBeenCalled();
+        expect(BodyParser.prototype.parse).toHaveBeenCalled();
+        expect(BodyParser.prototype.getBody).toHaveBeenCalled();
+
+    });
 
     it('getRequestBody', function () {
         request.getRequestBody = function() {};

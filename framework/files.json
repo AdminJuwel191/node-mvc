@@ -16,6 +16,7 @@
   "core/module": "@{framework}/core/module",
   "core/routeRule": "@{framework}/core/routeRule",
   "core/view": "@{framework}/core/view",
+  "core/bodyParser": "@{framework}/core/bodyParser",
 
   "db/mongo": "@{framework}/db/mongo",
 
