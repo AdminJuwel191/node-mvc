@@ -45,22 +45,22 @@ BodyParser = Type.create({
             this.parsedBody = this.parseBoundary(this.body, this.type.replace(/^.*boundary=/, ''));
         } else if (this.type.indexOf('application/x-www-form-urlencoded') > -1) {
             // raw url
-            this.parsedBody = this.body.split("&").forEach(function (item) {
+            this.body.split("&").forEach(function (item) {
                 var key, val;
                 item = item.split("=");
-                key = decodeURIComponent(item.shift());
-                val = decodeURIComponent(item.shift());
-                data[key] = val;
-            });
+                key = decodeURIComponent(item.shift().replace('+', ' '));
+                val = decodeURIComponent(item.shift().replace('+', ' '));
+                this.parsedBody[key] = val;
+            }.bind(this));
         } else if (this.type.indexOf('text/plain') > -1) {
             // plain text
-            this.parsedBody = this.body.split("\r\n").forEach(function (item) {
+            this.body.split("\n").forEach(function (item) {
                 var key, val;
                 item = item.split("=");
                 key = decodeURIComponent(item.shift());
-                val = decodeURIComponent(item.shift());
-                data[key] = val;
-            });
+                val = decodeURIComponent(item.join('='));
+                this.parsedBody[key] = val;
+            }.bind(this));
         } else if (this.type.indexOf('application/json') > -1) {
             try {
                 this.parsedBody = JSON.parse(this.body);
