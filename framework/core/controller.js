@@ -308,7 +308,7 @@ Controller = ControllerInterface.inherit({
         if (!Type.isString(key)) {
             throw new error.HttpError(500, {key: key, session_id: session_id}, 'Controller.getSession: key must be string type');
         } else if (!session_id) {
-            session_id = new Buffer(this.__requestApi__.uuid() + '_' + (new Date).toString() + '_' + Math.random()).toString("base64");
+            session_id = this.__requestApi__.uuid() + '_' + (new Date).getTime();
             this.setCookie(session.getCookieKey(), session_id, session.getExpiredTime());
         }
         session.set(session_id + key, value);

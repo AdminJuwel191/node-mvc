@@ -94,7 +94,7 @@ SessionStorage = Type.create({
             // remove key
             this.config.storage.remove(nKey);
             // clear old timeout to avoid memory leak
-            clearTimeout(this.config.storage.get(tKey));
+            clearTimeout(parseInt(this.config.storage.get(tKey)));
             // remove old time key
             this.config.storage.remove(tKey);
         }
@@ -106,7 +106,7 @@ SessionStorage = Type.create({
             this.config.storage.remove(tKey);
         }.bind(this), this.getExpiredTime());
         // set id value
-        this.config.storage.set(tKey, id, this.getExpiredTime());
+        this.config.storage.set(tKey, id.toString(), this.getExpiredTime());
     },
     /**
      * @since 0.0.1
