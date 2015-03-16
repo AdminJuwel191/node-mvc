@@ -19,7 +19,8 @@ var di = require('../di'),
  * Session storage
  */
 SessionStorage = Type.create({
-    config: Type.OBJECT
+    config: Type.OBJECT,
+    timeouts: Type.OBJECT
 }, {
     /**
      * @since 0.0.1
@@ -31,6 +32,7 @@ SessionStorage = Type.create({
      * @return {object}
      */
     _construct: function SessionStorage_construct(config) {
+        this.timeouts = {};
         this.config = core.extend(
             {
                 cookieKey: 'session_id',
@@ -85,8 +87,7 @@ SessionStorage = Type.create({
      * @return {object}
      */
     set: function SessionStorage_setValue(key, value) {
-        var id,
-            nKey = this.config.key_prefix + key,
+        var nKey = this.config.key_prefix + key,
             tKey = nKey + '_TIME';
 
         // if has key refresh it
@@ -94,19 +95,20 @@ SessionStorage = Type.create({
             // remove key
             this.config.storage.remove(nKey);
             // clear old timeout to avoid memory leak
-            clearTimeout(parseInt(this.config.storage.get(tKey)));
-            // remove old time key
-            this.config.storage.remove(tKey);
+            if (this.timeouts.hasOwnProperty(tKey) ) {
+                clearTimeout(this.timeouts[tKey]);
+                // remove old time key
+                delete this.timeouts[tKey];
+            }
         }
         // set new value
         this.config.storage.set(nKey, value, this.getExpiredTime());
         // set clear timeout
-        id = setTimeout(function ()  {
+        // set id value
+        this.timeouts[tKey] = setTimeout(function ()  {
             this.config.storage.remove(nKey);
             this.config.storage.remove(tKey);
         }.bind(this), this.getExpiredTime());
-        // set id value
-        this.config.storage.set(tKey, id.toString(), this.getExpiredTime());
     },
     /**
      * @since 0.0.1
@@ -128,7 +130,15 @@ SessionStorage = Type.create({
      * Remove key from cache
      */
     remove: function SessionStorage_remove(key) {
-        return this.config.storage.remove(this.config.key_prefix + key);
+        var nKey = this.config.key_prefix + key,
+            tKey = nKey + '_TIME';
+        // clear old timeout to avoid memory leak
+        if (this.timeouts.hasOwnProperty(tKey)) {
+            clearTimeout(this.timeouts[tKey]);
+            // remove old time key
+            delete this.timeouts[tKey];
+        }
+        return this.config.storage.remove(nKey);
     }
 });
 
