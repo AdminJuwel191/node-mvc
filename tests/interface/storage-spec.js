@@ -1,8 +1,8 @@
 var di = require('../../');
-describe('interface/cache', function () {
+describe('interface/storage', function () {
     var Interface, loadedNames = [], Type = di.load('typejs');
     beforeEach(function () {
-        Interface = di.mock('interface/cache', {
+        Interface = di.mock('interface/storage', {
             typejs: Type,
             core: di.load('core'),
             error: di.load('error')

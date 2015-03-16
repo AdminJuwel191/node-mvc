@@ -23,7 +23,7 @@
   "hooks/request": "@{framework}/hooks/request",
 
   "interface/requestHooks": "@{framework}/interface/requestHooks",
-  "interface/cache": "@{framework}/interface/storage",
+  "interface/storage": "@{framework}/interface/storage",
 
   "interface/controller": "@{framework}/interface/controller",
   "interface/routeRule": "@{framework}/interface/routeRule",

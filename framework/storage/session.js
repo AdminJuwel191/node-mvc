@@ -4,7 +4,7 @@ var di = require('../di'),
     Type = di.load('typejs'),
     error = di.load('error'),
     core = di.load('core'),
-    CacheInterface = di.load('interface/cache'),
+    StorageInterface = di.load('interface/storage'),
     component = di.load('core/component'),
     cache = component.get('storage/memory'),
     SessionStorage;
@@ -47,7 +47,7 @@ SessionStorage = Type.create({
             this.config.storage = di.load(this.config.storage);
         }
 
-        if(!(this.config.storage instanceof CacheInterface)) {
+        if(!(this.config.storage instanceof StorageInterface)) {
             throw new error.HttpError(500, this.config, 'Session storage must be instance of interface/storage');
         }
     },

@@ -24,7 +24,7 @@ describe('storage/session', function () {
         Type = di.load('typejs');
 
     beforeEach(function () {
-        var iface = di.load('interface/cache');
+        var iface = di.load('interface/storage');
         var sIface = iface.inherit({}, {
             set: memory.set,
             get: memory.get,
@@ -42,7 +42,7 @@ describe('storage/session', function () {
             };
         Session = di.mock('storage/session', {
             typejs: Type,
-            "interface/cache": iface,
+            "interface/storage": iface,
             "core/component": componentMock,
             error: di.load('error'),
             core: di.load('core')

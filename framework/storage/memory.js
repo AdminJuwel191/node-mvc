@@ -2,7 +2,7 @@
 /* global loader: true, Type: true, CacheInterface: true, MemoryCache: true */
 var di = require('../di'),
     Type = di.load('typejs'),
-    CacheInterface = di.load('interface/cache'),
+    StorageInterface = di.load('interface/storage'),
     error = di.load('error'),
     core = di.load('core'),
     MemoryCache;
@@ -16,7 +16,7 @@ var di = require('../di'),
  * @description
  * Memory cache
  */
-MemoryCache = CacheInterface.inherit({
+MemoryCache = StorageInterface.inherit({
     cache: Type.OBJECT,
     config: Type.OBJECT
 }, {

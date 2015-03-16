@@ -9,7 +9,7 @@ describe('storage/memory', function () {
     beforeEach(function () {
         MemoryCache = di.mock('storage/memory', {
             typejs: Type,
-            "interface/cache": di.load('interface/cache'),
+            "interface/storage": di.load('interface/storage'),
             error: di.load('error'),
             core: di.load('core')
         });
