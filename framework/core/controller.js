@@ -134,6 +134,17 @@ Controller = ControllerInterface.inherit({
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
+     * @method Controller#getRequestUrl
+     *
+     * @description
+     * Return request url
+     */
+    getRequestUrl: function Controller_getRequestUrl() {
+        return this.__requestApi__.url;
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
      * @method Controller#getParsedUrl
      *
      * @description
