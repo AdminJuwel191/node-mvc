@@ -118,9 +118,6 @@ describe('core/request', function () {
                 },
                 emit: function() {
                     return true;
-                },
-                setEncoding: function() {
-                    return 'utf8';
                 }
             },
             _process: function() {
@@ -131,14 +128,12 @@ describe('core/request', function () {
         spyOn(ctx.request, 'on').and.callThrough();
         spyOn(ctx.request, 'emit').and.callThrough();
         spyOn(ctx, '_process').and.callThrough();
-        spyOn(ctx.request, 'setEncoding').and.callThrough();
 
 
         request.parse.call(ctx).then(function(data) {
             expect(ctx.request.on).toHaveBeenCalled();
             expect(ctx.request.emit).toHaveBeenCalled();
             expect(ctx._process).toHaveBeenCalled();
-            expect(ctx.request.setEncoding).toHaveBeenCalled();
             done();
         });
     });
@@ -176,7 +171,7 @@ describe('core/request', function () {
 
     it('getRequestBody', function () {
         request = new Constructor(config, '/home/index');
-        expect(request.getRequestBody()).toBe('');
+        expect(request.getRequestBody()).toBe(null);
     });
 
     it('onEnd', function () {

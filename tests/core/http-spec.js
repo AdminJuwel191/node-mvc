@@ -26,9 +26,7 @@ describe('core/http', function () {
     });
 
 
-    it('getEncoding', function () {
-        expect(http.getEncoding()).toBe('utf8');
-    });
+
 
     it('on', function () {
         spyOn(server, 'on').and.callThrough();

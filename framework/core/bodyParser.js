@@ -18,7 +18,7 @@ BodyParser = Type.create({
 }, {
     _construct: function BodyParser_construct(type, body) {
         this.type = type;
-        this.body = body;
+        this.body = body.toString('binary');
         this.parsedBody = {};
     },
     /**
@@ -82,15 +82,14 @@ BodyParser = Type.create({
      */
     parseBoundary: function BodyParser_parseBoundary(body, boundary) {
         var data = {}, splits;
+
         splits = body.split("--" + boundary);
 
-        splits.shift();
-        splits.pop();
-
         if (splits.length > 0) {
-            splits = splits.map(function (item) {
-                return item.replace(/^\r\n/, '').replace(/\r\n$/, '').trim();
+            splits = splits.slice(1, splits.length - 1).map(function (item) {
+                return item.slice(2, item.length - 2);
             });
+
             splits.forEach(function (item) {
                 var fileName = this.parseFileName(item),
                     contentDisposition = this.parseContentDisposition(item),
@@ -100,17 +99,23 @@ BodyParser = Type.create({
                     obj = {},
                     temp;
 
+                obj.name = name;
+
                 if (!!fileName) {
                     obj.fileName = fileName;
+                    obj.value = new Buffer(value, 'binary');
+                } else {
+                    obj.value = value;
                 }
+
                 if (!!contentType) {
                     obj.contentType = contentType;
                 }
                 if (!!contentDisposition) {
                     obj.contentDisposition = contentDisposition;
                 }
-                obj.name = name;
-                obj.value = value;
+
+
                 if (data.hasOwnProperty(name)) {
                     temp = data[name];
                     if (Type.isArray(temp)) {
@@ -202,9 +207,7 @@ BodyParser = Type.create({
      * @return {boolean|string}
      */
     parseValue: function BodyParser_parseValue(str) {
-        var value = str.split(/\r\n\r\n/);
-        value.shift();
-        return value.join('\\r\\n\\r\\n');
+        return str.replace(/(.*)(([\S\s]+)(Content-Type:(.*)))?/i, '').slice(4);
     }
 });
 

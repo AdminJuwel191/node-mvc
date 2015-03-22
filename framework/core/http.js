@@ -17,27 +17,10 @@ var di = require('../di'),
  * HttpService object
  */
 HttpService = HttpServiceInterface.inherit({
-    server: Type.OBJECT,
-    config: Type.OBJECT
+    server: Type.OBJECT
 }, {
-    _construct: function HttpService(config) {
-        this.config = {
-            encoding: 'utf8'
-        };
-        core.extend(this.config, config);
+    _construct: function HttpService() {
         this.server = http.createServer();
-    },
-
-    /**
-     * @since 0.0.1
-     * @author Igor Ivanovic
-     * @method HttpService#getEncoding
-     *
-     * @description
-     * Return encoding
-     */
-    getEncoding: function HttpService_getEncoding() {
-        return this.config.encoding;
     },
     /**
      * @since 0.0.1

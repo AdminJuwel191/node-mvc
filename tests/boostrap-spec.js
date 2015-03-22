@@ -170,7 +170,6 @@ describe('bootstrap', function () {
         expect(isDestroyed).toBe(true);
         expect(isparsed).toBe(true);
         expect(isListened).toBe(8080);
-        expect(config.encoding).toBe('utf8');
 
         ev2.callback();
 

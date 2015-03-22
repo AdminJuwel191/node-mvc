@@ -41,12 +41,12 @@ Request = Type.create({
     isPromiseChainStopped: Type.BOOLEAN,
     isForwarded: Type.BOOLEAN,
     encoding: Type.STRING,
-    body: Type.STRING,
+    body: Type.OBJECT,
     id: Type.STRING
 }, {
     _construct: function Request(config, url) {
         this.isForwarded = false;
-        this.body = '';
+        this.body = null;
         this.isERROR = false;
         // body and isForwarded can be overriden
         core.extend(this, config);
@@ -371,10 +371,9 @@ Request = Type.create({
                 this.request.emit.bind(this.request, 'destory')
             );  // emit destroy on error and resolve
         }
-
-        this.request.setEncoding(this.encoding);
+        // receive body as buffer
         this.request.on('data', function (body) {
-            this.body += body;
+             this.body = body;
         }.bind(this));
 
         return new Promise(this.request.on.bind(this.request, 'end'))

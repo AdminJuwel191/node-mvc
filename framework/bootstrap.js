@@ -181,8 +181,7 @@ Bootstrap = Type.create({
             // new request
             var nRequest = new Request({
                 request: request,
-                response: response,
-                encoding: server.getEncoding()
+                response: response
             }, request.url);
             /// parse request
             nRequest.parse();
