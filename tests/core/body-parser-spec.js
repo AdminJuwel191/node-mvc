@@ -53,10 +53,10 @@ describe('core/body-parser', function () {
         expect(data.hasOwnProperty('description')).toBe(true);
 
 
-        expect(data.meta_title).toBe('meta title++short+a++aaa');
+        expect(data.meta_title).toBe('meta title++short a +aaa');
         expect(data.meta_description).toBe('meta description');
-        expect(data.title).toBe('title a++aaaa');
-        expect(data.short_description).toBe('short a+short++++a');
+        expect(data.title).toBe('title a +aaaa');
+        expect(data.short_description).toBe('short a short +++a');
         expect(data.description).toBe('description');
     });
 

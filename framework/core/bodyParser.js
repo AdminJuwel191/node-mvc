@@ -48,8 +48,8 @@ BodyParser = Type.create({
             this.body.split("&").forEach(function (item) {
                 var key, val;
                 item = item.split("=");
-                key = decodeURIComponent(item.shift().replace('+', ' '));
-                val = decodeURIComponent(item.shift().replace('+', ' '));
+                key = decodeURIComponent(item.shift().replace(/\+/g, ' '));
+                val = decodeURIComponent(item.shift().replace(/\+/g, ' '));
                 this.parsedBody[key] = val;
             }.bind(this));
         } else if (this.type.indexOf('text/plain') > -1) {
