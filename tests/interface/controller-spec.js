@@ -1,24 +1,7 @@
 var di = require('../../');
 describe('interface/controller', function () {
-    var Interface, loadedNames = [], Type = di.load('typejs');
-    beforeEach(function () {
-        Interface = di.mock('interface/controller', {
-            typejs: Type,
-            core: di.load('core'),
-            error: di.load('error'),
-            "core/component": {
-                get: function (name) {
-                    loadedNames.push(name);
-                }
-            }
-        });
-        loadedNames = [];
-    });
-
-
-    it('should be inherited', function () {
-        var config = {};
-        var IFace = Interface.inherit({}, {
+    var Interface, loadedNames = [], Type = di.load('typejs'),
+        methods = {
             has: n,
             get: n,
             redirect: n,
@@ -41,8 +24,31 @@ describe('interface/controller', function () {
             getRequestBody: n,
             getActionName: n,
             getControllerName: n,
-            getModuleName: n
+            getModuleName: n,
+            getRequestDomain: n,
+            getRequestRemoteAddress: n,
+            getRequestRemotePort: n,
+            getRequestLocalAddress: n,
+            getRequestLocalPort: n
+        };
+    beforeEach(function () {
+        Interface = di.mock('interface/controller', {
+            typejs: Type,
+            core: di.load('core'),
+            error: di.load('error'),
+            "core/component": {
+                get: function (name) {
+                    loadedNames.push(name);
+                }
+            }
         });
+        loadedNames = [];
+    });
+
+
+    it('should be inherited', function () {
+        var config = {};
+        var IFace = Interface.inherit({}, methods);
         var message = tryCatch(function () {
             return new IFace(config, {});
         });
@@ -53,330 +59,19 @@ describe('interface/controller', function () {
         expect(Type.isObject(message.__config__)).toBe(true);
     });
 
+    var keys = Object.keys(methods),
+        obj,
+        item;
 
-    createMethodTest('has', {});
-    createMethodTest('get', {
-        has: n
-    });
-    createMethodTest('redirect', {
-        has: n,
-        get: n
-    });
-    createMethodTest('forward', {
-        has: n,
-        get: n,
-        redirect: n
-    });
-    createMethodTest('addHeader', {
-        has: n,
-        get: n,
-        redirect: n,
-        forward: n
-    });
+    while (keys.length) {
+        item = keys.pop();
+        obj = {};
+        keys.forEach(function (key) {
+            obj[key] = n;
+        });
+        createMethodTest(item, obj);
+    }
 
-    createMethodTest('onEnd', {
-        has: n,
-        get: n,
-        redirect: n,
-        forward: n,
-        addHeader: n
-    });
-
-    createMethodTest('createUrl', {
-        has: n,
-        get: n,
-        redirect: n,
-        forward: n,
-        addHeader: n,
-        onEnd: n
-    });
-
-
-    createMethodTest('hasHeader', {
-        has: n,
-        get: n,
-        redirect: n,
-        forward: n,
-        addHeader: n,
-        onEnd: n,
-        createUrl: n
-    });
-
-
-    createMethodTest('getRequestHeader', {
-        has: n,
-        get: n,
-        redirect: n,
-        forward: n,
-        addHeader: n,
-        onEnd: n,
-        createUrl: n,
-        hasHeader: n
-    });
-
-    createMethodTest('getHeaders', {
-        has: n,
-        get: n,
-        redirect: n,
-        forward: n,
-        addHeader: n,
-        onEnd: n,
-        createUrl: n,
-        hasHeader: n,
-        getRequestHeader: n
-    });
-
-
-    createMethodTest('getMethod', {
-        has: n,
-        get: n,
-        redirect: n,
-        forward: n,
-        addHeader: n,
-        onEnd: n,
-        createUrl: n,
-        hasHeader: n,
-        getRequestHeader: n,
-        getHeaders: n
-    });
-
-    createMethodTest('getRequestHeaders', {
-        has: n,
-        get: n,
-        redirect: n,
-        forward: n,
-        addHeader: n,
-        onEnd: n,
-        createUrl: n,
-        hasHeader: n,
-        getRequestHeader: n,
-        getHeaders: n,
-        getMethod: n
-    });
-
-    createMethodTest('isHeaderCacheUnModified', {
-        has: n,
-        get: n,
-        redirect: n,
-        forward: n,
-        addHeader: n,
-        onEnd: n,
-        createUrl: n,
-        hasHeader: n,
-        getRequestHeader: n,
-        getHeaders: n,
-        getMethod: n,
-        getRequestHeaders: n
-    });
-
-    createMethodTest('sendNoChange', {
-        has: n,
-        get: n,
-        redirect: n,
-        forward: n,
-        addHeader: n,
-        onEnd: n,
-        createUrl: n,
-        hasHeader: n,
-        getRequestHeader: n,
-        getHeaders: n,
-        getMethod: n,
-        getRequestHeaders: n,
-        isHeaderCacheUnModified: n
-    });
-
-    createMethodTest('getParsedUrl', {
-        has: n,
-        get: n,
-        redirect: n,
-        forward: n,
-        addHeader: n,
-        onEnd: n,
-        createUrl: n,
-        hasHeader: n,
-        getRequestHeader: n,
-        getHeaders: n,
-        getMethod: n,
-        getRequestHeaders: n,
-        isHeaderCacheUnModified: n,
-        sendNoChange: n
-    });
-
-    createMethodTest('stopChain', {
-        has: n,
-        get: n,
-        redirect: n,
-        forward: n,
-        addHeader: n,
-        onEnd: n,
-        createUrl: n,
-        hasHeader: n,
-        getRequestHeader: n,
-        getHeaders: n,
-        getMethod: n,
-        getRequestHeaders: n,
-        isHeaderCacheUnModified: n,
-        sendNoChange: n,
-        getParsedUrl: n
-    });
-
-    createMethodTest('render', {
-        has: n,
-        get: n,
-        redirect: n,
-        forward: n,
-        addHeader: n,
-        onEnd: n,
-        createUrl: n,
-        hasHeader: n,
-        getRequestHeader: n,
-        getHeaders: n,
-        getMethod: n,
-        getRequestHeaders: n,
-        isHeaderCacheUnModified: n,
-        sendNoChange: n,
-        getParsedUrl: n,
-        stopChain: n
-    });
-
-    createMethodTest('renderFile', {
-        has: n,
-        get: n,
-        redirect: n,
-        forward: n,
-        addHeader: n,
-        onEnd: n,
-        createUrl: n,
-        hasHeader: n,
-        getRequestHeader: n,
-        getHeaders: n,
-        getMethod: n,
-        getRequestHeaders: n,
-        isHeaderCacheUnModified: n,
-        sendNoChange: n,
-        getParsedUrl: n,
-        stopChain: n,
-        render: n
-    });
-
-    createMethodTest('setStatusCode', {
-        has: n,
-        get: n,
-        redirect: n,
-        forward: n,
-        addHeader: n,
-        onEnd: n,
-        createUrl: n,
-        hasHeader: n,
-        getRequestHeader: n,
-        getHeaders: n,
-        getMethod: n,
-        getRequestHeaders: n,
-        isHeaderCacheUnModified: n,
-        sendNoChange: n,
-        getParsedUrl: n,
-        stopChain: n,
-        render: n,
-        renderFile: n
-    });
-
-    createMethodTest('getRequestBody', {
-        has: n,
-        get: n,
-        redirect: n,
-        forward: n,
-        addHeader: n,
-        onEnd: n,
-        createUrl: n,
-        hasHeader: n,
-        getRequestHeader: n,
-        getHeaders: n,
-        getMethod: n,
-        getRequestHeaders: n,
-        isHeaderCacheUnModified: n,
-        sendNoChange: n,
-        getParsedUrl: n,
-        stopChain: n,
-        render: n,
-        renderFile: n,
-        setStatusCode: n
-    });
-
-
-    createMethodTest('getActionName', {
-        has: n,
-        get: n,
-        redirect: n,
-        forward: n,
-        addHeader: n,
-        onEnd: n,
-        createUrl: n,
-        hasHeader: n,
-        getRequestHeader: n,
-        getHeaders: n,
-        getMethod: n,
-        getRequestHeaders: n,
-        isHeaderCacheUnModified: n,
-        sendNoChange: n,
-        getParsedUrl: n,
-        stopChain: n,
-        render: n,
-        renderFile: n,
-        setStatusCode: n,
-        getRequestBody: n
-    });
-
-
-
-    createMethodTest('getControllerName', {
-        has: n,
-        get: n,
-        redirect: n,
-        forward: n,
-        addHeader: n,
-        onEnd: n,
-        createUrl: n,
-        hasHeader: n,
-        getRequestHeader: n,
-        getHeaders: n,
-        getMethod: n,
-        getRequestHeaders: n,
-        isHeaderCacheUnModified: n,
-        sendNoChange: n,
-        getParsedUrl: n,
-        stopChain: n,
-        render: n,
-        renderFile: n,
-        setStatusCode: n,
-        getRequestBody: n,
-        getActionName: n
-    });
-
-
-    createMethodTest('getModuleName', {
-        has: n,
-        get: n,
-        redirect: n,
-        forward: n,
-        addHeader: n,
-        onEnd: n,
-        createUrl: n,
-        hasHeader: n,
-        getRequestHeader: n,
-        getHeaders: n,
-        getMethod: n,
-        getRequestHeaders: n,
-        isHeaderCacheUnModified: n,
-        sendNoChange: n,
-        getParsedUrl: n,
-        stopChain: n,
-        render: n,
-        renderFile: n,
-        setStatusCode: n,
-        getRequestBody: n,
-        getActionName: n,
-        getControllerName: n
-    });
 
 
 
@@ -404,6 +99,5 @@ describe('interface/controller', function () {
         }
     }
 
-    function n() {
-    }
+    function n() {}
 });

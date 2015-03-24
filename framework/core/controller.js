@@ -24,6 +24,56 @@ Controller = ControllerInterface.inherit({
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
+     * @method Controller#getRequestDomain
+     * @description
+     * Get request domain
+     */
+    getRequestDomain: function Controller_getRequestDomain() {
+        return this.__requestApi__.getRequestDomain();
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Controller#getRequestRemoteAddress
+     * @description
+     * Get request remote address
+     */
+    getRequestRemoteAddress: function Controller_getRequestRemoteAddress() {
+        return this.__requestApi__.getRequestRemoteAddress();
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Controller#getRequestRemotePort
+     * @description
+     * Get request remote port
+     */
+    getRequestRemotePort: function Controller_getRequestRemotePort() {
+        return this.__requestApi__.getRequestRemotePort();
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Controller#getRequestLocalAddress
+     * @description
+     * Get request local address
+     */
+    getRequestLocalAddress: function Controller_getRequestLocalAddress() {
+        return this.__requestApi__.getRequestLocalAddress();
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Controller#getRequestLocalPort
+     * @description
+     * Get request local port
+     */
+    getRequestLocalPort: function Controller_getRequestLocalPort() {
+       return this.__requestApi__.getRequestLocalPort();
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
      * @method Controller#setStatusCode
      * @param code {number}
      * @description

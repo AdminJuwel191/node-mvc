@@ -177,6 +177,64 @@ Request = Type.create({
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
+     * @method Request#getRequestDomain
+     *
+     * @description
+     * Return request domain
+     */
+    getRequestDomain: function Request_getRequestDomain() {
+        return this.request.connection.domain;
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Request#getRequestIpAddres
+     *
+     * @description
+     * Request remote ip address
+     */
+    getRequestRemoteAddress: function Request_getRequestRemoteAddress() {
+        return this.request.connection.remoteAddress;
+    },
+
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Request#getRequestRemotePort
+     *
+     * @description
+     * Request remote port
+     */
+    getRequestRemotePort: function Request_getRequestRemotePort() {
+        return this.request.connection.remotePort;
+    },
+
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Request#getRequestLocalAddress
+     *
+     * @description
+     * Request locals address
+     */
+    getRequestLocalAddress: function Request_getRequestLocalAddress() {
+        return this.request.connection.localAddress;
+    },
+
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Request#getRequestLocalPort
+     *
+     * @description
+     * Request local port
+     */
+    getRequestLocalPort: function Request_getRequestLocalPort() {
+        return this.request.connection.localPort;
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
      * @method Request#getRequestHeader
      *
      * @description
@@ -575,7 +633,12 @@ Request = Type.create({
             parsedUrl: core.copy(this.parsedUrl),
             url: this.url,
             forwardUrl: this.forward.bind(this),
-            uuid: this._uuid.bind(this)
+            uuid: this._uuid.bind(this),
+            getRequestDomain: this.getRequestDomain.bind(this),
+            getRequestRemoteAddress: this.getRequestRemoteAddress.bind(this),
+            getRequestRemotePort: this.getRequestRemotePort.bind(this),
+            getRequestLocalAddress: this.getRequestLocalAddress.bind(this),
+            getRequestLocalPort: this.getRequestLocalPort.bind(this)
         };
     },
     /**

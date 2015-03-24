@@ -32,7 +32,12 @@ ControllerInterface = Type.create({
             "getRequestBody",
             "getActionName",
             "getControllerName",
-            "getModuleName"
+            "getModuleName",
+            "getRequestDomain",
+            "getRequestRemoteAddress",
+            "getRequestRemotePort",
+            "getRequestLocalAddress",
+            "getRequestLocalPort"
         ].forEach(function (method) {
             if (!(method in this)) {
                 throw new error.DataError({method: method}, 'ControllerInterface: missing method in Controller object');
