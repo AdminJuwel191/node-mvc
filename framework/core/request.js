@@ -42,6 +42,7 @@ Request = Type.create({
     isPromiseChainStopped: Type.BOOLEAN,
     isForwarded: Type.BOOLEAN,
     isCompressed: Type.BOOLEAN,
+    isCompressionEnabled: Type.BOOLEAN,
     encoding: Type.STRING,
     body: Type.OBJECT,
     id: Type.STRING
@@ -50,6 +51,7 @@ Request = Type.create({
         this.isForwarded = false;
         this.body = null;
         this.isERROR = false;
+        this.isCompressionEnabled = false;
         // body and isForwarded can be overriden
         core.extend(this, config);
 
@@ -503,7 +505,7 @@ Request = Type.create({
             isForCompress = (Type.isString(response) || response instanceof Buffer) && !this.isCompressed;
 
 
-        if (isForCompress) {
+        if (isForCompress && !!this.isCompressionEnabled) {
             if (accept.indexOf('gzip') > -1) {
                 this.addHeader('Content-Encoding', 'gzip');
                 this.isCompressed = true;

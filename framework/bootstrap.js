@@ -12,6 +12,7 @@ var di = require('./di'),
 
 Bootstrap = Type.create({
     initalized: Type.BOOLEAN,
+    isCompressionEnabled: Type.BOOLEAN,
     listenPort: Type.NUMBER,
     listenHost: Type.STRING,
     controllersPath: Type.STRING,
@@ -35,6 +36,7 @@ Bootstrap = Type.create({
         this.controllersPath = '@{appPath}/controllers/';
         this.modulesPath = '@{appPath}/modules/';
         this.modelsPath = '@{appPath}/models/';
+        this.isCompressionEnabled = false;
     },
     /**
      * @since 0.0.1
@@ -91,6 +93,9 @@ Bootstrap = Type.create({
         }
         if (Type.isString(env.host)) {
             this.setListenHost(env.host);
+        }
+        if (Type.isBoolean(env.compression) && env.compression === true) {
+            this.enableCompression();
         }
         // set aliases
         if (Type.isArray(env.aliases)) {
@@ -181,7 +186,8 @@ Bootstrap = Type.create({
             // new request
             var nRequest = new Request({
                 request: request,
-                response: response
+                response: response,
+                isCompressionEnabled: this.isCompressionEnabled
             }, request.url);
             /// parse request
             nRequest.parse();
@@ -206,6 +212,17 @@ Bootstrap = Type.create({
         logger.print(env);
         logger.print(this.__dynamic__);
 
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Bootstrap#enableCompression
+     *
+     * @description
+     * Enable compression
+     */
+    enableCompression: function BootStrap_enableCompression() {
+        this.isCompressionEnabled = true;
     },
     /**
      * @since 0.0.1
