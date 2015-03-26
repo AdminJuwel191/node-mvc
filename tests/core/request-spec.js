@@ -49,6 +49,14 @@ describe('core/request', function () {
         },
         Constructor,
         mock,
+        zLib = {
+            gzip: function (response, callback) {
+                return callback(false, response);
+            },
+            deflate: function (response, callback) {
+                return callback(false, response);
+            }
+        },
         core = di.load('core'),
         Type = di.load('typejs');
 
@@ -85,6 +93,7 @@ describe('core/request', function () {
             promise: Promise,
             util: di.load('util'),
             url: di.load('url'),
+            zlib: zLib,
             "interface/controller": di.load('interface/controller'),
             "core/component": componentMock,
             "interface/module": di.load('interface/module')
@@ -700,6 +709,10 @@ describe('core/request', function () {
             _getApi: function () {
                 return 'getApi';
             },
+
+            _compress: function (data) {
+                return data;
+            },
             _handleError: function () {
                 return '_handleError';
             }
@@ -744,6 +757,9 @@ describe('core/request', function () {
             },
             _getApi: function () {
                 return 'getApi';
+            },
+            _compress: function (data) {
+                return data;
             },
             _handleError: function () {
                 return '_handleError';
@@ -805,6 +821,9 @@ describe('core/request', function () {
             },
             _handleError: function () {
                 return '_handleError';
+            },
+            _compress: function (data) {
+                return data;
             },
             isPromiseChainStopped: false
         };

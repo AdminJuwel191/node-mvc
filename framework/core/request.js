@@ -9,6 +9,7 @@ var di = require('../di'),
     logger = component.get('core/logger'),
     URLParser = di.load('url'),
     Type = di.load('typejs'),
+    zlib = di.load('zlib'),
     core = di.load('core'),
     error = di.load('error'),
     util = di.load('util'),
@@ -40,6 +41,7 @@ Request = Type.create({
     isERROR: Type.BOOLEAN,
     isPromiseChainStopped: Type.BOOLEAN,
     isForwarded: Type.BOOLEAN,
+    isCompressed: Type.BOOLEAN,
     encoding: Type.STRING,
     body: Type.OBJECT,
     id: Type.STRING
@@ -57,6 +59,7 @@ Request = Type.create({
         this.parsedUrl = URLParser.parse(this.url, true);
         this.isPromiseChainStopped = false;
         this.isRendered = false;
+        this.isCompressed = false;
         this.id = this._uuid();
     },
     /**
@@ -431,7 +434,7 @@ Request = Type.create({
         }
         // receive body as buffer
         this.request.on('data', function (body) {
-             this.body = body;
+            this.body = body;
         }.bind(this));
 
         return new Promise(this.request.on.bind(this.request, 'end'))
@@ -476,11 +479,57 @@ Request = Type.create({
                     .then(this._resolveRoute.bind(this)); // resolve route chain
 
             }.bind(this)) // handle hook chain
+            .then(this._compress.bind(this))
             .then(this._render.bind(this)) // resolve route chain
             .catch(this._handleError.bind(this)) // catch hook error
+            .then(this._compress.bind(this))
             .then(this._render.bind(this)) // render hook error
             .catch(this._handleError.bind(this)) // catch render error
+            .then(this._compress.bind(this))
             .then(this._render.bind(this)); // resolve render error
+    },
+
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Request#_compress
+     *
+     * @description
+     * Compress output
+     * @return object
+     */
+    _compress: function Request__compress(response) {
+        var accept = this.getRequestHeader('Accept-Encoding'),
+            isForCompress = (Type.isString(response) || response instanceof Buffer) && !this.isCompressed;
+
+
+        if (isForCompress) {
+            if (accept.indexOf('gzip') > -1) {
+                this.addHeader('Content-Encoding', 'gzip');
+                this.isCompressed = true;
+                return new Promise(function (resolve, reject) {
+                    zlib.gzip(response, function (err, data) {
+                        if (err) {
+                            return reject(err);
+                        }
+                        resolve(data);
+                    });
+                });
+            } else if (accept.indexOf('deflate') > -1) {
+                this.addHeader('Content-Encoding', 'deflate');
+                this.isCompressed = true;
+                return new Promise(function (resolve, reject) {
+                    zlib.deflate(response, function (err, data) {
+                        if (err) {
+                            return reject(err);
+                        }
+                        resolve(data);
+                    });
+                });
+            }
+        }
+
+        return response;
     },
     /**
      * @since 0.0.1
@@ -561,6 +610,7 @@ Request = Type.create({
             return this._render(response);
         }
     },
+
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
