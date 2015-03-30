@@ -118,6 +118,7 @@ describe('core/request', function () {
         request = new Constructor(config, '/home/index');
 
         var ctx = {
+            body: [],
             isForwarded: false,
             request: {
                 on: function(name, resolve) {
@@ -180,7 +181,8 @@ describe('core/request', function () {
 
     it('getRequestBody', function () {
         request = new Constructor(config, '/home/index');
-        expect(request.getRequestBody()).toBe(null);
+        request.body = [new Buffer('a'), new Buffer('b')];
+        expect(request.getRequestBody().toString('utf8')).toBe('ab');
     });
 
     it('onEnd', function () {
@@ -831,6 +833,7 @@ describe('core/request', function () {
 
 
         var request = new Constructor(config, '/home/index');
+        request.body = [];
         request._process.call(ctx).then(function (data) {
             expect(data).toBe(false);
             expect(ctx.isPromiseChainStopped).toBe(true);

@@ -44,12 +44,12 @@ Request = Type.create({
     isCompressed: Type.BOOLEAN,
     isCompressionEnabled: Type.BOOLEAN,
     encoding: Type.STRING,
-    body: Type.OBJECT,
+    body: Type.ARRAY,
     id: Type.STRING
 }, {
     _construct: function Request(config, url) {
         this.isForwarded = false;
-        this.body = null;
+        this.body = [];
         this.isERROR = false;
         this.isCompressionEnabled = false;
         // body and isForwarded can be overriden
@@ -166,6 +166,9 @@ Request = Type.create({
      * Return body data
      */
     getRequestBody: function Request_getRequestBody() {
+        if (Type.isArray(this.body) && this.body.length > 0) {
+            return Buffer.concat(this.body);
+        }
         return this.body;
     },
     /**
@@ -435,9 +438,7 @@ Request = Type.create({
             );  // emit destroy on error and resolve
         }
         // receive body as buffer
-        this.request.on('data', function (body) {
-            this.body = body;
-        }.bind(this));
+        this.request.on('data', this.body.push.bind(this.body));
 
         return new Promise(this.request.on.bind(this.request, 'end'))
             .then(this._process.bind(this))
