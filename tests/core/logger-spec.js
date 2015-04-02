@@ -111,7 +111,7 @@ describe('core/logger', function () {
         logger.error('error', {});
         logger.warn('warn', {});
         logger.log('log', {});
-
+        logger.print('log', {});
 
         setTimeout(function () {
             chunks = chunks.filter(function (item) {
@@ -134,11 +134,14 @@ describe('core/logger', function () {
                 'DATA: {}',
                 'TYPE: ALL',
                 'MESSAGE: log at Object.<anonymous> (' + cPath + 'tests/core/logger-spec.js)',
+                'DATA: {}' ,
+                'TYPE: INFO',
+                'MESSAGE: log at Type.Logger_info [as info] (' + cPath + 'framework/core/logger.js)',
                 'DATA: {}' ])).toBe(true);
 
 
             expect(logger.logs.length).toBe(0);
-            expect(chunks.length).toBe(15);
+            expect(chunks.length).toBe(18);
             done();
         }, 500);
     });

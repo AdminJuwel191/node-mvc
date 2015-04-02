@@ -248,6 +248,19 @@ Logger = Type.create({
         error: function Logger_info(message, data) {
             return this.log(message, data, 'ERROR');
         },
+
+        /**
+         * @since 0.0.1
+         * @author Igor Ivanovic
+         * @method Logger#print
+         * @deprecated
+         *
+         * @description
+         * Logger print to support old syntax
+         */
+        print: function Logger_print(message, data) {
+            return this.info(message, data);
+        },
         /**
          * @since 0.0.1
          * @author Igor Ivanovic
