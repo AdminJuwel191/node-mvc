@@ -3,16 +3,22 @@ var di = require("../"),
     core = di.load('core');
 describe('bootstrap', function () {
 
-    var bootstrap, isLoggerGet = false, logger, server, mock, initialized, request, hasComponent = false, isCloased = hasComponent, isComponentInitialized = isCloased;
+    var bootstrap, isLoggerGet = false, logger, server, mock, initialized, request, hasComponent = false, isComponentInitialized = hasComponent;
 
     beforeEach(function () {
         initialized = [];
         logger = {
-            print: function () {
+            info: function () {
 
             },
-            close: function () {
-                isCloased = true;
+            error: function() {
+
+            },
+            log: function() {
+
+            },
+            warn: function() {
+
             }
         };
         server = {
@@ -78,7 +84,7 @@ describe('bootstrap', function () {
     });
 
     it('should init', function () {
-        var basePath = di.normalizePath(__dirname + '/tf/'), logs = [], result, isDestroyed = false, isListened = false, events = [], config = {}, url, isparsed = false;
+        var basePath = di.normalizePath(__dirname + '/tf/'), logs = [], result,  isListened = false, events = [], config = {}, url, isparsed = false;
 
         bootstrap.setBasePath(basePath);
 
@@ -87,17 +93,11 @@ describe('bootstrap', function () {
 
 
         logger = {
-            print: function (log) {
+            info: function (log) {
                 logs.push(log);
-            },
-            close: function () {
-            },
-            destroy: function () {
             }
         };
 
-        spyOn(logger, 'close').and.callThrough();
-        spyOn(logger, 'destroy').and.callThrough();
 
         server = {
             on: function (evn, callback) {
@@ -118,11 +118,11 @@ describe('bootstrap', function () {
             config = a;
             url = b;
             return {
+                destroy: function () {
+
+                },
                 parse: function () {
                     isparsed = true;
-                },
-                destroy: function () {
-                    isDestroyed = true;
                 },
                 onEnd: function(callback) {
                     expect(typeof callback).toBe("function");
@@ -152,10 +152,9 @@ describe('bootstrap', function () {
         );
 
 
-        var ev1 = events.shift(), ev2 = events.shift();
+        var ev1 = events.shift();
 
         expect(ev1.evn).toBe('request');
-        expect(ev2.evn).toBe('close');
 
         var a1 = {
                 url: 1
@@ -166,15 +165,9 @@ describe('bootstrap', function () {
 
         expect(config.request).toBe(a1);
         expect(config.response).toBe(a2);
-        expect(url).toBe(1);
-        expect(isDestroyed).toBe(true);
         expect(isparsed).toBe(true);
         expect(isListened).toBe(8080);
 
-        ev2.callback();
-
-        expect(logger.close).toHaveBeenCalled();
-        expect(logger.destroy).toHaveBeenCalled();
 
 
         result = di.mock(function () {

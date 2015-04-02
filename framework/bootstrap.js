@@ -176,7 +176,7 @@ Bootstrap = Type.create({
         // create server
         Request = di.load('core/request');
         server.on('request', function (request, response) {
-            logger.print('Create new request', request.url);
+            logger.info('Bootstrap.init.request: request', request.url);
 
             // set paths on each request
             di.setAlias('controllersPath', this.controllersPath);
@@ -195,11 +195,6 @@ Bootstrap = Type.create({
             nRequest.onEnd(nRequest.destroy.bind(nRequest));
 
         }.bind(this));
-        // server close event
-        server.on('close', function () {
-            logger.close();
-            logger.destroy();
-        });
 
         // this must be last !
         if (!!this.listenHost) {
@@ -209,8 +204,8 @@ Bootstrap = Type.create({
         }
 
         // logger
-        logger.print(env);
-        logger.print(this.__dynamic__);
+        logger.info('Bootstrap.init.env', env);
+        logger.info('Bootstrap.init.args', this.__dynamic__);
 
     },
     /**

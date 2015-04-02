@@ -8,8 +8,17 @@ describe('core/assets', function () {
         },
         source,
         logger = {
-            print: function () {
-                //console.log(arguments);
+            info: function () {
+
+            },
+            error: function() {
+
+            },
+            log: function() {
+
+            },
+            warn: function() {
+
             }
         },
         hook = function (key, val) {
@@ -87,9 +96,6 @@ describe('core/assets', function () {
                 isSended = true;
             }
         };
-        logger.print = function (a, b, c) {
-            filePath = c;
-        };
         spyOn(api, 'addHeader').and.callThrough();
         spyOn(api, 'getMethod').and.callThrough();
         spyOn(api, 'isHeaderCacheUnModified').and.callThrough();
@@ -104,7 +110,6 @@ describe('core/assets', function () {
         var promise = instance.onRequest(api);
 
         promise.then(function(data) {
-            expect(filePath).toBe(path.normalize(__dirname + '/../tf/di-test-load.js'));
             expect(data.toString()).toBe('module.exports = "CORRECT";');
             expect(api.addHeader).toHaveBeenCalled();
             expect(api.getMethod).toHaveBeenCalled();

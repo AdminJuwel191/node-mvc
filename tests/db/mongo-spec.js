@@ -34,7 +34,7 @@ describe('core/logger', function () {
                 get: function (name) {
                     if (name === 'core/logger') {
                         return {
-                            print: function () {
+                            info: function () {
                                 //console.log(arguments);
                             }
                         };

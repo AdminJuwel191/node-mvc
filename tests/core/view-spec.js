@@ -52,10 +52,16 @@ describe('core/view', function () {
                 get: function (name) {
                     if (name === "core/logger") {
                         return {
-                            print: function () {
+                            info: function () {
 
                             },
-                            log: function () {
+                            error: function() {
+
+                            },
+                            log: function() {
+
+                            },
+                            warn: function() {
 
                             }
                         };

@@ -20,6 +20,26 @@ describe('core/body-parser', function () {
         expect(init.getBody()).toEqual({});
     });
 
+    it('parseContentDisposition|parseName', function () {
+        var init = new Parser('multipart/form-data; boundary=----WebKitFormBoundarybCuYQd38rY4mhYtL', '');
+        var cd = init.parseContentDisposition('Content-Disposition: form-data;');
+        expect(cd).toBe('form-data');
+        expect(init.parseName('')).toBe(false);
+        expect(init.parseContentDisposition('')).toBe(false);
+
+    });
+
+
+    it('parseBoundary', function () {
+        var body = di.readFileSync(__dirname + '/../tf/body4.txt');
+        var init = new Parser('', '');
+        var cd = init.parseBoundary(body, '----WebKitFormBoundarybCuYQd38rY4mhYtL');
+        expect(cd.files.contentDisposition).toBe('form-data');
+
+        cd = init.parseBoundary('', '');
+        expect(cd).toEqual({});
+    });
+
 
     it('parse', function () {
         var body = di.readFileSync(__dirname + '/../tf/body.txt');
@@ -36,6 +56,9 @@ describe('core/body-parser', function () {
         expect(data.hasOwnProperty('files')).toBe(true);
         expect(Type.isArray(data.files)).toBe(true);
 
+        init = new Parser('multipart/form-data; boundary=----WebKitFormBoundarybCuYQd38rY4mhYtL', '');
+        init.parse();
+        expect(init.getBody()).toEqual({});
     });
 
 
@@ -58,6 +81,8 @@ describe('core/body-parser', function () {
         expect(data.title).toBe('title a +aaaa');
         expect(data.short_description).toBe('short a short +++a');
         expect(data.description).toBe('description');
+
+
     });
 
 

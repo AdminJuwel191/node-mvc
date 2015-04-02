@@ -339,7 +339,9 @@ Request = Type.create({
                 body: this.body
             }, url);
 
-            logger.print('Request.forward.url', url);
+            logger.info('Request.forward.url:', {
+                url: url
+            });
 
             return request.parse();
         }
@@ -372,7 +374,10 @@ Request = Type.create({
                 body: this.body
             }, router.createUrl(route, params));
 
-            logger.print('Request.forward.route', route, params);
+            logger.info('Request.forward.route:', {
+                route: route,
+                params: params
+            });
 
             return request.parse();
         }
@@ -386,7 +391,10 @@ Request = Type.create({
      * Redirect request
      */
     redirect: function Request_redirect(url, isTemp) {
-        logger.print('Request.redirect', url, isTemp);
+        logger.info('Request.redirect:', {
+            url: url,
+            isTemp: isTemp
+        });
         this.addHeader('Location', url);
         this.stopPromiseChain();
         this.isRendered = true;
@@ -565,13 +573,14 @@ Request = Type.create({
             return false;
         }
         // log error request
-        logger.print('Request.error', {
+        logger.error('Request:', {
             url: this.url,
             status: this.statusCode,
             id: this.id,
             isRendered: this.isRendered,
-            content_type: this.getHeader('content-type')
-        }, response);
+            content_type: this.getHeader('content-type'),
+            response: response
+        });
         // set status codes
         if (response.code) {
             this.setStatusCode(response.code);
@@ -645,7 +654,7 @@ Request = Type.create({
             throw new error.HttpError(500, {}, 'Invalid response type, string or buffer is required!');
         }
 
-        logger.print('Request.render', {
+        logger.info('Request.render:', {
             url: this.url,
             status: this.statusCode,
             id: this.id,
@@ -775,7 +784,7 @@ Request = Type.create({
             throw new error.HttpError(500, controller, 'Controller must be instance of ControllerInterface "core/controller"');
         }
 
-        logger.print('LoadRequest', {
+        logger.info('Controller:', {
             controller: controller.__dynamic__,
             controllerToLoad: controllerToLoad,
             route: {

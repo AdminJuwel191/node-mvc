@@ -60,6 +60,47 @@ describe('core/controller', function () {
         expect(request.stopPromiseChain).toHaveBeenCalled();
     });
 
+    it('getRequestDomain', function () {
+        request.getRequestDomain = function() {return true;};
+        spyOn(request, 'getRequestDomain').and.callThrough();
+        expect(controller.getRequestDomain()).toBe(true);
+        expect(request.getRequestDomain).toHaveBeenCalled();
+    });
+
+    it('getRequestRemoteAddress', function () {
+        request.getRequestRemoteAddress = function() {return true;};
+        spyOn(request, 'getRequestRemoteAddress').and.callThrough();
+        expect(controller.getRequestRemoteAddress()).toBe(true);
+        expect(request.getRequestRemoteAddress).toHaveBeenCalled();
+    });
+
+    it('getRequestRemotePort', function () {
+        request.getRequestRemotePort = function() {return true;};
+        spyOn(request, 'getRequestRemotePort').and.callThrough();
+        expect(controller.getRequestRemotePort()).toBe(true);
+        expect(request.getRequestRemotePort).toHaveBeenCalled();
+    });
+
+    it('getRequestLocalAddress', function () {
+        request.getRequestLocalAddress = function() {return true;};
+        spyOn(request, 'getRequestLocalAddress').and.callThrough();
+        expect(controller.getRequestLocalAddress()).toBe(true);
+        expect(request.getRequestLocalAddress).toHaveBeenCalled();
+    });
+
+    it('getRequestLocalPort', function () {
+        request.getRequestLocalPort = function() {return true;};
+        spyOn(request, 'getRequestLocalPort').and.callThrough();
+        expect(controller.getRequestLocalPort()).toBe(true);
+        expect(request.getRequestLocalPort).toHaveBeenCalled();
+    });
+
+
+    it('getRequestUrl', function () {
+        request.url = 'ABC';
+        expect(controller.getRequestUrl()).toBe('ABC');
+    });
+
     it('getParsedBody', function () {
         BodyParser.prototype.parse = function () {}
         BodyParser.prototype.getBody = function () {}

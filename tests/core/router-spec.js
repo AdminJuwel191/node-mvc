@@ -5,10 +5,16 @@ describe('core/router', function () {
             errorRoute: "core/error"
         },
         logger = {
-            print: function () {
+            info: function () {
 
             },
-            log: function () {
+            error: function() {
+
+            },
+            log: function() {
+
+            },
+            warn: function() {
 
             }
         },

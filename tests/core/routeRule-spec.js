@@ -3,10 +3,16 @@ var di = require('../../'), fs = di.load('fs'), path = di.load('path');
 describe('core/routeRule', function () {
     var routeRule,
         logger = {
-            print: function () {
+            info: function () {
 
             },
-            log: function () {
+            error: function() {
+
+            },
+            log: function() {
+
+            },
+            warn: function() {
 
             }
         },

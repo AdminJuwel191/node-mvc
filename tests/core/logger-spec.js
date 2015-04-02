@@ -1,5 +1,6 @@
 var di = require('../../'), fs = require('fs'), path = require('path');
 describe('core/logger', function () {
+
     var
         nPath,
         config = {
@@ -11,19 +12,76 @@ describe('core/logger', function () {
             file: "server.log",
             level: 3
         },
-        Logger = di.load('core/logger');
+        streamMock = {
+            write: function () {
+            }
+        },
+        core = di.load('core'),
+        fsmock = {
+            open: function (name, r, mode, callback) {
+                callback(200, 'file')
+            },
+            fstat: function (fd, callback) {
+                callback(false, {size: 500})
+            },
+            read: function (a, b, c, d, e, callback) {
+                callback();
+            },
+            createWriteStream: function () {
+                return streamMock;
+            }
+        },
+        request = {},
+        response = {
+            writeHead: function () {
+            },
+            end: function () {
+            }
+        },
+        regests = [],
+        Logger = di.mock('core/logger', {
+            typejs: di.load('typejs'),
+            util: di.load('util'),
+            fs: fsmock,
+            core: di.load('core'),
+            error: di.load('error'),
+            'core/http': HttpServer
+        });
 
+    function HttpServer() {
+    }
+
+    HttpServer.prototype.on = function (name, callback) {
+        regests.push({
+            name: name,
+            callback: callback
+        });
+    };
+    HttpServer.prototype.listen = function () {
+    };
+    HttpServer.prototype.emit = function (name, a, b, c, d) {
+        regests.forEach(function (item) {
+            if (item.name == name) {
+                item.callback.call(item.callback, request, response);
+            }
+        })
+    };
     beforeEach(function () {
         nPath = path.normalize(__dirname + '/../tf/');
         di.setAlias('basePath', nPath);
     });
 
-    it('instance|close|print', function (done) {
-        var logger = new Logger(config);
-        var filePath = nPath + config.file;
-        expect(di.exists(filePath)).toBe(true);
+    it('instance|close|info|error|log|warn', function (done) {
 
-        var isServerEnded = false, isStreamEnded = false;
+        var cPath = path.normalize(__dirname + '/../../');
+
+
+        var chunks = [];
+        streamMock.write = function (chunk) {
+            chunks.push(chunk);
+        };
+
+        var logger = new Logger(config);
 
         var response = {
             writeHead: function () {
@@ -39,16 +97,6 @@ describe('core/logger', function () {
         logger.server.emit('request', {}, response);
 
 
-        logger.server.on('close', function () {
-            isServerEnded = true;
-        });
-        logger.stream.on('close', function () {
-            isStreamEnded = true;
-        });
-
-        logger.close();
-
-
         expect(logger.config.enabled).toBe(true);
         expect(logger.config.write).toBe(true);
         expect(logger.config.publish).toBe(true);
@@ -57,41 +105,71 @@ describe('core/logger', function () {
         expect(logger.config.file).toBe('server.log');
         expect(logger.config.level).toBe(3);
 
+
         logger.addHook(response.hook);
-        logger.print('printing');
+        logger.info('info', {});
+        logger.error('error', {});
+        logger.warn('warn', {});
+        logger.log('log', {});
 
 
         setTimeout(function () {
-            var html = "Publishing log write stream on port: 10000";
-            var message = fs.readFileSync(filePath, {encoding: 'utf-8'});
-            expect(message.indexOf(html) > -1).toBe(true);
+            chunks = chunks.filter(function (item) {
+                return item !== '\n' && item.indexOf('CREATED:') === -1;
+            });
+            chunks = chunks.map(function (item) {
+                return item.replace('\t', '').replace(/(.*\.js).*/, '$1)');
+            });
+            expect(core.compare(chunks,[ 'TYPE: INFO',
+                'MESSAGE: Publishing log write stream on port:  at Type.Logger_info [as info] (' + cPath + 'framework/core/logger.js)',
+                'DATA: 10000',
+                'TYPE: INFO',
+                'MESSAGE: info at Type.Logger_info [as info] (' + cPath + 'framework/core/logger.js)',
+                'DATA: {}',
+                'TYPE: ERROR',
+                'MESSAGE: error at Type.Logger_info [as error] (' + cPath + 'framework/core/logger.js)',
+                'DATA: {}',
+                'TYPE: WARNING',
+                'MESSAGE: warn at Type.Logger_warn [as warn] (' + cPath + 'framework/core/logger.js)',
+                'DATA: {}',
+                'TYPE: ALL',
+                'MESSAGE: log at Object.<anonymous> (' + cPath + 'tests/core/logger-spec.js)',
+                'DATA: {}' ])).toBe(true);
 
-            setTimeout(function () {
-                fs.unlinkSync(filePath);
-                setTimeout(function () {
-                    expect(isStreamEnded).toBe(true);
-                    expect(isServerEnded).toBe(true);
-                    expect(di.exists(filePath)).toBe(false);
-                    expect(response.hook).toHaveBeenCalled();
-                    done();
-                }, 200);
-            }, 100);
-        }, 100);
+
+            expect(logger.logs.length).toBe(0);
+            expect(chunks.length).toBe(15);
+            done();
+        }, 500);
     });
 
 
-    it('instance|print not enabled|log|addHook', function () {
+    it('instance|print not enabled|write', function () {
 
         var logger = new Logger({enabled: false});
-        var print = logger.print('printing');
-        expect(logger.config.enabled).toBe(false);
-        expect(print.shift()).toBe('printing');
+        logger.log('printing');
 
-        print = logger.log('printing2');
         expect(logger.config.enabled).toBe(false);
-        expect(print.shift()).toBe('printing2');
 
-        var message = tryCatch(function() {
+        var ctx = {
+            config: {
+
+            },
+            logs: [{ type: 'ERROR',
+                message: 'error',
+                trace: 'at Type.Logger_info [as error] (/Volumes/External/Github/node-mvc/framework/core/logger.js:9:7983)',
+                data: '{}',
+                created: '2015-04-02T21:49:00.131Z' }
+            ],
+            stream: false
+        };
+
+        logger.write.call(ctx);
+
+        logger.config.console = false;
+        logger.write.call(ctx);
+
+        var message = tryCatch(function () {
             logger.addHook(1);
         });
 
@@ -100,29 +178,10 @@ describe('core/logger', function () {
         logger.addHook(n);
 
         expect(logger.hooks.length).toBe(1);
-        function n(){};
+        function n() {
+        };
     });
 
-
-    it('construct', function (done) {
-        var logger = new Logger(config);
-        var _e;
-        nPath = path.normalize(__dirname + '/../tf/ab/cd/');
-        di.setAlias('basePath', nPath);
-        config.port = 11111;
-        tryCatch(function () {
-            logger._construct(config);
-        });
-
-        process.once('uncaughtException', function (e) {
-            _e = e;
-        });
-
-        setTimeout(function () {
-            expect(_e.path).toBe(nPath + 'server.log');
-            done();
-        }, 100);
-    });
 
 
     function tryCatch(callback) {

@@ -38,7 +38,11 @@ RequestHooks = RequestHooksInterface.inherit({}, {
             key: key,
             func: value
         });
-        logger.print('RequestHooks.add', key, value.toString());
+
+        logger.info('RequestHooks.set:', {
+            key: key,
+            func: value.toString()
+        });
     },
     /**
      * @since 0.0.1
@@ -84,19 +88,22 @@ RequestHooks = RequestHooksInterface.inherit({}, {
      */
     process: function RequestHooks_process(api) {
         var that = this, route = api.parsedUrl.pathname;
-        logger.print('RequestHooks.process', route);
+        logger.info('RequestHooks.process:', route);
         return new Promise(function (resolve, reject) {
             var hook;
             try {
                 hook = that.get(route);
-                logger.print('RequestHooks.hook', hook);
+                logger.info('RequestHooks.hook:', hook);
                 if (!!hook) {
                     resolve(hook.func(api));
                 } else {
                     resolve(false);
                 }
             } catch (e) {
-                logger.print('RequestHooks.hook error', e);
+                logger.error('RequestHooks.hook:', {
+                    hook: hook,
+                    e: e
+                });
                 reject(new error.HttpError(500, {hook: route}, 'Hook error', e));
             }
         });

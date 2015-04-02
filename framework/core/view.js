@@ -101,7 +101,7 @@ View = ViewInterface.inherit(
                 this.paths.forEach(this.preloadTemplates.bind(this));
             }
 
-            logger.print("View.construct", this.config);
+            logger.info('View.construct:', this.config);
         },
         /**
          * @since 0.0.1
@@ -158,7 +158,10 @@ View = ViewInterface.inherit(
          * Set preloaded template
          */
         setPreloaded: function View_setPreloaded(key, value) {
-            logger.log('View.setPreloaded: ', key + '\n' + value);
+            logger.info('View.setPreloaded:', {
+                key: key,
+                value: value
+            });
             this.preloaded[key] = value;
         },
         /**
@@ -190,7 +193,7 @@ View = ViewInterface.inherit(
                 path = di.normalizePath(path);
                 return fs.statSync(path).isFile();
             } catch (e) {
-                logger.print('View.isFile path is not valid file', {path: path});
+                logger.error('View.isFile:', {path: path, e: e});
             }
             return false;
         },
@@ -208,7 +211,7 @@ View = ViewInterface.inherit(
                 path = di.normalizePath(path);
                 return fs.statSync(path).isDirectory();
             } catch (e) {
-                logger.print('View.isDir path is not valid path', {path: path});
+                logger.error('View.isDir:', {path: path, e: e});
             }
             return false;
         },
@@ -340,13 +343,13 @@ View = ViewInterface.inherit(
             try {
                 template = di.readFileSync(path);
             } catch (e) {
-                logger.print('ViewLoader.load.error', {
+                logger.error('ViewLoader.load:', {
                     path: path,
                     cb: cb,
                     e: e
                 });
             } finally {
-                logger.print('ViewLoader.load', {
+                logger.info('ViewLoader.load:', {
                     path: path,
                     template: template,
                     cb: cb

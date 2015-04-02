@@ -53,8 +53,6 @@ RouteRule = RouteRuleInterface.inherit({
         pattern = this.trim(config.pattern, '/');
         this.route = this.trim(config.route, '/');
 
-        logger.print('route', this.route);
-
         if (this.route.indexOf('<') > -1) {
             matches = core.match(ROUTE_MATCH, this.route);
             if (Type.isArray(matches)) {
@@ -120,7 +118,7 @@ RouteRule = RouteRuleInterface.inherit({
             }
         }
 
-        logger.print('RouteRule', {
+        logger.info('RouteRule.construct:', {
             escapePattern: escapePattern,
             escapeRule: escapeRule,
             escapedTemplate: template,

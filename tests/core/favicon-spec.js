@@ -21,8 +21,17 @@ describe('core/favicon', function () {
                 get: function (name) {
                     if (name === 'core/logger') {
                         return {
-                            print: function () {
-                                //console.log(arguments);
+                            info: function () {
+
+                            },
+                            error: function() {
+
+                            },
+                            log: function() {
+
+                            },
+                            warn: function() {
+
                             }
                         };
 

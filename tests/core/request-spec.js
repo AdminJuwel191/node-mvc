@@ -5,9 +5,17 @@ describe('core/request', function () {
         config = {},
         Promise = di.load('promise'),
         logger = {
-            print: function () {
+            info: function () {
+
             },
-            log: function () {
+            error: function() {
+
+            },
+            log: function() {
+
+            },
+            warn: function() {
+
             }
         },
         router = {
@@ -63,6 +71,7 @@ describe('core/request', function () {
     beforeEach(function () {
         config = {
             request: {
+                connection: {},
                 method: 'GET',
                 on: function () {
 
@@ -183,6 +192,9 @@ describe('core/request', function () {
         request = new Constructor(config, '/home/index');
         request.body = [new Buffer('a'), new Buffer('b')];
         expect(request.getRequestBody().toString('utf8')).toBe('ab');
+
+        request.body = [];
+        expect(request.getRequestBody()).toEqual([]);
     });
 
     it('onEnd', function () {
@@ -221,10 +233,11 @@ describe('core/request', function () {
         request.addHeader('Content-Length', 180);
         request.addHeader('Set-cookie', "one=1");
         request.addHeader('Set-cookie', "three=3");
+        request.addHeader('Set-cookie', "three=5");
         var headers = request.getHeaders();
         expect(headers['content-type']).toBe('text/html');
         expect(headers['content-length']).toBe('180');
-        expect(headers['set-cookie']).toEqual([ 'one=1', 'three=3' ]);
+        expect(headers['set-cookie']).toEqual([ 'one=1', 'three=3', 'three=5' ]);
         var message = tryCatch(function () {
             request.addHeader(1, '180');
         });
@@ -587,6 +600,34 @@ describe('core/request', function () {
     it('_chain error', function (done) {
         var ctx = {
             _handleError: function (error) {
+                expect(error.customMessage).toBe('CUSTOM');
+            }
+        };
+        request = new Constructor(config, '/home/index');
+
+        spyOn(ctx, '_handleError').and.callThrough();
+
+        var promise = request._chain.call(ctx, null, function () {
+            return 1;
+        });
+
+        promise = request._chain.call(ctx, promise, function (n) {
+            return n + 1;
+        });
+        promise = request._chain.call(ctx, promise, function (n) {
+            return new error.HttpError(500, {}, "CUSTOM");
+        });
+
+
+        promise.then(null, function () {
+            done();
+        });
+    });
+
+
+    it('_chain error 1', function (done) {
+        var ctx = {
+            _handleError: function (error) {
                 expect(error.customMessage).toBe('Error on executing action');
             }
         };
@@ -602,7 +643,7 @@ describe('core/request', function () {
             return n + 1;
         });
         promise = request._chain.call(ctx, promise, function (n) {
-            return n.aa.a + 1;
+            return a.b.c.a.d;
         });
 
 
@@ -623,6 +664,26 @@ describe('core/request', function () {
 
         var promise = request._chain.call(ctx, null, function () {
             return {}.b.c;
+        });
+
+        promise.then(null, function () {
+
+            done();
+        });
+    });
+
+    it('_chain error2 2', function (done) {
+        var ctx = {
+            _handleError: function (error) {
+                expect(error.customMessage).toBe('CUSTOM');
+            }
+        };
+        request = new Constructor(config, '/home/index');
+
+        spyOn(ctx, '_handleError').and.callThrough();
+
+        var promise = request._chain.call(ctx, null, function () {
+            return new error.HttpError(500, {}, "CUSTOM");
         });
 
         promise.then(null, function () {
@@ -904,7 +965,8 @@ describe('core/request', function () {
         request._handleError.call(ctx, response);
         expect(ctx._render).toHaveBeenCalled();
 
-
+        ctx.isRendered = true;
+        expect(request._handleError.call(ctx, response)).toBe(false);
     });
 
 
@@ -1273,6 +1335,11 @@ describe('core/request', function () {
         expect(route.url).toBe('/test/index?id=1');
         expect(request.isPromiseChainStopped).toBe(true);
 
+        request.url = '/test/index?id=1';
+        var message = tryCatch(function () {
+            request.forwardUrl('/test/index?id=1');
+        });
+        expect(message.customMessage).toBe('Cannot forward to same url');
     });
 
     it('forward error', function () {
@@ -1287,6 +1354,47 @@ describe('core/request', function () {
             request.forward('index/index', {id: 1});
         });
         expect(message.customMessage).toBe('Cannot forward to same route');
+    });
+
+
+    it('getRequestDomain', function () {
+        var cpath = path.normalize(__dirname + "/../tf/controllers");
+        di.setAlias('controllersPath', cpath);
+        var request = new Constructor(config, '/index/index');
+        request.request.connection.domain = 'www.igorivanovic.info';
+        expect(request.getRequestDomain()).toBe('www.igorivanovic.info');
+    });
+
+    it('getRequestRemoteAddress', function () {
+        var cpath = path.normalize(__dirname + "/../tf/controllers");
+        di.setAlias('controllersPath', cpath);
+        var request = new Constructor(config, '/index/index');
+        request.request.connection.remoteAddress = 'www.igorivanovic.info';
+        expect(request.getRequestRemoteAddress()).toBe('www.igorivanovic.info');
+    });
+
+    it('getRequestRemotePort', function () {
+        var cpath = path.normalize(__dirname + "/../tf/controllers");
+        di.setAlias('controllersPath', cpath);
+        var request = new Constructor(config, '/index/index');
+        request.request.connection.remotePort = 'www.igorivanovic.info';
+        expect(request.getRequestRemotePort()).toBe('www.igorivanovic.info');
+    });
+
+    it('getRequestLocalAddress', function () {
+        var cpath = path.normalize(__dirname + "/../tf/controllers");
+        di.setAlias('controllersPath', cpath);
+        var request = new Constructor(config, '/index/index');
+        request.request.connection.localAddress = 'www.igorivanovic.info';
+        expect(request.getRequestLocalAddress()).toBe('www.igorivanovic.info');
+    });
+
+    it('getRequestLocalPort', function () {
+        var cpath = path.normalize(__dirname + "/../tf/controllers");
+        di.setAlias('controllersPath', cpath);
+        var request = new Constructor(config, '/index/index');
+        request.request.connection.localPort = 'www.igorivanovic.info';
+        expect(request.getRequestLocalPort()).toBe('www.igorivanovic.info');
     });
 
     function tryCatch(callback) {

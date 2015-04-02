@@ -87,7 +87,7 @@ BodyParser = Type.create({
 
         if (splits.length > 0) {
             splits = splits.slice(1, splits.length - 1).map(function (item) {
-                return item.slice(2, item.length - 2);
+                return item.slice(1, item.length - 2);
             });
 
             splits.forEach(function (item) {

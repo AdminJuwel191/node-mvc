@@ -30,7 +30,7 @@ Favicon = Type.create({
             hook: '\\/favicon\\.ico$'
         }, config);
         this.readFile();
-        logger.print('Favicon.construct', config);
+        logger.info('Favicon.construct:', config);
         hook.set(new RegExp(this.config.hook), this.onRequest.bind(this));
     },
     /**
@@ -67,7 +67,9 @@ Favicon = Type.create({
      */
     readFile: function Favicon_readFile() {
         var path = di.normalizePath(this.config.path);
-        logger.print('Favicon.readFile', path);
+        logger.info('Favicon.readFile:', {
+            path: path
+        });
         try {
             this.file = fs.readFileSync(path, {encoding: null});
         } catch (e) {

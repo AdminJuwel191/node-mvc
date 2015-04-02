@@ -35,7 +35,7 @@ Assets = Type.create({
             hook: '^\\/assets'
         }, config);
 
-        logger.print('Assets.construct', config);
+        logger.info('Assets.construct:', config);
         this.regex = new RegExp(this.config.hook);
         hook.set(this.regex, this.onRequest.bind(this));
     },
@@ -64,7 +64,10 @@ Assets = Type.create({
         mimeType = this.mimeType(filePath);
 
         if (!mimeType) {
-            logger.print('MimeType', mimeType, filePath);
+            logger.info('Assets.onRequest.mimeType: missing', {
+                mimeType: mimeType,
+                filePath: filePath
+            });
             return this.handleError(function() {
                 new error.HttpError(500, {path: filePath}, 'Invalid mime type');
             });
@@ -97,7 +100,10 @@ Assets = Type.create({
                     return resolve(api.sendNoChange());
                 }
 
-                logger.print('MimeType', mimeType, filePath);
+                logger.info('Assets.onRequest.mimeType:', {
+                    mimeType: mimeType,
+                    filePath: filePath
+                });
                 resolve(file);
             });
         }.bind(this));

@@ -79,7 +79,8 @@ Router = Type.create({
             throw new error.HttpError(500, {rule: rule, route: route}, 'Router.add: rule must be instance of RouteRuleInterface');
         }
 
-        logger.print('Router.add: route', route);
+        logger.info('Router.add:', route);
+
         this.routes.push(rule);
     },
     /**

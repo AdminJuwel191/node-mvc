@@ -6,8 +6,17 @@ describe('hooks/request', function () {
         Type = di.load('typejs'),
         _data,
         logger = {
-            print: function () {
-                //console.log('logger', arguments);
+            info: function () {
+
+            },
+            error: function() {
+
+            },
+            log: function() {
+
+            },
+            warn: function() {
+
             }
         };
 

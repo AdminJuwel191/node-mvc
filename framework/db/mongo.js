@@ -48,7 +48,7 @@ Mongo = Type.create({
             options: {}
         }, config);
         this.db = mongoose.connect(this.config.connection, this.config.options);
-        logger.print('Initialize mongoose', this.db, this.config);
+        logger.info('Mongo.construct:', this.config);
     },
 
     /**
@@ -70,8 +70,10 @@ Mongo = Type.create({
         } else if (!Type.assert(Type.OBJECT, definition)) {
             throw new error.HttpError(500, {definition: definition}, 'Schema definition must be object');
         }
-
-        logger.print('Mongo.schema:', definition, options);
+        logger.info('Mongo.schema:', {
+            definition: definition,
+            options: options
+        });
         return new mongoose.Schema(definition, options);
     },
     /**
@@ -87,7 +89,9 @@ Mongo = Type.create({
         if (!(schema instanceof mongoose.Schema)) {
             schema = this.schema(schema);
         }
-        logger.print('Mongo.model: ', name);
+        logger.info('Mongo.schema:', {
+            name: name
+        });
         return mongoose.model(name, schema);
     }
 });

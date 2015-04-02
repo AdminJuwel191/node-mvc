@@ -4,9 +4,9 @@ var di = require('../di'),
     Type = di.load('typejs'),
     util = di.load('util'),
     fs = di.load('fs'),
-    http = di.load('http'),
     core = di.load('core'),
     error = di.load('error'),
+    HttpServer = di.load('core/http'),
     replace = [],
     Logger;
 // remove colors from inspect
@@ -22,73 +22,92 @@ for (var i = 0; i < 100; ++i) {
  * @constructor
  * @description
  * Logger is used to log stuff in application
+ *
+
+ ALL indicates that all messages should be logged.
+ INFO is a message level for informational messages.
+ ERROR is a message level indicating a serious failure.
+ WARNING is a message level indicating a potential problem.
+
  */
 Logger = Type.create({
         stream: Type.OBJECT,
         server: Type.OBJECT,
         config: Type.OBJECT,
         length: Type.NUMBER,
-        hooks: Type.ARRAY
+        file: Type.STRING,
+        hooks: Type.ARRAY,
+        logs: Type.ARRAY
     },
     {
         _construct: function Logger(config) {
-            var file;
-            this.length = 0;
             this.stream = this.server = null;
             this.hooks = [];
+            this.logs = [];
             this.config = core.extend({
                 enabled: false,
                 write: false,
                 publish: false,
                 console: false,
-                readLength: 20000,
+                readLength: 50000,
                 port: 9001,
+                type: 'ALL',
+                types: ['ALL', 'ERROR', 'INFO', 'WARNING'],
                 file: "server.log",
                 level: 5
             }, config);
-
+            this.file = di.normalizePath('@{basePath}/' + this.config.file);
             if (this.config.write && this.config.enabled) {
-                file = di.normalizePath('@{basePath}/' + this.config.file);
-                this.stream = fs.createWriteStream(file, {encoding: 'utf8'});
+                this.createStream();
                 if (this.config.publish) {
-
-                    this.server = http.createServer();
-                    this.server.on('request', function (request, response) {
-                        var len = this.length,
-                            start = len - this.config.readLength,
-                            blen = 0,
-                            buffer,
-                            blenMessage;
-
-                        if (start < 0) {
-                            start = 0;
-                            blen = 1000;
-                        } else {
-                            blen = len - start;
-                        }
-
-                        blenMessage = 'LAST '+ blen + ' BYTES:\n\n';
-                        buffer =  new Buffer(blen + blenMessage.length, 'utf8');
-
-                        fs.open(file, 'r', 755, function(status, fd) {
-                            fs.read(fd, buffer,  0, blen, start, function(err) {
-                                if (err) {
-                                    var errorMessage = 'Error reading logger buffer';
-                                    response.writeHead(200, {'Content-type': 'text/plain', 'Content-Length': errorMessage.length});
-                                    response.end(errorMessage);
-                                } else {
-                                    response.writeHead(200, {'Content-type': 'text/plain', 'Content-Length': buffer.length});
-                                    response.write(blenMessage);
-                                    response.end(buffer);
-                                }
-                            });
-                        });
-
-                    }.bind(this));
-                    this.server.listen(this.config.port);
-                    this.print('Publishing log write stream on port: ' + this.config.port);
+                    this.createReadLogServer();
                 }
             }
+        },
+        /**
+         * @since 0.0.1
+         * @author Igor Ivanovic
+         * @method Logger#createStreams
+         *
+         * @description
+         * Create read log server
+         */
+        createReadLogServer: function Logger_createReadLogServer() {
+            var that = this;
+            this.server = new HttpServer();
+            this.server.on('request', function (request, response) {
+                var startMessage = 'LAST '+ that.config.readLength + ' BYTES:\n\n';
+
+                fs.open(that.file, 'r', 755, function(status, fd) {
+                    fs.fstat(fd, function (err, stats) {
+                        var size = stats.size,
+                            start = size > that.config.readLength ? size - that.config.readLength : 0,
+                            end = size > that.config.readLength ? that.config.readLength : size,
+                            buffer =  new Buffer(end + startMessage.length);
+                        buffer.fill(startMessage);
+                        fs.read(fd, buffer, startMessage.length, end, start, function() {
+                            response.writeHead(200, {'Content-type': 'text/plain', 'Content-Length': buffer.length});
+                            response.end(buffer);
+                        });
+                    });
+                });
+
+            });
+
+            this.server.listen(this.config.port);
+
+            this.info('Publishing log write stream on port: ', this.config.port);
+        },
+        /**
+         * @since 0.0.1
+         * @author Igor Ivanovic
+         * @method Logger#createStreams
+         *
+         * @description
+         * Create streams
+         */
+        createStream: function Logger_createStream() {
+            this.stream = fs.createWriteStream(this.file);
         },
         /**
          * @since 0.0.1
@@ -99,7 +118,7 @@ Logger = Type.create({
          * Hooks are used to do an extra stuff on log.
          * Eg. if we want to store in db
          */
-        addHook: function (callback) {
+        addHook: function Logger_addHook(callback) {
             if (!Type.isFunction(callback)) {
                 throw new error.Exception('Logger hook must be function');
             }
@@ -108,18 +127,126 @@ Logger = Type.create({
         /**
          * @since 0.0.1
          * @author Igor Ivanovic
-         * @method Logger#close
+         * @method Logger#trace
          *
          * @description
-         * Logger close
+         * Trace log call
          */
-        close: function Logger_close() {
-            if (this.stream) {
-                this.stream.close();
+        trace: function Logger_trace() {
+            try {
+                throw new Error();
+            } catch (e) {
+                return core.trim(e.stack.split('\n').slice(3, 4).shift());
             }
-            if (this.server) {
-                this.server.close();
+        },
+        /**
+         * @since 0.0.1
+         * @author Igor Ivanovic
+         * @method Logger#inspect
+         *
+         * @description
+         * Inspect log data output
+         */
+        inspect: function Logger_inspect(data) {
+            if (Type.isObject(data)) {
+                return util.inspect(data, {colors: true, depth: this.config.level});
             }
+            return data;
+        },
+        /**
+         * @since 0.0.1
+         * @author Igor Ivanovic
+         * @method Logger#write
+         *
+         * @description
+         * Write to file and exec hooks
+         */
+        write: function Logger_write() {
+            var log = this.logs.shift();
+
+            if (log && (this.config.type === log.type || this.config.type === 'ALL')) {
+                if (this.config.console) {
+                    if (log.type === 'ERROR') {
+                        console.error(log);
+                    } else if (log.type === 'INFO') {
+                        console.info(log);
+                    } else if (log.type === 'WARNING') {
+                        console.warn(log);
+                    } else {
+                        console.log(log);
+                    }
+                }
+
+                if (this.stream) {
+                    this.stream.write('TYPE: ' + log.type);
+                    this.stream.write('\n');
+                    this.stream.write('CREATED: ' + log.created + '\t ');
+                    this.stream.write('\n');
+                    this.stream.write('MESSAGE: ' + log.message + '\t ' + log.trace);
+                    this.stream.write('\n');
+                    this.stream.write('DATA: ' + this.clean(log.data));
+                    this.stream.write('\n');
+                    this.stream.write('\n');
+                }
+                // call log
+                this.hooks.forEach(function (callback) {
+                    callback(log);
+                });
+            }
+
+        },
+        /**
+         * @since 0.0.1
+         * @author Igor Ivanovic
+         * @method Logger#clean
+         *
+         * @description
+         * Clean message for write
+         * @return string
+         */
+        clean: function Logger_clean(message) {
+            if (Type.isString(message)) {
+                replace.forEach(function (value) {
+                    message = message.replace(value, '');
+                });
+                message = message.replace(/\\'/g, "'");
+                message = message.replace(/\\n/g, "\n");
+                return message.replace(/\\u001b/g, '\u001b');
+            }
+            return message;
+        },
+        /**
+         * @since 0.0.1
+         * @author Igor Ivanovic
+         * @method Logger#warn
+         *
+         * @description
+         * Log warn case
+         */
+        warn: function Logger_warn(message, data) {
+            return this.log(message, data, 'WARNING');
+        },
+        /**
+         * @since 0.0.1
+         * @author Igor Ivanovic
+         * @method Logger#info
+         *
+         * @description
+         * Log info case
+         */
+        info: function Logger_info(message, data) {
+            return this.log(message, data, 'INFO');
+        },
+        /**
+         * @since 0.0.1
+         * @author Igor Ivanovic
+         * @method Logger#error
+         *
+         * @description
+         * Log error case
+         */
+        error: function Logger_info(message, data) {
+            return this.log(message, data, 'ERROR');
         },
         /**
          * @since 0.0.1
@@ -129,82 +256,25 @@ Logger = Type.create({
          * @description
          * Log something in console
          */
-        log: function Logger_log() {
-            var logs = "",
-                url = '',
-                date,
-                args = Array.prototype.slice.call(arguments);
+        log: function Logger_log(message, data, type) {
 
             if (!this.config.enabled) {
-                return args;
+                return;
             }
 
-            date = new Date().toISOString();
-            logs += date + "\n";
-            try {
-                throw new Error();
-            } catch (e) {
-                url = core.trim(e.stack.split('\n').slice(3, 4).shift());
-                logs += url + "\n";
+            if (this.config.types.indexOf(type) === -1) {
+                type = 'ALL';
             }
-            args.forEach(function (item) {
-                logs += core.trim(item);
+
+            this.logs.push({
+                type: type,
+                message: message,
+                trace: this.trace(),
+                data: this.inspect(data),
+                created: new Date().toISOString()
             });
-            logs += '\n';
-            logs += '\n';
-            if (this.config.console) {
-                console.log(logs);
-            }
-            try {
-                replace.forEach(function (value) {
-                    logs = logs.replace(value, '');
-                });
-                logs = logs.replace(/\\'/g, "'");
-                logs = logs.replace(/\\n/g, "\n");
-                logs = logs.replace(/\\u001b/g, '\u001b');
 
-            } catch (e) {
-                this.print(e);
-            }
-
-            if (this.config.write && this.stream) {
-                try {
-                    this.length += logs.length;
-                    this.stream.write(logs);
-                } catch (e) {
-                    this.print(e);
-                }
-            }
-
-            this.hooks.forEach(function (hook) {
-                try {
-                    hook(logs);
-                } catch (e) {
-                    this.print(e);
-                }
-            }.bind(this));
-
-
-        },
-        /**
-         * @since 0.0.1
-         * @author Igor Ivanovic
-         * @method Logger#inspect
-         *
-         * @description
-         * Inspect
-         */
-        print: function Logger_print() {
-            var log = "",
-                args = Array.prototype.slice.call(arguments);
-            if (!this.config.enabled) {
-                return args;
-            }
-            util.inspect.styles.string = 'green';
-            args.forEach(function (item) {
-                log += " " + util.inspect(item, {colors: true, depth: this.config.level});
-            }.bind(this));
-            return this.log(log);
+            process.nextTick(this.write.bind(this));
         }
     }
 );
