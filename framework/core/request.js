@@ -514,7 +514,7 @@ Request = Type.create({
             isForCompress = (Type.isString(response) || response instanceof Buffer) && !this.isCompressed;
 
 
-        if (isForCompress && !!this.isCompressionEnabled) {
+        if (isForCompress && !!this.isCompressionEnabled && Type.isString(accept)) {
             if (accept.indexOf('gzip') > -1) {
                 this.addHeader('Content-Encoding', 'gzip');
                 this.isCompressed = true;
