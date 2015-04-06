@@ -188,6 +188,8 @@ Logger = Type.create({
                     this.stream.write('\n');
                     this.stream.write('\n');
                 }
+                // clean log data for hook
+                log.data = this.clean(log.data);
                 // call log
                 this.hooks.forEach(function (callback) {
                     callback(log);
