@@ -10,7 +10,7 @@ describe("error", function () {
         var message = tryCatch(function() {
             return new error.Exception('Message', new Error);
         });
-        expect(message.customMessage).toBe('Message');
+        expect(message.message).toBe('Message');
         message.trace = null;
         expect(Type.isString(message.toString())).toBe(true);
 
@@ -30,8 +30,9 @@ describe("error", function () {
             return new error.DataError(c, 'DataMessage', new Error);
         });
         expect(message.name).toBe('DataError');
-        expect(message.customMessage).toBe('DataMessage');
+        expect(message.message).toBe('DataMessage');
         expect(message.data).toBe(c);
+        expect(Type.isString(message.toString())).toBe(true);
     });
 
 
@@ -44,8 +45,9 @@ describe("error", function () {
         });
         expect(message.name).toBe('HttpError');
         expect(message.code).toBe(500);
-        expect(message.customMessage).toBe('DataMessage');
+        expect(message.message).toBe('DataMessage');
         expect(message.data).toBe(c);
+        expect(Type.isString(message.toString())).toBe(true);
     });
     function tryCatch(callback) {
         try {

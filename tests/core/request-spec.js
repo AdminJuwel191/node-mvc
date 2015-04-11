@@ -216,7 +216,7 @@ describe('core/request', function () {
             request.setStatusCode('500');
         });
 
-        expect(message.customMessage).toBe('Status code must be number type');
+        expect(message.message).toBe('Status code must be number type');
     });
 
 
@@ -241,7 +241,7 @@ describe('core/request', function () {
         var message = tryCatch(function () {
             request.addHeader(1, '180');
         });
-        expect(message.customMessage).toBe('Request.addHeader: Header key must be string type');
+        expect(message.message).toBe('Request.addHeader: Header key must be string type');
 
         expect(request.getHeader('content-type')).toBe('text/html');
         expect(request.getHeader('non-existing')).toBe(false);
@@ -260,7 +260,7 @@ describe('core/request', function () {
         var message = tryCatch(function () {
             request.hasHeader(1);
         });
-        expect(message.customMessage).toBe('Request.hasHeader: Header key must be string type');
+        expect(message.message).toBe('Request.hasHeader: Header key must be string type');
     });
 
 
@@ -316,7 +316,7 @@ describe('core/request', function () {
         var message = tryCatch(function () {
             request.getRequestHeader(1);
         });
-        expect(message.customMessage).toBe('Request.getRequestHeader: Header key must be string type');
+        expect(message.message).toBe('Request.getRequestHeader: Header key must be string type');
     });
 
 
@@ -600,7 +600,7 @@ describe('core/request', function () {
     it('_chain error', function (done) {
         var ctx = {
             _handleError: function (error) {
-                expect(error.customMessage).toBe('CUSTOM');
+                expect(error.message).toBe('CUSTOM');
             }
         };
         request = new Constructor(config, '/home/index');
@@ -628,7 +628,7 @@ describe('core/request', function () {
     it('_chain error 1', function (done) {
         var ctx = {
             _handleError: function (error) {
-                expect(error.customMessage).toBe('Error on executing action');
+                expect(error.message).toBe('Error on executing action');
             }
         };
         request = new Constructor(config, '/home/index');
@@ -655,7 +655,7 @@ describe('core/request', function () {
     it('_chain error2', function (done) {
         var ctx = {
             _handleError: function (error) {
-                expect(error.customMessage).toBe('Error on executing action');
+                expect(error.message).toBe('Error on executing action');
             }
         };
         request = new Constructor(config, '/home/index');
@@ -675,7 +675,7 @@ describe('core/request', function () {
     it('_chain error2 2', function (done) {
         var ctx = {
             _handleError: function (error) {
-                expect(error.customMessage).toBe('CUSTOM');
+                expect(error.message).toBe('CUSTOM');
             }
         };
         request = new Constructor(config, '/home/index');
@@ -737,7 +737,7 @@ describe('core/request', function () {
             request._render.call(ctx);
         });
         expect(message.code).toBe(500);
-        expect(message.customMessage).toBe('No data to render');
+        expect(message.message).toBe('No data to render');
 
         message = tryCatch(function () {
             ctx.isRendered = false;
@@ -745,7 +745,7 @@ describe('core/request', function () {
             request._render.call(ctx, {});
         });
         expect(message.code).toBe(500);
-        expect(message.customMessage).toBe('Invalid response type, string or buffer is required!');
+        expect(message.message).toBe('Invalid response type, string or buffer is required!');
 
         ctx.isRendered = true;
         expect(request._render.call(ctx, response)).toBe(false);
@@ -1079,6 +1079,232 @@ describe('core/request', function () {
     });
 
 
+    it('_compress gzip', function (done) {
+        var cpath = path.normalize(__dirname + "/../tf/modules");
+        di.setAlias('modulesPath', cpath);
+        var request = new Constructor(config, '/home/index');
+        var headers = [];
+        var ctx = {
+            getRequestHeader: function () {
+                return 'gzip';
+            },
+            hasHeader: function (key) {
+                expect(key).toBe('Vary');
+                return false;
+            },
+            addHeader: function (key, value) {
+                headers.push({
+                    key: key,
+                    value: value
+                });
+            },
+            isCompressionEnabled: true,
+            isCompressed: false
+        };
+        spyOn(ctx, 'addHeader').and.callThrough();
+
+        var promise = request._compress.call(ctx, 'STRING');
+
+        promise.then(function (data) {
+            expect(data).toBe('STRING');
+            expect(ctx.isCompressed).toBe(true);
+            expect(headers).toEqual([{ key : 'Vary', value : 'Accept-Encoding' }, { key : 'Content-Encoding', value : 'gzip' }]);
+            done();
+        }).catch(function (error) {
+            fail(error);
+            done();
+        });
+    });
+
+
+    it('_compress deflate', function (done) {
+        var cpath = path.normalize(__dirname + "/../tf/modules");
+        di.setAlias('modulesPath', cpath);
+        var request = new Constructor(config, '/home/index');
+        var headers = [];
+        var ctx = {
+            getRequestHeader: function () {
+                return 'deflate';
+            },
+            hasHeader: function (key) {
+                expect(key).toBe('Vary');
+                return false;
+            },
+            addHeader: function (key, value) {
+                headers.push({
+                    key: key,
+                    value: value
+                });
+            },
+            isCompressionEnabled: true,
+            isCompressed: false
+        };
+        spyOn(ctx, 'addHeader').and.callThrough();
+
+        var promise = request._compress.call(ctx, 'STRING');
+
+        promise.then(function (data) {
+            expect(data).toBe('STRING');
+            expect(ctx.isCompressed).toBe(true);
+            expect(headers).toEqual([{ key : 'Vary', value : 'Accept-Encoding' }, { key : 'Content-Encoding', value : 'deflate' }]);
+            done();
+        }).catch(function (error) {
+            fail(error);
+            done();
+        });
+    });
+
+    it('_compress deflate 2', function (done) {
+        var cpath = path.normalize(__dirname + "/../tf/modules");
+        di.setAlias('modulesPath', cpath);
+        var request = new Constructor(config, '/home/index');
+        var headers = [];
+        var ctx = {
+            getRequestHeader: function () {
+                return 'deflate';
+            },
+            hasHeader: function (key) {
+                expect(key).toBe('Vary');
+                return true;
+            },
+            addHeader: function (key, value) {
+                headers.push({
+                    key: key,
+                    value: value
+                });
+            },
+            isCompressionEnabled: true,
+            isCompressed: false
+        };
+        spyOn(ctx, 'addHeader').and.callThrough();
+
+        var promise = request._compress.call(ctx, 'STRING');
+
+        promise.then(function (data) {
+            expect(data).toBe('STRING');
+            expect(ctx.isCompressed).toBe(true);
+            expect(headers).toEqual([ { key : 'Content-Encoding', value : 'deflate' }]);
+            done();
+        }).catch(function (error) {
+            fail(error);
+            done();
+        });
+    });
+
+
+    it('_compress reject deflate', function (done) {
+        var cpath = path.normalize(__dirname + "/../tf/modules");
+        di.setAlias('modulesPath', cpath);
+        var request = new Constructor(config, '/home/index');
+        var headers = [];
+        var ctx = {
+            getRequestHeader: function () {
+                return 'deflate';
+            },
+            hasHeader: function (key) {
+                expect(key).toBe('Vary');
+                return true;
+            },
+            addHeader: function (key, value) {
+                headers.push({
+                    key: key,
+                    value: value
+                });
+            },
+            isCompressionEnabled: true,
+            isCompressed: false
+        };
+        spyOn(ctx, 'addHeader').and.callThrough();
+
+        zLib.deflate = function (response, callback) {
+            return callback(true, response);
+        }
+
+        var promise = request._compress.call(ctx, 'STRING');
+
+        promise.then(null, function (data) {
+            expect(data).toBe(true);
+            expect(ctx.isCompressed).toBe(false);
+            expect(headers).toEqual([]);
+            done();
+        }).catch(function (error) {
+            fail(error);
+            done();
+        });
+    });
+
+    it('_compress reject gzip', function (done) {
+        var cpath = path.normalize(__dirname + "/../tf/modules");
+        di.setAlias('modulesPath', cpath);
+        var request = new Constructor(config, '/home/index');
+        var headers = [];
+        var ctx = {
+            getRequestHeader: function () {
+                return 'gzip';
+            },
+            hasHeader: function (key) {
+                expect(key).toBe('Vary');
+                return true;
+            },
+            addHeader: function (key, value) {
+                headers.push({
+                    key: key,
+                    value: value
+                });
+            },
+            isCompressionEnabled: true,
+            isCompressed: false
+        };
+        spyOn(ctx, 'addHeader').and.callThrough();
+
+        zLib.gzip = function (response, callback) {
+            return callback(true, response);
+        }
+
+        var promise = request._compress.call(ctx, 'STRING');
+
+        promise.then(null, function (data) {
+            expect(data).toBe(true);
+            expect(ctx.isCompressed).toBe(false);
+            expect(headers).toEqual([]);
+            done();
+        }).catch(function (error) {
+            fail(error);
+            done();
+        });
+    });
+
+    it('_compress no compression', function () {
+        var cpath = path.normalize(__dirname + "/../tf/modules");
+        di.setAlias('modulesPath', cpath);
+        var request = new Constructor(config, '/home/index');
+        var headers = [];
+        var ctx = {
+            getRequestHeader: function () {
+                return 'deflate';
+            },
+            hasHeader: function (key) {
+                expect(key).toBe('Vary');
+                return false;
+            },
+            addHeader: function (key, value) {
+                headers.push({
+                    key: key,
+                    value: value
+                });
+            },
+            isCompressionEnabled: false,
+            isCompressed: false
+        };
+        spyOn(ctx, 'addHeader').and.callThrough();
+
+        var buff = new Buffer('STRING');
+
+        expect(request._compress.call(ctx, buff)).toBe(buff);
+    });
+
+
+
 
     it('_handleModule', function (done) {
         var cpath = path.normalize(__dirname + "/../tf/modules");
@@ -1106,6 +1332,7 @@ describe('core/request', function () {
 
 
 
+
     it('_handleModule error', function () {
         var cpath = path.normalize(__dirname + "/../tf/modules");
         di.setAlias('modulesPath', cpath);
@@ -1118,7 +1345,7 @@ describe('core/request', function () {
             request._handleModule('@{modulesPath}/');
         });
 
-        expect(message.customMessage).toBe('Missing module');
+        expect(message.message).toBe("Missing module, DI.load, Cannot find module '"+cpath+"/test'");
 
 
         request.module = 'invalid2';
@@ -1126,7 +1353,7 @@ describe('core/request', function () {
             request._handleModule('@{modulesPath}/');
         });
 
-        expect(message.customMessage).toBe('Module must be function type');
+        expect(message.message).toBe('Module must be function type');
 
 
     });
@@ -1144,7 +1371,7 @@ describe('core/request', function () {
             request._handleModule('@{modulesPath}/');
         });
 
-        expect(message.customMessage).toBe('Module must be instance of ModuleInterface "core/module"');
+        expect(message.message).toBe('Module must be instance of ModuleInterface "core/module"');
 
     });
 
@@ -1263,7 +1490,7 @@ describe('core/request', function () {
             return request._handleController('@{controllersPath}/');
         });
 
-        expect(message.customMessage).toBe('Controller must be function type');
+        expect(message.message).toBe('Controller must be function type');
     });
 
 
@@ -1279,7 +1506,7 @@ describe('core/request', function () {
             return request._handleController('@{controllersPath}/');
         });
 
-        expect(message.customMessage).toBe('Missing action in controller');
+        expect(message.message).toBe('Missing action in controller');
     });
 
 
@@ -1293,7 +1520,7 @@ describe('core/request', function () {
         var message = tryCatch(function () {
             return request._handleController('@{controllersPath}/');
         });
-        expect(message.customMessage).toBe('Missing controller');
+        expect(message.message).toBe("Missing controller, DI.load, Cannot find module '"+cpath+"/index'");
     });
 
 
@@ -1307,7 +1534,7 @@ describe('core/request', function () {
         var message = tryCatch(function () {
             return request._handleController('@{controllersPath}/');
         });
-        expect(message.customMessage).toBe('Controller must be instance of ControllerInterface "core/controller"');
+        expect(message.message).toBe('Controller must be instance of ControllerInterface "core/controller"');
     });
 
     it('forward', function () {
@@ -1339,7 +1566,7 @@ describe('core/request', function () {
         var message = tryCatch(function () {
             request.forwardUrl('/test/index?id=1');
         });
-        expect(message.customMessage).toBe('Cannot forward to same url');
+        expect(message.message).toBe('Cannot forward to same url');
     });
 
     it('forward error', function () {
@@ -1353,7 +1580,7 @@ describe('core/request', function () {
         var message = tryCatch(function() {
             request.forward('index/index', {id: 1});
         });
-        expect(message.customMessage).toBe('Cannot forward to same route');
+        expect(message.message).toBe('Cannot forward to same route');
     });
 
 

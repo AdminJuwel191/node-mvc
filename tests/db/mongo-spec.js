@@ -75,12 +75,12 @@ describe('core/logger', function () {
         var message = tryCatch(function() {
             instance.schema({}, 1);
         });
-        expect(message.customMessage).toBe('Schema options must be object');
+        expect(message.message).toBe('Schema options must be object');
 
         message = tryCatch(function() {
             instance.schema(1);
         });
-        expect(message.customMessage).toBe('Schema definition must be object');
+        expect(message.message).toBe('Schema definition must be object');
     });
 
 

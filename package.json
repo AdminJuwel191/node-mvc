@@ -1,21 +1,21 @@
 {
-  "name" : "mvcjs",
-  "main" : "./framework/di.js",
+  "name": "mvcjs",
+  "main": "./framework/di.js",
   "description": "Powerful lightweight mvc framework for nodejs",
-  "version": "0.1.0-beta-71",
-  "dependencies" : {
-      "mongoose": "3.8.x",
-      "swig": "1.4.x",
-      "promise": "6.0.x",
-      "static-type-js": "0.3.x",
-      "etag": "1.5.x",
-      "mime-types" : "2.0.x"
+  "version": "0.1.0-rc1",
+  "dependencies": {
+    "mongoose": "3.8.x",
+    "swig": "1.4.x",
+    "promise": "6.0.x",
+    "static-type-js": "0.3.x",
+    "etag": "1.5.x",
+    "mime-types": "2.0.x"
   },
   "devDependencies": {
-      "gulp": "3.8.x",
-      "gulp-istanbul": "0.5.x",
-      "gulp-jasmine": "1.0.x",
-      "gulp-exit": "0.0.x"
+    "gulp": "3.8.x",
+    "gulp-exit": "0.0.x",
+    "gulp-istanbul": "^0.5.0",
+    "gulp-jasmine": "^2.0.1"
   },
   "repository": {
     "type": "git",

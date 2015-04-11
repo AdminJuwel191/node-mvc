@@ -139,7 +139,7 @@ describe('core/body-parser', function () {
             init.parse();
         });
 
-        expect(message.customMessage).toBe('Error parsing json');
+        expect(message.message).toBe('Error parsing json, Unexpected token a');
 
         init = new Parser('application/jsobcn', body + 'aabc');
 
@@ -147,7 +147,7 @@ describe('core/body-parser', function () {
             init.parse();
         });
 
-        expect(message.customMessage).toBe('Unsupported form type');
+        expect(message.message).toBe('Unsupported form type');
     });
 
     function tryCatch(callback) {

@@ -34,7 +34,7 @@ describe("di", function () {
         try {
             di.exists(1, 1);
         } catch (e) {
-            message = e.customMessage;
+            message = e.message;
         }
         expect(message).toBe("DI.exists:  file or fileType must bi string");
     });
@@ -63,7 +63,7 @@ describe("di", function () {
         try {
             di.getAlias("test");
         } catch (e) {
-            message = e.customMessage;
+            message = e.message;
         }
         expect(message).toBe("DI.getAlias: \"test\" is not valid");
     });
@@ -85,7 +85,7 @@ describe("di", function () {
         try {
             di.setAlias("test", val);
         } catch (e) {
-            message = e.customMessage;
+            message = e.message;
         }
         expect(message).toBe('DI.setAlias: Invalid alias value, chars \'\\?%*:|"<>.\' and spaces are not allowed. KEY: test, VAL:' + val);
     });
@@ -96,9 +96,9 @@ describe("di", function () {
         try {
             di.load("@{test}/one");
         } catch (e) {
-            message = e.customMessage;
+            message = e.message;
         }
-        expect(message).toBe("DI.load");
+        expect(message).toBe("DI.load, Cannot find module '" + di.getAlias("test") + "one'");
     });
 
     it("load", function () {
@@ -117,8 +117,8 @@ describe("di", function () {
         try {
             di.readFileSync("@{test}/di-test-load1.js");
         } catch (e) {
-            message = e.customMessage;
+            message = e.message;
         }
-        expect(message).toBe('DI.readFileSync');
+        expect(message).toBe("DI.readFileSync, ENOENT, no such file or directory '" + di.getAlias("test") + "di-test-load1.js'");
     });
 });

@@ -176,7 +176,7 @@ describe('core/logger', function () {
             logger.addHook(1);
         });
 
-        expect(message.customMessage).toBe('Logger hook must be function');
+        expect(message.message).toBe('Logger hook must be function');
 
         logger.addHook(n);
 

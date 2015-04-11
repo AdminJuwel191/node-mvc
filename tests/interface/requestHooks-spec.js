@@ -62,7 +62,7 @@ describe('interface/requestHooks', function () {
                 callback(message);
             }
             expect(message.data.method).toBe(method);
-            expect(message.customMessage).toBe('RequestHooksInterface: missing method in Hook object');
+            expect(message.message).toBe('RequestHooksInterface: missing method in Hook object');
         });
     }
 

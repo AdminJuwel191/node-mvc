@@ -511,29 +511,33 @@ Request = Type.create({
      */
     _compress: function Request__compress(response) {
         var accept = this.getRequestHeader('Accept-Encoding'),
-            isForCompress = (Type.isString(response) || response instanceof Buffer) && !this.isCompressed;
+            isForCompress = (Type.isString(response) || response instanceof Buffer) && !this.isCompressed,
+            that = this;
 
 
         if (isForCompress && !!this.isCompressionEnabled && Type.isString(accept)) {
+            if (!this.hasHeader('Vary')) {
+                this.addHeader('Vary', 'Accept-Encoding');
+            }
             if (accept.indexOf('gzip') > -1) {
-                this.addHeader('Content-Encoding', 'gzip');
-                this.isCompressed = true;
                 return new Promise(function (resolve, reject) {
                     zlib.gzip(response, function (err, data) {
                         if (err) {
                             return reject(err);
                         }
+                        that.isCompressed = true;
+                        that.addHeader('Content-Encoding', 'gzip');
                         resolve(data);
                     });
                 });
             } else if (accept.indexOf('deflate') > -1) {
-                this.addHeader('Content-Encoding', 'deflate');
-                this.isCompressed = true;
                 return new Promise(function (resolve, reject) {
                     zlib.deflate(response, function (err, data) {
                         if (err) {
                             return reject(err);
                         }
+                        that.isCompressed = true;
+                        that.addHeader('Content-Encoding', 'deflate');
                         resolve(data);
                     });
                 });

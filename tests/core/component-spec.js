@@ -80,7 +80,7 @@ describe('core/component', function () {
         message = tryCatch(function () {
             return component._construct();
         });
-        expect(message.customMessage).toBe("Component.construct: problem with loading dependency file");
+        expect(message.message).toBe('Component.construct: problem with loading dependency file, DI.readFileSync, ENOENT, no such file or directory \''+oFile+'\'');
         fs.renameSync(nFile, oFile);
     });
 
@@ -149,13 +149,13 @@ describe('core/component', function () {
             return component.get('test/1123');
         });
 
-        expect(message.customMessage).toBe('Component "test/1123" is not registered in system');
+        expect(message.message).toBe('Component "test/1123" is not registered in system');
 
         message = tryCatch(function () {
             return component.init('test/1123');
         });
 
-        expect(message.customMessage).toBe('Component.init: components argument must be array type');
+        expect(message.message).toBe('Component.init: components argument must be array type');
 
         component.components = {};
 
@@ -165,7 +165,7 @@ describe('core/component', function () {
                 "name": "custom"
             }]);
         });
-        expect(message.customMessage).toBe('Component "custom" is not initialized');
+        expect(message.message).toBe('Component "custom" is not initialized, DI.load, Cannot find module \'custom\'');
     });
 
 
@@ -192,7 +192,7 @@ describe('core/component', function () {
                 "errorRoute": "error/route"
             });
         });
-        expect(message.customMessage).toBe('Component "core/router" already exist in system');
+        expect(message.message).toBe('Component "core/router" already exist in system');
         component.components = {};
         component.set("core/logger", {
             "name": "core/logger"
@@ -237,12 +237,12 @@ describe('core/component', function () {
                 return config.a.b;
             });
         });
-        expect(message.customMessage).toBe('Component "custom" is not initialized');
+        expect(message.message).toBe('Component "custom" is not initialized, Cannot read property \'b\' of undefined');
 
         message = tryCatch(function () {
             component.get("custom")
         });
-        expect(message.customMessage).toBe('Component "custom" is not registered in system');
+        expect(message.message).toBe('Component "custom" is not registered in system');
 
     });
 

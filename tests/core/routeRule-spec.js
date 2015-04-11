@@ -365,7 +365,7 @@ describe('core/routeRule', function () {
                 route: 'posts/index'
             });
         });
-        expect(message.customMessage).toBe('RouteRule: rule object must have an pattern property');
+        expect(message.message).toBe('RouteRule: rule object must have an pattern property');
 
         message = tryCatch(function() {
             new Constructor({
@@ -373,7 +373,7 @@ describe('core/routeRule', function () {
                 route: 'posts/index'
             });
         });
-        expect(message.customMessage).toBe('RouteRule: rule.pattern must be string type');
+        expect(message.message).toBe('RouteRule: rule.pattern must be string type');
 
         message = tryCatch(function() {
             new Constructor({
@@ -391,7 +391,7 @@ describe('core/routeRule', function () {
             });
         });
 
-        expect(message.customMessage).toBe('RouteRule: rule object must have an route property');
+        expect(message.message).toBe('RouteRule: rule object must have an route property');
     });
 
 
@@ -442,7 +442,7 @@ describe('core/routeRule', function () {
                 route: 'posts/<action>'
             });
         });
-        expect(message.customMessage).toBe('RouteRule: invalid route rule');
+        expect(message.message).toBe('RouteRule: invalid route rule');
     });
 
 
@@ -509,12 +509,12 @@ describe('core/routeRule', function () {
         var message = tryCatch(function() {
             routeRule.escape(1, [{key: 'bcc', value: 'ac'}]);
         });
-        expect(message.customMessage).toBe('RouteRule.escape: str must be a string type');
+        expect(message.message).toBe('RouteRule.escape: str must be a string type');
 
         message = tryCatch(function() {
             routeRule.escape('abc', 1);
         });
-        expect(message.customMessage).toBe('RouteRule.escape: escape must be a array type');
+        expect(message.message).toBe('RouteRule.escape: escape must be a array type');
     });
 
 

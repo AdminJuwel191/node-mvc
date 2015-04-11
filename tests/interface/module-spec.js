@@ -48,7 +48,7 @@ describe('interface/module', function () {
                 callback(message);
             }
             expect(message.data.method).toBe(method);
-            expect(message.customMessage).toBe('ModuleInterface: missing method in Module object');
+            expect(message.message).toBe('ModuleInterface: missing method in Module object');
         });
     }
 

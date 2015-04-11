@@ -1,6 +1,8 @@
 "use strict";
 /* global Type: true, error: true, Object: true */
-var Type = require('static-type-js');
+var Type = require('static-type-js'),
+    util = require('util');
+
 /**
  * @since 0.0.1
  * @author Igor Ivanovic
@@ -189,7 +191,32 @@ function compare(a, b) {
     return false;
 }
 
+/**
+ * @since 0.0.1
+ * @author Igor Ivanovic
+ * @function trace
+ *
+ * @description
+ * Trace call
+ */
+function trace(a, b) {
+    return trim((new Error()).stack.split('\n').slice(a || 3, b || 4).join('\n'));
+}
 
+/**
+ * @since 0.0.1
+ * @author Igor Ivanovic
+ * @method Exception#inspect
+ *
+ * @description
+ * Inspect data object
+ */
+function inspect(data, depth) {
+    if (Type.isObject(data)) {
+        return util.inspect(data, {depth: depth || 10});
+    }
+    return data;
+}
 /**
  * Export functions
  * @type {{isBoolean: isBoolean, isUndefined: isUndefined, isDefined: isDefined, isObject: isObject, isString: isString, isNumber: isNumber, isDate: isDate, isArray: isArray, isFunction: isFunction, isRegExp: isRegExp, isConstructor: isConstructor, copy: copy, trim: trim, throwError: throwError}}
@@ -202,5 +229,7 @@ module.exports = {
     match: match,
     createRegex: createRegex,
     toObject: toObject,
-    compare: compare
+    compare: compare,
+    trace: trace,
+    inspect: inspect
 };

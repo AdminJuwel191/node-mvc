@@ -54,7 +54,7 @@ describe('interface/storage', function () {
                 callback(message);
             }
             expect(message.data.method).toBe(method);
-            expect(message.customMessage).toBe('CacheInterface: missing method in cache object');
+            expect(message.message).toBe('CacheInterface: missing method in cache object');
         });
     }
 

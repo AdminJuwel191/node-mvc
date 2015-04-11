@@ -101,7 +101,7 @@ describe('interface/view', function () {
                 callback(message);
             }
             expect(message.data.method).toBe(method);
-            expect(message.customMessage).toBe('ViewInterface: missing method in view object');
+            expect(message.message).toBe('ViewInterface: missing method in view object');
         });
     }
 

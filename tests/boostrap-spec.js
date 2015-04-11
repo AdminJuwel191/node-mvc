@@ -11,13 +11,13 @@ describe('bootstrap', function () {
             info: function () {
 
             },
-            error: function() {
+            error: function () {
 
             },
-            log: function() {
+            log: function () {
 
             },
-            warn: function() {
+            warn: function () {
 
             }
         };
@@ -84,7 +84,7 @@ describe('bootstrap', function () {
     });
 
     it('should init', function () {
-        var basePath = di.normalizePath(__dirname + '/tf/'), logs = [], result,  isListened = false, events = [], config = {}, url, isparsed = false;
+        var basePath = di.normalizePath(__dirname + '/tf/'), logs = [], result, isListened = false, events = [], config = {}, url, isparsed = false;
 
         bootstrap.setBasePath(basePath);
 
@@ -109,7 +109,7 @@ describe('bootstrap', function () {
             listen: function (port) {
                 isListened = port;
             },
-            getEncoding: function() {
+            getEncoding: function () {
                 return 'utf8';
             }
         };
@@ -124,7 +124,7 @@ describe('bootstrap', function () {
                 parse: function () {
                     isparsed = true;
                 },
-                onEnd: function(callback) {
+                onEnd: function (callback) {
                     expect(typeof callback).toBe("function");
                     callback();
                 }
@@ -169,12 +169,11 @@ describe('bootstrap', function () {
         expect(isListened).toBe(8080);
 
 
-
         result = di.mock(function () {
             return bootstrap.init('');
         }, mock);
 
-        expect(result.customMessage).toBe('You cannot reinitialize application');
+        expect(result.message).toBe('You cannot reinitialize application');
 
 
         bootstrap.initalized = false;
@@ -183,7 +182,7 @@ describe('bootstrap', function () {
             return bootstrap.init('/abc', 'ccas.json');
         }, mock);
 
-        expect(result.customMessage).toBe('Problem with loading file, do you have your environment file json in path: "' + di.getAlias('envPath') + '" ?');
+        expect(result.message).toBe('Problem with loading file, do you have your environment file json in path: "'+di.getAlias("envPath")+'" ?, ENOENT, no such file or directory \''+di.getAlias("envPath")+'/ccas.json\'');
 
         bootstrap.initalized = false;
 
@@ -191,7 +190,7 @@ describe('bootstrap', function () {
             return bootstrap.init('', 'invalid.json');
         }, mock);
 
-        expect(result.customMessage).toBe('Problem with parsing environment json file');
+        expect(result.message).toBe('Problem with parsing environment json file, Unexpected end of input');
 
 
         bootstrap.initalized = false;
@@ -216,7 +215,7 @@ describe('bootstrap', function () {
             return bootstrap.init('', 'noconfig.json');
         }, mock);
 
-        expect(result.customMessage).toBe('Config file is not defined');
+        expect(result.message).toBe('Config file is not defined');
 
 
         bootstrap.initalized = false;
@@ -224,7 +223,7 @@ describe('bootstrap', function () {
             return bootstrap.init('', 'valid2.json');
         }, mock);
 
-        expect(result.customMessage).toBe('Initialize config: '+ envPath + 'bootstrap-config2.js');
+        expect(result.message).toBe("Initialize config: " + envPath + "bootstrap-config2.js, undefined is not a function");
 
     });
 });

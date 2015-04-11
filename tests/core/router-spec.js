@@ -120,7 +120,7 @@ describe('core/router', function () {
                 method: ['GET']
             });
         });
-        expect(message.customMessage).toBe('Router.add: rule must be instance of RouteRuleInterface');
+        expect(message.message).toBe('Router.add: rule must be instance of RouteRuleInterface');
     });
 
 
@@ -141,7 +141,7 @@ describe('core/router', function () {
                 constructor: 1
             });
         });
-        expect(message.customMessage).toBe('Router.add: dynamic route is not function');
+        expect(message.message).toBe('Router.add: dynamic route is not function');
     });
 
 
@@ -190,12 +190,12 @@ describe('core/router', function () {
         var message = tryCatch(function () {
             return router.createUrl(1, 1);
         });
-        expect(message.customMessage).toBe('RouteRule.createUrl: route must be string type');
+        expect(message.message).toBe('RouteRule.createUrl: route must be string type');
 
         message = tryCatch(function () {
             return router.createUrl('home/index', 1);
         });
-        expect(message.customMessage).toBe('RouteRule.createUrl: params must be object type');
+        expect(message.message).toBe('RouteRule.createUrl: params must be object type');
 
         var url = router.createUrl('home/index', {id: 1, '#': 'element-id'});
         expect(url).toBe('/home/index?id=1#element-id');
@@ -369,7 +369,7 @@ describe('core/router', function () {
         promise.then(null, function (error) {
             expect(error.name).toBe('HttpError');
             expect(error.code).toBe(404);
-            expect(error.customMessage).toBe('Not found');
+            expect(error.message).toBe('Not found');
             done();
         });
 
@@ -401,7 +401,7 @@ describe('core/router', function () {
         promise.then(null, function (error) {
             expect(error.name).toBe('HttpError');
             expect(error.code).toBe(500);
-            expect(error.customMessage).toBe('Not found');
+            expect(error.message).toBe("Not found, Cannot read property 'c' of undefined");
             done();
         });
 

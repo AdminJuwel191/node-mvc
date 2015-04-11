@@ -1,7 +1,9 @@
 var di = require('../../framework/di'), path = require('path');
 describe('core/assets', function () {
     var Assets,
-        etag =  function() { return 'ETAG'; },
+        etag = function () {
+            return 'ETAG';
+        },
         mime = {
             lookup: function () {
             }
@@ -11,13 +13,13 @@ describe('core/assets', function () {
             info: function () {
 
             },
-            error: function() {
+            error: function () {
 
             },
-            log: function() {
+            log: function () {
 
             },
-            warn: function() {
+            warn: function () {
 
             }
         },
@@ -109,7 +111,7 @@ describe('core/assets', function () {
 
         var promise = instance.onRequest(api);
 
-        promise.then(function(data) {
+        promise.then(function (data) {
             expect(data.toString()).toBe('module.exports = "CORRECT";');
             expect(api.addHeader).toHaveBeenCalled();
             expect(api.getMethod).toHaveBeenCalled();
@@ -167,17 +169,14 @@ describe('core/assets', function () {
             hook: '^\\/files'
         });
         headerModified = true;
-        var promise =  instance.onRequest(api);
+        var promise = instance.onRequest(api);
 
-        promise.then(function() {
+        promise.then(function () {
             expect(isSended).toBe(true);
             expect(api.sendNoChange).toHaveBeenCalled();
             done();
         });
     });
-
-
-
 
 
     it('onRequest 5', function (done) {
@@ -211,14 +210,14 @@ describe('core/assets', function () {
         });
         headerModified = true;
 
-        var promise =  instance.onRequest(api);
-        promise.then(null, function(message) {
-            expect(message.customMessage).toBe('No file found');
+        var promise = instance.onRequest(api);
+        promise.then(null, function (message) {
+            expect(message.message).toBe("No file found, ENOENT, open '" + path.normalize(__dirname + '/../') + "tf/di-test-load-not-found.js'");
             done();
         });
     });
 
-   it('onRequest 3', function (done) {
+    it('onRequest 3', function (done) {
         mime.lookup = function () {
             return 'application/javascript';
         };
@@ -250,9 +249,9 @@ describe('core/assets', function () {
         headerModified = true;
 
         method = 'POST';
-        var promise =  instance.onRequest(api);
-        promise.then(null, function(message) {
-            expect(message.customMessage).toBe('Assets are accessible only via GET request');
+        var promise = instance.onRequest(api);
+        promise.then(null, function (message) {
+            expect(message.message).toBe('Assets are accessible only via GET request');
             done();
         });
     });
@@ -294,9 +293,9 @@ describe('core/assets', function () {
             return false;
         };
 
-        var promise =  instance.onRequest(api);
-        promise.then(null, function(data) {
-            expect(data.customMessage).toBe('Invalid mime type');
+        var promise = instance.onRequest(api);
+        promise.then(null, function (data) {
+            expect(data.message).toBe('Invalid mime type');
             done();
         });
 
@@ -326,7 +325,7 @@ describe('core/assets', function () {
         var instance = new Assets(obj);
         var nPath = path.normalize(__dirname + '/../tf/di-test-load.js');
 
-        instance.readFile(nPath, {encoding: 'utf8'}, function(err, data) {
+        instance.readFile(nPath, {encoding: 'utf8'}, function (err, data) {
             expect(data).toBe('module.exports = "CORRECT";');
             done();
         });

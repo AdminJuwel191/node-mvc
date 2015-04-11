@@ -367,11 +367,11 @@ describe('core/controller', function () {
         var message = tryCatch(function () {
             return controller.setCookie(1);
         });
-        expect(message.customMessage).toBe('Controller.setCookie: Key and Value must be provided!');
+        expect(message.message).toBe('Controller.setCookie: Key and Value must be provided!');
         message = tryCatch(function () {
             return  controller.setCookie(undefined, 1);
         });
-        expect(message.customMessage).toBe('Controller.setCookie: Key and Value must be provided!');
+        expect(message.message).toBe('Controller.setCookie: Key and Value must be provided!');
     });
 
 
@@ -436,7 +436,7 @@ describe('core/controller', function () {
             controller.getSession.call(ctx, 1);
         });
 
-        expect(message.customMessage).toBe('Controller.getSession: key must be string type');
+        expect(message.message).toBe('Controller.getSession: key must be string type');
     });
 
 
@@ -456,7 +456,7 @@ describe('core/controller', function () {
             controller.removeSession.call(ctx, 1);
         });
 
-        expect(message.customMessage).toBe('Controller.removeSession: key must be string type');
+        expect(message.message).toBe('Controller.removeSession: key must be string type');
     });
 
 
@@ -477,7 +477,7 @@ describe('core/controller', function () {
             controller.setSession.call(ctx, 1);
         });
 
-        expect(message.customMessage).toBe('Controller.getSession: key must be string type');
+        expect(message.message).toBe('Controller.getSession: key must be string type');
     });
 
 

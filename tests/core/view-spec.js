@@ -122,7 +122,7 @@ describe('core/view', function () {
         var message = tryCatch(function () {
             view.resolve('@{modulesPath}/user/abc/theme');
         });
-        expect(message.customMessage).toBe("View.resolve: template don't exists");
+        expect(message.message).toBe("View.resolve: template don't exists");
     });
 
 
