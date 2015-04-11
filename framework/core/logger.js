@@ -167,13 +167,13 @@ Logger = Type.create({
             if (log && (this.config.type === log.type || this.config.type === 'ALL')) {
                 if (this.config.console) {
                     if (log.type === 'ERROR') {
-                        console.error(log);
+                        exec_console(console.error, log);
                     } else if (log.type === 'INFO') {
-                        console.info(log);
+                        exec_console(console.info, log);
                     } else if (log.type === 'WARNING') {
-                        console.warn(log);
+                        exec_console(console.warn, log);
                     } else {
-                        console.log(log);
+                        exec_console(console.log, log);
                     }
                 }
 
@@ -195,7 +195,20 @@ Logger = Type.create({
                     callback(log);
                 });
             }
-
+            /**
+             * Exec console output
+             * @param func
+             * @param log
+             */
+            function exec_console(func, log) {
+                func(
+                    ' ' + log.type + '\n',
+                    'CREATED: ' + log.created + '\t ' + '\n',
+                    'MESSAGE: ' + log.message + '\t ' + log.trace + '\n',
+                    !!log.data ? 'DATA:' + log.data + '\n' : '',
+                    '\n'
+                );
+            }
         },
         /**
          * @since 0.0.1
