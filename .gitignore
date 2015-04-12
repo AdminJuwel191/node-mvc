@@ -4,3 +4,4 @@ node_modules
 server.log
 npm-debug.log
 coverage
+.DS_Store
