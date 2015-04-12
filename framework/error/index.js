@@ -19,6 +19,7 @@ var di = require('../di'),
 Exception = Type.create({},
     {
         _construct: function Exception(message, e) {
+            var stack;
             if (!(e instanceof Error)) {
                 e = new Error();
             }
@@ -30,6 +31,10 @@ Exception = Type.create({},
 
             e.name = 'Exception';
             e.trace = core.trace(8, 9);
+            // store stack string reference to avoid multiple to toString conversion loop
+            // possible bug in js/v8
+            stack = e.stack;
+
             e.toString = function () {
                 var m = this.name + ' ' + this.trace;
                 m += '\n';
@@ -43,7 +48,7 @@ Exception = Type.create({},
                     m += core.inspect(this.data);
                 }
                 m += '\n';
-                m += this.stack;
+                m += stack;
                 return m;
             };
             throw e;
