@@ -297,7 +297,9 @@ Request = Type.create({
         var item;
         if (Type.isString(key)) {
             key = key.toLowerCase();
-            value = Type.isString(value) ? value : Type.isInitialized(value) ? value.toString() : null;
+            if (!Type.isString(value) && !!value && Type.isFunction(value.toString)) {
+                value = value.toString();
+            }
             if (Type.isString(value)) {
                 if (this.hasHeader(key) && !Type.isArray(this.headers[key])) {
                     item = this.getHeader(key);
