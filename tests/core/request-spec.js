@@ -234,6 +234,9 @@ describe('core/request', function () {
         request.addHeader('Set-cookie', "one=1");
         request.addHeader('Set-cookie', "three=3");
         request.addHeader('Set-cookie', "three=5");
+        request.addHeader('a', undefined);
+        request.addHeader('b', null);
+
         var headers = request.getHeaders();
         expect(headers['content-type']).toBe('text/html');
         expect(headers['content-length']).toBe('180');
@@ -246,6 +249,9 @@ describe('core/request', function () {
         expect(request.getHeader('content-type')).toBe('text/html');
         expect(request.getHeader('non-existing')).toBe(false);
 
+
+        expect(request.getHeader('a')).toBe(false);
+        expect(request.getHeader('b')).toBe(false);
     });
 
 
