@@ -158,10 +158,6 @@ View = ViewInterface.inherit(
          * Set preloaded template
          */
         setPreloaded: function View_setPreloaded(key, value) {
-            logger.info('View.setPreloaded:', {
-                key: key,
-                value: value
-            });
             this.preloaded[key] = value;
         },
         /**
@@ -347,12 +343,6 @@ View = ViewInterface.inherit(
                     path: path,
                     cb: cb,
                     e: e
-                });
-            } finally {
-                logger.info('ViewLoader.load:', {
-                    path: path,
-                    template: template,
-                    cb: cb
                 });
             }
             return template;
