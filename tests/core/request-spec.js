@@ -950,16 +950,6 @@ describe('core/request', function () {
         expect(ctx._render).toHaveBeenCalled();
 
 
-        response = {};
-        response.trace = 'TRACE';
-        ctx.isERROR = true;
-        ctx._render = function (a) {
-            expect(a).toBe('TRACE');
-        };
-        spyOn(ctx, '_render').and.callThrough();
-        request._handleError.call(ctx, response);
-        expect(ctx._render).toHaveBeenCalled();
-
 
         response = {};
         response.stack = 'TRACE';

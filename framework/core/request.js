@@ -12,7 +12,6 @@ var di = require('../di'),
     zlib = di.load('zlib'),
     core = di.load('core'),
     error = di.load('error'),
-    util = di.load('util'),
     Promise = di.load('promise'),
     Request;
 /**
@@ -616,15 +615,15 @@ Request = Type.create({
             }
             // return parsed request
             return request.parse();
-        } else if (response.trace) {
+        } else if (['HttpError', 'DataError', 'Exception'].indexOf(response.name) > -1) {
             this.addHeader('Content-Type', 'text/plain');
-            return this._render(response.trace);
+            return this._render(response.toString());
         } else if (response.stack) {
             this.addHeader('Content-Type', 'text/plain');
             return this._render(response.stack);
         } else if (this.isERROR) {
             this.addHeader('Content-Type', 'text/plain');
-            return this._render(util.inspect(response));
+            return this._render(core.inspect(response));
         } else {
             return this._render(response);
         }
