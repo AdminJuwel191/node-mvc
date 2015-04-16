@@ -655,9 +655,9 @@ Request = Type.create({
             this.addHeader('Content-Length', response.length);
             this.response.end(response);
         } else if (!response) {
-            throw new error.HttpError(500, {}, 'No data to render');
+            throw new error.HttpError(500, {url: this.url}, 'No data to render');
         } else {
-            throw new error.HttpError(500, {}, 'Invalid response type, string or buffer is required!');
+            throw new error.HttpError(500, {url: this.url}, 'Invalid response type, string or buffer is required!');
         }
 
         logger.info('Request.render:', {
@@ -772,17 +772,18 @@ Request = Type.create({
         try {
             LoadedController = di.load(controllerToLoad);
         } catch (e) {
-            throw new error.HttpError(500, {path: controllerToLoad}, 'Missing controller', e);
+            throw new error.HttpError(500, {path: controllerToLoad, url: this.url}, 'Missing controller', e);
         }
 
         if (!Type.assert(Type.FUNCTION, LoadedController)) {
-            throw new error.HttpError(500, {path: controllerToLoad}, 'Controller must be function type');
+            throw new error.HttpError(500, {path: controllerToLoad, url: this.url}, 'Controller must be function type');
         }
 
         controller = new LoadedController(this._getApi(), {
             controller: this.controller,
             action: this.action,
             module: this.module,
+            url: this.url,
             viewsPath: viewsPath
         });
 
@@ -816,6 +817,7 @@ Request = Type.create({
                 controller: controller,
                 hasAction: controller.has(this.action),
                 route: {
+                    url: this.url,
                     controller: this.controller,
                     action: this.action,
                     module: this.module,
@@ -854,17 +856,17 @@ Request = Type.create({
         try {
             LoadedModule = di.load(moduleToLoad);
         } catch (e) {
-            throw new error.HttpError(500, {path: moduleToLoad}, 'Missing module', e);
+            throw new error.HttpError(500, {path: moduleToLoad, url: this.url}, 'Missing module', e);
         }
 
         if (!Type.assert(Type.FUNCTION, LoadedModule)) {
-            throw new error.HttpError(500, {path: moduleToLoad}, 'Module must be function type');
+            throw new error.HttpError(500, {path: moduleToLoad, url: this.url}, 'Module must be function type');
         }
 
         module = new LoadedModule(this.module);
 
         if (!(module instanceof  ModuleInterface)) {
-            throw new error.HttpError(500, module, 'Module must be instance of ModuleInterface "core/module"');
+            throw new error.HttpError(500, {module: module, url: this.url}, 'Module must be instance of ModuleInterface "core/module"');
         }
 
 
