@@ -699,7 +699,7 @@ Request = Type.create({
             stopPromiseChain: this.stopPromiseChain.bind(this),
             setStatusCode: this.setStatusCode.bind(this),
             createUrl: router.createUrl.bind(router),
-            parsedUrl: core.copy(this.parsedUrl),
+            parsedUrl: this.parsedUrl,
             url: this.url,
             forwardUrl: this.forward.bind(this),
             uuid: this._uuid.bind(this),
