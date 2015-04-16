@@ -596,6 +596,14 @@ Request = Type.create({
         // stop current chain!!!
         this.stopPromiseChain();
 
+        if (!response.data) {
+            response.data = {};
+        }
+        // add route info
+        if (!response.data.__request_route__) {
+            response.data.__request_route__ = this._getRouteInfo();
+        }
+
         if (response instanceof Error && !this.isERROR && !!router.getErrorRoute()) {
             // return new request
             request = new Request({
@@ -606,7 +614,9 @@ Request = Type.create({
                 isERROR: true
             }, router.createUrl(router.getErrorRoute()));
             // pass exception response over parsed url query as query parameter
+            // assign to exception
             request.parsedUrl.query.exception = response;
+
             // set status codes for new request
             if (response.code) {
                 request.setStatusCode(response.code);
@@ -655,9 +665,9 @@ Request = Type.create({
             this.addHeader('Content-Length', response.length);
             this.response.end(response);
         } else if (!response) {
-            throw new error.HttpError(500, {url: this.url}, 'No data to render');
+            throw new error.HttpError(500, {}, 'No data to render');
         } else {
-            throw new error.HttpError(500, {url: this.url}, 'Invalid response type, string or buffer is required!');
+            throw new error.HttpError(500, {}, 'Invalid response type, string or buffer is required!');
         }
 
         logger.info('Request.render:', {
@@ -772,11 +782,11 @@ Request = Type.create({
         try {
             LoadedController = di.load(controllerToLoad);
         } catch (e) {
-            throw new error.HttpError(500, {path: controllerToLoad, url: this.url}, 'Missing controller', e);
+            throw new error.HttpError(500, {path: controllerToLoad}, 'Missing controller', e);
         }
 
         if (!Type.assert(Type.FUNCTION, LoadedController)) {
-            throw new error.HttpError(500, {path: controllerToLoad, url: this.url}, 'Controller must be function type');
+            throw new error.HttpError(500, {path: controllerToLoad}, 'Controller must be function type');
         }
 
         controller = new LoadedController(this._getApi(), {
@@ -794,12 +804,7 @@ Request = Type.create({
         logger.info('Controller:', {
             controller: controller.__dynamic__,
             controllerToLoad: controllerToLoad,
-            route: {
-                controller: this.controller,
-                action: this.action,
-                module: this.module,
-                params: this.params
-            }
+            route: this._getRouteInfo()
         });
 
         if (controller.has("beforeEach")) {
@@ -816,13 +821,7 @@ Request = Type.create({
             throw new error.HttpError(500, {
                 controller: controller,
                 hasAction: controller.has(this.action),
-                route: {
-                    url: this.url,
-                    controller: this.controller,
-                    action: this.action,
-                    module: this.module,
-                    params: this.params
-                }
+                route: this._getRouteInfo()
             }, 'Missing action in controller');
         }
 
@@ -856,17 +855,17 @@ Request = Type.create({
         try {
             LoadedModule = di.load(moduleToLoad);
         } catch (e) {
-            throw new error.HttpError(500, {path: moduleToLoad, url: this.url}, 'Missing module', e);
+            throw new error.HttpError(500, {path: moduleToLoad}, 'Missing module', e);
         }
 
         if (!Type.assert(Type.FUNCTION, LoadedModule)) {
-            throw new error.HttpError(500, {path: moduleToLoad, url: this.url}, 'Module must be function type');
+            throw new error.HttpError(500, {path: moduleToLoad}, 'Module must be function type');
         }
 
         module = new LoadedModule(this.module);
 
         if (!(module instanceof  ModuleInterface)) {
-            throw new error.HttpError(500, {module: module, url: this.url}, 'Module must be instance of ModuleInterface "core/module"');
+            throw new error.HttpError(500, {module: module}, 'Module must be instance of ModuleInterface "core/module"');
         }
 
 
@@ -897,6 +896,31 @@ Request = Type.create({
         }
 
         return this._handleController(di.getAlias('controllersPath'), di.getAlias('viewsPath'));
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
+     * @method Request#_getRouteInfo
+     *
+     * @description
+     * Return route info for easy debugging
+     * @return {object}
+     */
+    _getRouteInfo: function Request__getRouteInfo() {
+        return {
+            id: this.id,
+            url: this.url,
+            controller: this.controller,
+            action: this.action,
+            module: this.module,
+            params: this.params,
+            method: this.getMethod(),
+            requestDomain: this.getRequestDomain(),
+            remoteAddress: this.getRequestRemoteAddress(),
+            remotePort: this.getRequestRemotePort(),
+            localAddress: this.getRequestLocalAddress(),
+            localPort: this.getRequestLocalPort()
+        };
     }
 
 });
