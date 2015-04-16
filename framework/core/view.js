@@ -189,7 +189,7 @@ View = ViewInterface.inherit(
                 path = di.normalizePath(path);
                 return fs.statSync(path).isFile();
             } catch (e) {
-                logger.error('View.isFile:', {path: path, e: e});
+                logger.warn('View.isFile:', {path: path, e: e});
             }
             return false;
         },
@@ -207,7 +207,7 @@ View = ViewInterface.inherit(
                 path = di.normalizePath(path);
                 return fs.statSync(path).isDirectory();
             } catch (e) {
-                logger.error('View.isDir:', {path: path, e: e});
+                logger.warn('View.isDir:', {path: path, e: e});
             }
             return false;
         },
