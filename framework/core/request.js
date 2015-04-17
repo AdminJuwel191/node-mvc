@@ -842,6 +842,8 @@ Request = Type.create({
             promise = this._chain(promise, controller.afterEach.bind(controller, this.action, this.params));
         }
 
+        this.onEnd(controller.destroy.bind(controller));
+
         return promise;
     },
     /**
