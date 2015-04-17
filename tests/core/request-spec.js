@@ -129,6 +129,7 @@ describe('core/request', function () {
         var ctx = {
             body: [],
             isForwarded: false,
+            isRendered: true,
             request: {
                 on: function(name, resolve) {
 
@@ -163,6 +164,7 @@ describe('core/request', function () {
 
         var ctx = {
             isForwarded: true,
+            isRendered: true,
             request: {
                 emit: function() {
                     return true;

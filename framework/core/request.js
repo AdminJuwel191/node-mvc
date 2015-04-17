@@ -442,20 +442,21 @@ Request = Type.create({
     parse: function Request_parse() {
 
         if (this.isForwarded) {
-            return this._process().then(
-                this.request.emit.bind(this.request, 'destory'),
-                this.request.emit.bind(this.request, 'destory')
-            );  // emit destroy on error and resolve
+            return this._process().then(destroy.bind(this), destroy.bind(this));
         }
         // receive body as buffer
         this.request.on('data', this.body.push.bind(this.body));
 
         return new Promise(this.request.on.bind(this.request, 'end'))
             .then(this._process.bind(this))
-            .then(
-            this.request.emit.bind(this.request, 'destory'),
-            this.request.emit.bind(this.request, 'destory')
-        );  // emit destroy on error and resolve
+            .then(destroy.bind(this),destroy.bind(this));  // emit destroy on error and resolve
+
+
+        function destroy() {
+            if (this.isRendered) {
+                this.request.emit('destory');
+            }
+        }
     },
     /**
      * @since 0.0.1
@@ -644,16 +645,24 @@ Request = Type.create({
             return false;
         }
 
-        this._checkContentType('text/html');
-
-        this.response.writeHead(this.statusCode, this.headers);
-
         if (Type.isString(response)) {
+
+            this._checkContentType('text/html');
+            this.response.writeHead(this.statusCode, this.headers);
+
             this.addHeader('Content-Length', response.length);
             this.response.end(response);
+            this.isRendered = true;
+
         } else if (response instanceof Buffer) {
+
+            this._checkContentType('text/html');
+            this.response.writeHead(this.statusCode, this.headers);
+
             this.addHeader('Content-Length', response.length);
             this.response.end(response);
+            this.isRendered = true;
+
         } else if (!response) {
             throw new error.HttpError(500, {url: this.url}, 'No data to render');
         } else {
@@ -668,7 +677,6 @@ Request = Type.create({
             content_type: this.getHeader('content-type')
         });
 
-        this.isRendered = true;
 
         return true;
     },
@@ -834,8 +842,6 @@ Request = Type.create({
         if (controller.has("afterEach")) {
             promise = this._chain(promise, controller.afterEach.bind(controller, this.action, this.params));
         }
-
-        this.onEnd(controller.destroy.bind(controller));
 
         return promise;
     },
