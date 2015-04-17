@@ -924,6 +924,7 @@ describe('core/request', function () {
             stopPromiseChain: function () {
 
             },
+            _getRouteInfo: function() {},
             getHeader: function () {},
             setStatusCode: function () {},
             statusCode: 0,
@@ -945,7 +946,7 @@ describe('core/request', function () {
         response = {};
         ctx.isERROR = true;
         ctx._render = function (a) {
-            expect(a).toBe('{}');
+            expect(a).toBe('{ data: { __request_route__: undefined } }');
         };
         spyOn(ctx, '_render').and.callThrough();
         request._handleError.call(ctx, response);
@@ -985,6 +986,7 @@ describe('core/request', function () {
             setStatusCode: function(code) {
                 this.statusCode = code;
             },
+            _getRouteInfo: function () {},
             stopPromiseChain: function () {
 
             },
@@ -1039,6 +1041,7 @@ describe('core/request', function () {
             stopPromiseChain: function () {
 
             },
+            _getRouteInfo: function() {},
             getHeader: function () {},
             statusCode: 0,
             id: 1,
