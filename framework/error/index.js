@@ -19,7 +19,6 @@ var di = require('../di'),
 Exception = Type.create({},
     {
         _construct: function Exception(message, e) {
-            var stack;
             if (!(e instanceof Error)) {
                 e = new Error();
             }
@@ -30,27 +29,34 @@ Exception = Type.create({},
             }
 
             e.name = 'Exception';
-            e.trace = core.trace(8, 9);
-            // store stack string reference to avoid multiple to toString conversion loop
-            // possible bug in js/v8
-            stack = e.stack;
 
-            e.toString = function () {
-                var m = this.name + ' ' + this.trace;
-                m += '\n';
-                m += this.message;
-                if (this.code) {
+            e.toString = (function (name, trace, message, code, data, stack) {
+                return function error_toString() {
+                    var m = name + ' ' + trace;
                     m += '\n';
-                    m += 'CODE:' + this.code;
-                }
-                if (this.data) {
+                    m += message;
+                    if (code) {
+                        m += '\n';
+                        m += 'CODE:' + code;
+                    }
+                    if (data) {
+                        m += '\n';
+                        m += data;
+                    }
                     m += '\n';
-                    m += core.inspect(this.data);
+                    m += stack;
+                    return m;
                 }
-                m += '\n';
-                m += stack;
-                return m;
-            };
+            }(e.name, core.trace(8, 9), e.message, e.code, core.inspect(e.data), e.stack));
+
+            if (e.code) {
+                delete e.code;
+            }
+
+            if (e.data) {
+                delete e.data;
+            }
+
             throw e;
         }
     }
@@ -95,7 +101,9 @@ HttpError = DataError.inherit({},
             try {
                 this._super(data, message, e);
             } catch (e) {
-                e.code = code;
+                if (Type.isNumber(code) && !isNaN(code)) {
+                    e.code = code;
+                }
                 e.name = 'HttpError';
                 throw e;
             }
