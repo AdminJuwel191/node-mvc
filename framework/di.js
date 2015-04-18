@@ -27,7 +27,7 @@ var DI = Type.create({
         try {
             this.filePaths = JSON.parse(fs.readFileSync(this.normalizePath('@{framework}/files.json'), {encoding: 'utf8'}));
         } catch (e) {
-            throw new Error("Cannot load @{framework}/files.json path");
+            throw "Cannot load @{framework}/files.json path";
         }
 
     },

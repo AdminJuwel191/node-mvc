@@ -120,7 +120,7 @@ describe('core/router', function () {
                 method: ['GET']
             });
         });
-        expect(message.message).toBe('Router.add: rule must be instance of RouteRuleInterface');
+        expect(message.indexOf('Router.add: rule must be instance of RouteRuleInterface') > -1).toBe(true);
     });
 
 
@@ -141,7 +141,8 @@ describe('core/router', function () {
                 constructor: 1
             });
         });
-        expect(message.message).toBe('Router.add: dynamic route is not function');
+
+        expect(message.indexOf('Router.add: dynamic route is not function') > -1).toBe(true);
     });
 
 
@@ -190,12 +191,12 @@ describe('core/router', function () {
         var message = tryCatch(function () {
             return router.createUrl(1, 1);
         });
-        expect(message.message).toBe('RouteRule.createUrl: route must be string type');
+        expect(message.indexOf('RouteRule.createUrl: route must be string type') > -1).toBe(true);
 
         message = tryCatch(function () {
             return router.createUrl('home/index', 1);
         });
-        expect(message.message).toBe('RouteRule.createUrl: params must be object type');
+        expect(message.indexOf('RouteRule.createUrl: params must be object type') > -1).toBe(true);
 
         var url = router.createUrl('home/index', {id: 1, '#': 'element-id'});
         expect(url).toBe('/home/index?id=1#element-id');
@@ -367,9 +368,9 @@ describe('core/router', function () {
 
         var promise = router.process('GET', {pathname: '/user/view1'});
         promise.then(null, function (error) {
-            expect(error.name).toBe('HttpError');
-            expect(error.code).toBe(404);
-            expect(error.message).toBe('Not found');
+            expect(error.indexOf('HttpError') > -1).toBe(true);
+            expect(error.indexOf('404') > -1).toBe(true);
+            expect(error.indexOf('Not found') > -1).toBe(true);
             done();
         });
 
@@ -399,9 +400,9 @@ describe('core/router', function () {
 
         var promise = router.process('GET', {pathname: '/user/view1'});
         promise.then(null, function (error) {
-            expect(error.name).toBe('HttpError');
-            expect(error.code).toBe(500);
-            expect(error.message).toBe("Not found, Cannot read property 'c' of undefined");
+            expect(error.indexOf('HttpError') > -1).toBe(true);
+            expect(error.indexOf('500') > -1).toBe(true);
+            expect(error.indexOf("Not found, Cannot read property 'c' of undefined") > -1).toBe(true);
             done();
         });
 

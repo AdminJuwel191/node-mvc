@@ -173,7 +173,7 @@ describe('bootstrap', function () {
             return bootstrap.init('');
         }, mock);
 
-        expect(result.message).toBe('You cannot reinitialize application');
+        expect(result.indexOf('You cannot reinitialize application') > -1).toBe(true);
 
 
         bootstrap.initalized = false;
@@ -182,7 +182,7 @@ describe('bootstrap', function () {
             return bootstrap.init('/abc', 'ccas.json');
         }, mock);
 
-        expect(result.message).toBe('Problem with loading file, do you have your environment file json in path: "'+di.getAlias("envPath")+'" ?, ENOENT, no such file or directory \''+di.getAlias("envPath")+'/ccas.json\'');
+        expect(result.indexOf('Problem with loading file, do you have your environment file json in path') > -1).toBe(true);
 
         bootstrap.initalized = false;
 
@@ -190,7 +190,7 @@ describe('bootstrap', function () {
             return bootstrap.init('', 'invalid.json');
         }, mock);
 
-        expect(result.message).toBe('Problem with parsing environment json file, Unexpected end of input');
+        expect(result.indexOf('Problem with parsing environment json file, Unexpected end of input') > -1).toBe(true);
 
 
         bootstrap.initalized = false;
@@ -215,7 +215,8 @@ describe('bootstrap', function () {
             return bootstrap.init('', 'noconfig.json');
         }, mock);
 
-        expect(result.message).toBe('Config file is not defined');
+        expect(result.indexOf('Config file is not defined') > -1).toBe(true);
+
 
 
         bootstrap.initalized = false;
@@ -223,7 +224,7 @@ describe('bootstrap', function () {
             return bootstrap.init('', 'valid2.json');
         }, mock);
 
-        expect(result.message).toBe("Initialize config: " + envPath + "bootstrap-config2.js, undefined is not a function");
+        expect(result.indexOf('Initialize config') > -1).toBe(true);
 
     });
 });

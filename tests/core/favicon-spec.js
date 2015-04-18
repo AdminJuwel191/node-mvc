@@ -75,7 +75,7 @@ describe('core/favicon', function () {
         var message = tryCatch(function () {
             new Favicon(obj);
         });
-        expect(message.message).toBe("Cannot load favicon, ENOENT, no such file or directory '"+obj.path+"'");
+        expect(message.indexOf('Cannot load favicon, ENOENT, no such file or directory') > -1).toBe(true);
     });
 
     it('onRequest', function () {
@@ -137,9 +137,7 @@ describe('core/favicon', function () {
         var message = tryCatch(function () {
             return instance.onRequest(api);
         });
-
-        expect(message.message).toBe('Favicon is accessible only via GET request');
-
+        expect(message.indexOf('Favicon is accessible only via GET request') > -1).toBe(true);
     });
 
 

@@ -68,8 +68,7 @@ describe('storage/session', function () {
                 }
             });
         });
-
-        expect(message.message).toBe('Session storage must be instance of interface/storage');
+        expect(message.indexOf('Session storage must be instance of interface/storage') > -1).toBe(true);
     });
 
 

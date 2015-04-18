@@ -19,10 +19,13 @@ describe("di", function () {
         try {
             di._construct();
         } catch (e) {
-            message = e.message;
+            message = e;
         }
-        expect(message).toBe("Cannot load @{framework}/files.json path");
         fs.renameSync(nFile, oFile);
+
+        console.log('message', message);
+
+        expect(message.indexOf('Cannot load @{framework}/files.json path') > -1).toBe(true);
     });
 
 
@@ -34,9 +37,10 @@ describe("di", function () {
         try {
             di.exists(1, 1);
         } catch (e) {
-            message = e.message;
+            message = e;
         }
-        expect(message).toBe("DI.exists:  file or fileType must bi string");
+        expect(message.indexOf('DI.exists:  file or fileType must bi string') > -1).toBe(true);
+
     });
 
     it("mock", function () {
@@ -63,9 +67,10 @@ describe("di", function () {
         try {
             di.getAlias("test");
         } catch (e) {
-            message = e.message;
+            message = e;
         }
-        expect(message).toBe("DI.getAlias: \"test\" is not valid");
+        expect(message.indexOf("DI.getAlias: \"test\" is not valid") > -1).toBe(true);
+
     });
 
     it("setAlias", function () {
@@ -85,9 +90,10 @@ describe("di", function () {
         try {
             di.setAlias("test", val);
         } catch (e) {
-            message = e.message;
+            message = e;
         }
-        expect(message).toBe('DI.setAlias: Invalid alias value, chars \'\\?%*:|"<>.\' and spaces are not allowed. KEY: test, VAL:' + val);
+        expect(message.indexOf("DI.setAlias: Invalid alias value, chars") > -1).toBe(true);
+
     });
 
     it("loadError", function () {
@@ -96,9 +102,9 @@ describe("di", function () {
         try {
             di.load("@{test}/one");
         } catch (e) {
-            message = e.message;
+            message = e;
         }
-        expect(message).toBe("DI.load, Cannot find module '" + di.getAlias("test") + "one'");
+        expect(message.indexOf("DI.load, Cannot find module") > -1).toBe(true);
     });
 
     it("load", function () {
@@ -117,8 +123,8 @@ describe("di", function () {
         try {
             di.readFileSync("@{test}/di-test-load1.js");
         } catch (e) {
-            message = e.message;
+            message = e;
         }
-        expect(message).toBe("DI.readFileSync, ENOENT, no such file or directory '" + di.getAlias("test") + "di-test-load1.js'");
+        expect(message.indexOf("DI.readFileSync, ENOENT, no such file or directory") > -1).toBe(true);
     });
 });

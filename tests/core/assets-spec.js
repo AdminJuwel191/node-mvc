@@ -212,7 +212,7 @@ describe('core/assets', function () {
 
         var promise = instance.onRequest(api);
         promise.then(null, function (message) {
-            expect(message.message).toBe("No file found, ENOENT, open '" + path.normalize(__dirname + '/../') + "tf/di-test-load-not-found.js'");
+            expect(message.indexOf("No file found, ENOENT, open") > -1).toBe(true);
             done();
         });
     });
@@ -251,7 +251,7 @@ describe('core/assets', function () {
         method = 'POST';
         var promise = instance.onRequest(api);
         promise.then(null, function (message) {
-            expect(message.message).toBe('Assets are accessible only via GET request');
+            expect(message.indexOf("Assets are accessible only via GET request") > -1).toBe(true);
             done();
         });
     });
@@ -295,7 +295,7 @@ describe('core/assets', function () {
 
         var promise = instance.onRequest(api);
         promise.then(null, function (data) {
-            expect(data.message).toBe('Invalid mime type');
+            expect(data.indexOf("Invalid mime type") > -1).toBe(true);
             done();
         });
 

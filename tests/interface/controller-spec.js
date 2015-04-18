@@ -86,8 +86,7 @@ describe('interface/controller', function () {
             if (typeof callback === 'function') {
                 callback(message);
             }
-            expect(message.data.method).toBe(method);
-            expect(message.message).toBe('ControllerInterface: missing method in Controller object');
+            expect(message.indexOf('ControllerInterface: missing method in Controller object') > -1).toBe(true);
         });
     }
 

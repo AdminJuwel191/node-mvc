@@ -80,7 +80,8 @@ describe('core/component', function () {
         message = tryCatch(function () {
             return component._construct();
         });
-        expect(message.message).toBe('Component.construct: problem with loading dependency file, DI.readFileSync, ENOENT, no such file or directory \''+oFile+'\'');
+        expect(message.indexOf("Component.construct: problem with loading dependency file") > -1).toBe(true);
+
         fs.renameSync(nFile, oFile);
     });
 
@@ -149,13 +150,14 @@ describe('core/component', function () {
             return component.get('test/1123');
         });
 
-        expect(message.message).toBe('Component "test/1123" is not registered in system');
+        expect(message.indexOf('Component "test/1123" is not registered in system') > -1).toBe(true);
+
 
         message = tryCatch(function () {
             return component.init('test/1123');
         });
 
-        expect(message.message).toBe('Component.init: components argument must be array type');
+        expect(message.indexOf('Component.init: components argument must be array type') > -1).toBe(true);
 
         component.components = {};
 
@@ -165,7 +167,7 @@ describe('core/component', function () {
                 "name": "custom"
             }]);
         });
-        expect(message.message).toBe('Component "custom" is not initialized, DI.load, Cannot find module \'custom\'');
+        expect(message.indexOf('Component "custom" is not initialized') > -1).toBe(true);
     });
 
 
@@ -192,7 +194,8 @@ describe('core/component', function () {
                 "errorRoute": "error/route"
             });
         });
-        expect(message.message).toBe('Component "core/router" already exist in system');
+        expect(message.indexOf('Component "core/router" already exist in system') > -1).toBe(true);
+
         component.components = {};
         component.set("core/logger", {
             "name": "core/logger"
@@ -237,12 +240,14 @@ describe('core/component', function () {
                 return config.a.b;
             });
         });
-        expect(message.message).toBe('Component "custom" is not initialized, Cannot read property \'b\' of undefined');
+        expect(message.indexOf('Component "custom" is not initialized, Cannot read property \'b\' of undefined') > -1).toBe(true);
+
 
         message = tryCatch(function () {
             component.get("custom")
         });
-        expect(message.message).toBe('Component "custom" is not registered in system');
+        expect(message.indexOf('Component "custom" is not registered in system') > -1).toBe(true);
+
 
     });
 

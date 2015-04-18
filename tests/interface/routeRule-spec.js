@@ -47,8 +47,7 @@ describe('interface/routeRule', function () {
             if (typeof callback === 'function') {
                 callback(message);
             }
-            expect(message.data.method).toBe(method);
-            expect(message.message).toBe('RouteRuleInterface: missing method in routerRule object');
+            expect(message.indexOf('RouteRuleInterface: missing method in routerRule object') > -1).toBe(true);
         });
     }
 

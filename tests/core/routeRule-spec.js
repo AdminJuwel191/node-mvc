@@ -365,7 +365,7 @@ describe('core/routeRule', function () {
                 route: 'posts/index'
             });
         });
-        expect(message.message).toBe('RouteRule: rule object must have an pattern property');
+        expect(message.indexOf('RouteRule: rule object must have an pattern property') > -1).toBe(true);
 
         message = tryCatch(function() {
             new Constructor({
@@ -373,7 +373,8 @@ describe('core/routeRule', function () {
                 route: 'posts/index'
             });
         });
-        expect(message.message).toBe('RouteRule: rule.pattern must be string type');
+
+        expect(message.indexOf('RouteRule: rule.pattern must be string type') > -1).toBe(true);
 
         message = tryCatch(function() {
             new Constructor({
@@ -382,7 +383,7 @@ describe('core/routeRule', function () {
             });
         });
 
-        expect(message.message).toBe('key: route, value: "number"  (1), is expected to be: "string" type.');
+        expect(message.message.indexOf('key: route, value: "number"  (1), is expected to be: "string" type.') > -1).toBe(true);
 
 
         message = tryCatch(function() {
@@ -390,8 +391,7 @@ describe('core/routeRule', function () {
                 pattern: 'posts/index'
             });
         });
-
-        expect(message.message).toBe('RouteRule: rule object must have an route property');
+        expect(message.indexOf('RouteRule: rule object must have an route property') > -1).toBe(true);
     });
 
 
@@ -442,7 +442,7 @@ describe('core/routeRule', function () {
                 route: 'posts/<action>'
             });
         });
-        expect(message.message).toBe('RouteRule: invalid route rule');
+        expect(message.indexOf('RouteRule: invalid route rule') > -1).toBe(true);
     });
 
 
@@ -509,12 +509,12 @@ describe('core/routeRule', function () {
         var message = tryCatch(function() {
             routeRule.escape(1, [{key: 'bcc', value: 'ac'}]);
         });
-        expect(message.message).toBe('RouteRule.escape: str must be a string type');
+        expect(message.indexOf('RouteRule.escape: str must be a string type') > -1).toBe(true);
 
         message = tryCatch(function() {
             routeRule.escape('abc', 1);
         });
-        expect(message.message).toBe('RouteRule.escape: escape must be a array type');
+        expect(message.indexOf('RouteRule.escape: escape must be a array type') > -1).toBe(true);
     });
 
 

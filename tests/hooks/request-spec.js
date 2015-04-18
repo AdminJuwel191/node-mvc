@@ -67,19 +67,20 @@ describe('hooks/request', function () {
             reqInstance.set(1, 2);
         });
 
-        expect(message.message).toBe('RequestHooks.has regex must be regex type');
-
+        expect(message.indexOf('RequestHooks.has regex must be regex type') > -1).toBe(true);
 
         message = tryCatch(function () {
             reqInstance.set(regex, 2);
         });
-        expect(message.message).toBe('RequestHooks.add hook already exists');
+
+        expect(message.indexOf('RequestHooks.add hook already exists') > -1).toBe(true);
 
 
         message = tryCatch(function () {
             reqInstance.set(/abc/, 2);
         });
-        expect(message.message).toBe('RequestHooks.add hook value must be function type');
+        expect(message.indexOf('RequestHooks.add hook value must be function type') > -1).toBe(true);
+
     });
 
 
@@ -96,7 +97,8 @@ describe('hooks/request', function () {
         var message = tryCatch(function () {
             reqInstance.has(1);
         });
-        expect(message.message).toBe('RequestHooks.has regex must be regex type');
+        expect(message.indexOf('RequestHooks.has regex must be regex type') > -1).toBe(true);
+
 
     });
 
@@ -115,7 +117,7 @@ describe('hooks/request', function () {
         var message = tryCatch(function () {
             reqInstance.get(regex);
         });
-        expect(message.message).toBe('RequestHooks.get value must be string type');
+        expect(message.indexOf('RequestHooks.get value must be string type') > -1).toBe(true);
     });
 
 
@@ -146,7 +148,8 @@ describe('hooks/request', function () {
         var message = tryCatch(function () {
             return reqInstance.process(api);
         });
-        expect(message.message).toBe('Hook error, RequestHooks.get value must be string type');
+
+        expect(message.indexOf('Hook error') > -1).toBe(true);
     });
 
 

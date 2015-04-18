@@ -77,8 +77,7 @@ describe('interface/component', function () {
             if (typeof callback === 'function') {
                 callback(message);
             }
-            expect(message.data.method).toBe(method);
-            expect(message.message).toBe('ComponentInterface: missing method in Component object');
+            expect(message.indexOf('ComponentInterface: missing method in Component object') > -1).toBe(true);
         });
     }
 

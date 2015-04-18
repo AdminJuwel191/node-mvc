@@ -10,15 +10,12 @@ describe("error", function () {
         var message = tryCatch(function() {
             return new error.Exception('Message', new Error);
         });
-        expect(message.message).toBe('Message');
-        message.trace = null;
-        expect(Type.isString(message.toString())).toBe(true);
+        expect(message.indexOf("Message") > -1).toBe(true);
 
         message = tryCatch(function() {
             return new error.Exception({}, new Error);
         });
-
-        expect(message.name).toBe('Exception');
+        expect(message.indexOf("Exception") > -1).toBe(true);
     });
 
 
@@ -29,10 +26,8 @@ describe("error", function () {
         var message = tryCatch(function() {
             return new error.DataError(c, 'DataMessage', new Error);
         });
-        expect(message.name).toBe('DataError');
-        expect(message.message).toBe('DataMessage');
-        expect(message.data).toBe(c);
-        expect(Type.isString(message.toString())).toBe(true);
+        expect(message.indexOf("DataError") > -1).toBe(true);
+        expect(message.indexOf("DataMessage") > -1).toBe(true);
     });
 
 
@@ -43,11 +38,9 @@ describe("error", function () {
         var message = tryCatch(function() {
             return new error.HttpError(500, c, 'DataMessage', new Error);
         });
-        expect(message.name).toBe('HttpError');
-        expect(message.code).toBe(500);
-        expect(message.message).toBe('DataMessage');
-        expect(message.data).toBe(c);
-        expect(Type.isString(message.toString())).toBe(true);
+        expect(message.indexOf("HttpError") > -1).toBe(true);
+        expect(message.indexOf("500") > -1).toBe(true);
+        expect(message.indexOf("DataMessage") > -1).toBe(true);
     });
     function tryCatch(callback) {
         try {

@@ -5,7 +5,34 @@ var di = require('../di'),
     core = di.load('core'),
     DataError,
     Exception,
-    HttpError;
+    HttpError,
+    SlientHttpError;
+/**
+ * Stringify error message
+ * @param name
+ * @param trace
+ * @param message
+ * @param stack
+ * @param data
+ * @param code
+ * @returns {string}
+ */
+function toString(name, trace, message, stack, data, code) {
+    var m = name + ' ' + trace;
+    m += '\n';
+    m += message;
+    if (code) {
+        m += '\n';
+        m += 'CODE:' + code;
+    }
+    if (data) {
+        m += '\n';
+        m += data;
+    }
+    m += '\n';
+    m += stack;
+    return m;
+}
 /**
  * @license Mit Licence 2014
  * @since 0.0.1
@@ -19,45 +46,16 @@ var di = require('../di'),
 Exception = Type.create({},
     {
         _construct: function Exception(message, e) {
+
+            if (e && e.message) {
+                message = message + ', ' + e.message;
+            }
+
             if (!(e instanceof Error)) {
                 e = new Error();
             }
-            if (e.message) {
-                e.message = message + ', ' + e.message;
-            } else {
-                e.message = message;
-            }
 
-            e.name = 'Exception';
-
-            e.toString = (function (name, trace, message, code, data, stack) {
-                return function error_toString() {
-                    var m = name + ' ' + trace;
-                    m += '\n';
-                    m += message;
-                    if (code) {
-                        m += '\n';
-                        m += 'CODE:' + code;
-                    }
-                    if (data) {
-                        m += '\n';
-                        m += data;
-                    }
-                    m += '\n';
-                    m += stack;
-                    return m;
-                }
-            }(e.name, core.trace(8, 9), e.message, e.code, core.inspect(e.data), e.stack));
-
-            if (e.code) {
-                delete e.code;
-            }
-
-            if (e.data) {
-                delete e.data;
-            }
-
-            throw e;
+            throw toString('Exception', core.trace(8, 9), message, e.stack);
         }
     }
 );
@@ -75,13 +73,16 @@ Exception = Type.create({},
 DataError = Exception.inherit({},
     {
         _construct: function DataError(data, message, e) {
-            try {
-                this._super(message, e);
-            } catch (e) {
-                e.data = data;
-                e.name = 'DataError';
-                throw e;
+
+            if (e && e.message) {
+                message = message + ', ' + e.message;
             }
+
+            if (!(e instanceof Error)) {
+                e = new Error();
+            }
+
+            throw toString('DataError', core.trace(8, 9), message, e.stack, core.inspect(data));
         }
     }
 );
@@ -98,22 +99,47 @@ DataError = Exception.inherit({},
 HttpError = DataError.inherit({},
     {
         _construct: function HttpError(code, data, message, e) {
-            try {
-                this._super(data, message, e);
-            } catch (e) {
-                if (Type.isNumber(code) && !isNaN(code)) {
-                    e.code = code;
-                }
-                e.name = 'HttpError';
-                throw e;
+
+            if (e && e.message) {
+                message = message + ', ' + e.message;
             }
+
+            if (!(e instanceof Error)) {
+                e = new Error();
+            }
+
+            throw toString('HttpError', core.trace(8, 9), message, e.stack, core.inspect(data), code);
         }
     }
 );
+
+/**
+ * @license Mit Licence 2014
+ * @since 0.0.1
+ * @author Igor Ivanovic
+ * @name silentHttpError
+ *
+ * @constructor
+ * @description
+ * SlientHttpError is an error without throw
+ * @return string
+ */
+function silentHttpError(code, data, message, e) {
+    if (e && e.message) {
+        message = message + ', ' + e.message;
+    }
+
+    if (!(e instanceof Error)) {
+        e = new Error();
+    }
+
+    return toString('SlientHttpError', core.trace(8, 9), message, e.stack, core.inspect(data), code);
+}
 
 
 module.exports = {
     Exception: Exception,
     HttpError: HttpError,
-    DataError: DataError
+    DataError: DataError,
+    silentHttpError: silentHttpError
 };

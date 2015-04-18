@@ -14,6 +14,32 @@ var di = require('../di'),
     error = di.load('error'),
     Promise = di.load('promise'),
     Request;
+
+
+/**
+ * @license Mit Licence 2014
+ * @since 0.0.1
+ * @author Igor Ivanovic
+ * @name getErrorCode
+ *
+ * @description
+ * Get error code from request
+ * @return number
+ */
+function getErrorCode(message) {
+    var tokens = message.split('\n'),
+        token;
+    while (tokens.length) {
+        token = tokens.shift();
+        if (token.indexOf('CODE:') === 0) {
+            token = parseInt(token.replace('CODE:', ''));
+            if (Type.isNumber(token) && !isNaN(token)) {
+                return token;
+            }
+        }
+    }
+    return 500;
+}
 /**
  * @license Mit Licence 2014
  * @since 0.0.1
@@ -418,7 +444,7 @@ Request = Type.create({
     sendNoChange: function () {
         this.stopPromiseChain();
         this.setStatusCode(304);
-        this._render('');
+        this._render('NO CHANGE');
     },
     /**
      * @since 0.0.1
@@ -434,6 +460,18 @@ Request = Type.create({
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
+     * @method Request#destroy
+     *
+     * @description
+     * Destroy current instance
+     */
+    _destroy: function Request__destroy() {
+        this.request.emit('destory');
+        this.destroy();
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
      * @method Request#parseRequest
      *
      * @description
@@ -442,19 +480,14 @@ Request = Type.create({
     parse: function Request_parse() {
 
         if (this.isForwarded) {
-            return this._process().then(destroy.bind(this), destroy.bind(this));
+            return this._process().then(this._destroy.bind(this), this._destroy.bind(this));
         }
         // receive body as buffer
         this.request.on('data', this.body.push.bind(this.body));
 
         return new Promise(this.request.on.bind(this.request, 'end'))
             .then(this._process.bind(this))
-            .then(destroy.bind(this),destroy.bind(this));  // emit destroy on error and resolve
-
-
-        function destroy() {
-            this.request.emit('destory');
-        }
+            .then(this._destroy.bind(this), this._destroy.bind(this));  // emit destroy on error and resolve
     },
     /**
      * @since 0.0.1
@@ -571,7 +604,7 @@ Request = Type.create({
      * @return boolean
      */
     _handleError: function Request_handleError(response) {
-        var request;
+        var request, code;
 
         if (this.isRendered) {
             // we have multiple recursion in parse for catching
@@ -584,26 +617,24 @@ Request = Type.create({
             id: this.id,
             isRendered: this.isRendered,
             content_type: this.getHeader('content-type'),
-            response: response
+            message: response
         });
-        // set status codes
-        if (response.code && Type.isNumber(response.code) && !isNaN(response.code)) {
-            this.setStatusCode(response.code);
-        } else {
-            this.setStatusCode(500);
+
+        if (response instanceof Error) {
+            response = error.silentHttpError(500, {}, 'SlientHttpError: mvcjs error is not thrown', response);
         }
+        // get error code from message
+        code = getErrorCode(response);
+        // set status codes
+        this.setStatusCode(code);
         // stop current chain!!!
         this.stopPromiseChain();
 
-        if (!response.data) {
-            response.data = {};
-        }
-        // add route info
-        if (!response.data.__request_route__) {
-            response.data.__request_route__ = this._getRouteInfo();
-        }
+        response += '\n';
+        response += 'ROUTE:' + core.inspect(this._getRouteInfo());
 
-        if (response instanceof Error && !this.isERROR && !!router.getErrorRoute()) {
+        if (!this.isERROR && !!router.getErrorRoute()) {
+
             // return new request
             request = new Request({
                 request: this.request,
@@ -612,28 +643,20 @@ Request = Type.create({
                 body: this.body,
                 isERROR: true
             }, router.createUrl(router.getErrorRoute()));
+            // destroy current request this must after we transfer reference of request/response/body to forwarded route
+            this._destroy();
             // pass exception response over parsed url query as query parameter
             // assign to exception
             request.parsedUrl.query.exception = response;
-
             // set status codes for new request
-            if (response.code) {
-                request.setStatusCode(response.code);
-            } else {
-                request.setStatusCode(500);
-            }
+            request.setStatusCode(code);
             // return parsed request
+
+
+
             return request.parse();
-        } else if (['HttpError', 'DataError', 'Exception'].indexOf(response.name) > -1) {
-            this.addHeader('Content-Type', 'text/plain');
-            return this._render(response.toString());
-        } else if (response.stack) {
-            this.addHeader('Content-Type', 'text/plain');
-            return this._render(response.stack);
-        } else if (this.isERROR) {
-            this.addHeader('Content-Type', 'text/plain');
-            return this._render(core.inspect(response));
         } else {
+            this.addHeader('Content-Type', 'text/plain');
             return this._render(response);
         }
     },

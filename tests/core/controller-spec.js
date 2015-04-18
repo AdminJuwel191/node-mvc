@@ -370,11 +370,13 @@ describe('core/controller', function () {
         var message = tryCatch(function () {
             return controller.setCookie(1);
         });
-        expect(message.message).toBe('Controller.setCookie: Key and Value must be provided!');
+        expect(message.indexOf('Controller.setCookie: Key and Value must be provided!') > -1).toBe(true);
+
         message = tryCatch(function () {
             return  controller.setCookie(undefined, 1);
         });
-        expect(message.message).toBe('Controller.setCookie: Key and Value must be provided!');
+        expect(message.indexOf('Controller.setCookie: Key and Value must be provided!') > -1).toBe(true);
+
     });
 
 
@@ -438,8 +440,8 @@ describe('core/controller', function () {
         var message = tryCatch(function () {
             controller.getSession.call(ctx, 1);
         });
+        expect(message.indexOf('Controller.getSession: key must be string type') > -1).toBe(true);
 
-        expect(message.message).toBe('Controller.getSession: key must be string type');
     });
 
 
@@ -458,8 +460,8 @@ describe('core/controller', function () {
         var message = tryCatch(function () {
             controller.removeSession.call(ctx, 1);
         });
+        expect(message.indexOf('Controller.removeSession: key must be string type') > -1).toBe(true);
 
-        expect(message.message).toBe('Controller.removeSession: key must be string type');
     });
 
 
@@ -479,8 +481,7 @@ describe('core/controller', function () {
         var message = tryCatch(function () {
             controller.setSession.call(ctx, 1);
         });
-
-        expect(message.message).toBe('Controller.getSession: key must be string type');
+        expect(message.indexOf('Controller.getSession: key must be string type') > -1).toBe(true);
     });
 
 

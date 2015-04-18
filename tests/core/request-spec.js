@@ -142,19 +142,20 @@ describe('core/request', function () {
                     return true;
                 }
             },
+            _destroy: function () {},
             _process: function() {
                 return 'process';
             }
         };
 
         spyOn(ctx.request, 'on').and.callThrough();
-        spyOn(ctx.request, 'emit').and.callThrough();
+        spyOn(ctx, '_destroy').and.callThrough();
         spyOn(ctx, '_process').and.callThrough();
 
 
         request.parse.call(ctx).then(function(data) {
             expect(ctx.request.on).toHaveBeenCalled();
-            expect(ctx.request.emit).toHaveBeenCalled();
+            expect(ctx._destroy).toHaveBeenCalled();
             expect(ctx._process).toHaveBeenCalled();
             done();
         });
@@ -172,6 +173,7 @@ describe('core/request', function () {
                     return true;
                 }
             },
+            _destroy: function () {},
             _process: function() {
                 return {
                     then: function(a, b) {
@@ -182,13 +184,13 @@ describe('core/request', function () {
             }
         };
 
-        spyOn(ctx.request, 'emit').and.callThrough();
+        spyOn(ctx, '_destroy').and.callThrough();
         spyOn(ctx, '_process').and.callThrough();
 
 
         request.parse.call(ctx);
 
-        expect(ctx.request.emit).toHaveBeenCalled();
+        expect(ctx._destroy).toHaveBeenCalled();
         expect(ctx._process).toHaveBeenCalled();
     });
 
@@ -219,8 +221,7 @@ describe('core/request', function () {
         var message = tryCatch(function() {
             request.setStatusCode('500');
         });
-
-        expect(message.message).toBe('Status code must be number type');
+        expect(message.indexOf('Status code must be number type') > -1).toBe(true);
     });
 
 
@@ -248,8 +249,7 @@ describe('core/request', function () {
         var message = tryCatch(function () {
             request.addHeader(1, '180');
         });
-        expect(message.message).toBe('Request.addHeader: Header key must be string type');
-
+        expect(message.indexOf('Request.addHeader: Header key must be string type') > -1).toBe(true);
         expect(request.getHeader('content-type')).toBe('text/html');
         expect(request.getHeader('non-existing')).toBe(false);
 
@@ -270,7 +270,7 @@ describe('core/request', function () {
         var message = tryCatch(function () {
             request.hasHeader(1);
         });
-        expect(message.message).toBe('Request.hasHeader: Header key must be string type');
+        expect(message.indexOf('Request.hasHeader: Header key must be string type') > -1).toBe(true);
     });
 
 
@@ -326,7 +326,7 @@ describe('core/request', function () {
         var message = tryCatch(function () {
             request.getRequestHeader(1);
         });
-        expect(message.message).toBe('Request.getRequestHeader: Header key must be string type');
+        expect(message.indexOf('Request.getRequestHeader: Header key must be string type') > -1).toBe(true);
     });
 
 
@@ -746,17 +746,18 @@ describe('core/request', function () {
             request = new Constructor(config, '/home/index');
             request._render.call(ctx);
         });
-        expect(message.code).toBe(500);
-        expect(message.message).toBe('No data to render');
+
+        expect(message.indexOf('No data to render') > -1).toBe(true);
+        expect(message.indexOf('500') > -1).toBe(true);
+
 
         message = tryCatch(function () {
             ctx.isRendered = false;
             request = new Constructor(config, '/home/index');
             request._render.call(ctx, {});
         });
-        expect(message.code).toBe(500);
-        expect(message.message).toBe('Invalid response type, string or buffer is required!');
-
+        expect(message.indexOf('Invalid response type, string or buffer is required!') > -1).toBe(true);
+        expect(message.indexOf('500') > -1).toBe(true);
         ctx.isRendered = true;
         expect(request._render.call(ctx, response)).toBe(false);
     });
@@ -878,6 +879,9 @@ describe('core/request', function () {
         };
 
         var ctx = {
+            response: {
+                writeHead: function () {}
+            },
             _render: function (a) {
                 return a;
             },
@@ -918,6 +922,12 @@ describe('core/request', function () {
     it('_handleError', function () {
 
         var ctx = {
+            request: {},
+            response: {
+                writeHead: function () {},
+                end: function () {}
+            },
+
             addHeader: function () {
             },
             _render: function () {
@@ -926,6 +936,8 @@ describe('core/request', function () {
             stopPromiseChain: function () {
 
             },
+            _checkContentType: function () {},
+            destroy: function () {},
             _getRouteInfo: function() {},
             getHeader: function () {},
             setStatusCode: function () {},
@@ -935,39 +947,77 @@ describe('core/request', function () {
         router.getErrorRoute = function () {
             return 'core/error'.split('/');
         };
-        var response = {};
+        var response = 'THIS IS AN ERROR MESSAGE, \n CODE:500 \n this is an error';
 
         spyOn(ctx, '_render').and.callThrough();
         spyOn(ctx, 'setStatusCode').and.callThrough();
 
         var request = new Constructor(config, '/home/index');
+
+        ctx.isERROR = true;
         request._handleError.call(ctx, response);
         expect(ctx._render).toHaveBeenCalled();
         expect(ctx.setStatusCode).toHaveBeenCalled();
 
-        response = {};
-        ctx.isERROR = true;
-        ctx._render = function (a) {
-            expect(a).toBe('{ data: { __request_route__: undefined } }');
+    });
+
+    it('_handleError async', function (done) {
+
+        // @todo update this test
+        var ctx = {
+            response: {
+                writeHead: function () {},
+                end: function (data) {
+                    console.log('Data', data);
+                }
+            },
+            request: {
+
+                method: 'GET',
+                on: function (name, resolve) {
+                    if (name !== 'destory') {
+                        resolve();
+                    }
+                },
+                once: function (name, resolve) {
+                    if (name !== 'destory') {
+                        resolve();
+                    }
+                },
+                connection: {},
+                headers: {},
+                getRequestHeader: function () { return ''; },
+                emit: function () {}
+            },
+
+            stopPromiseChain: function () {
+
+            },
+            _destroy: function () {},
+            _getRouteInfo: function() {},
+            getHeader: function () {},
+            setStatusCode: function () {},
+            statusCode: 0,
+            isERROR: false
         };
-        spyOn(ctx, '_render').and.callThrough();
-        request._handleError.call(ctx, response);
-        expect(ctx._render).toHaveBeenCalled();
-
-
-
-        response = {};
-        response.stack = 'TRACE';
-        ctx.isERROR = true;
-        ctx._render = function (a) {
-            expect(a).toBe('TRACE');
+        router.getErrorRoute = function () {
+            return 'core/error'.split('/');
         };
-        spyOn(ctx, '_render').and.callThrough();
-        request._handleError.call(ctx, response);
-        expect(ctx._render).toHaveBeenCalled();
+        var response = 'THIS IS AN ERROR MESSAGE, \n CODE:500 \n this is an error';
 
-        ctx.isRendered = true;
-        expect(request._handleError.call(ctx, response)).toBe(false);
+        spyOn(ctx, 'setStatusCode').and.callThrough();
+
+
+        var request = new Constructor(config, '/home/index');
+
+        request._handleError.call(ctx, response).then(function (data) {
+
+            expect(ctx.setStatusCode).toHaveBeenCalled();
+            done();
+        }).catch(function(data) {
+            fail(data.stack);
+            done();
+        })
     });
 
 
@@ -979,6 +1029,7 @@ describe('core/request', function () {
             _render: function () {
                 return 'RENDERED';
             },
+            _destroy: function () {},
             _resolveRoute: function(a) {
                 var a1 = a.shift(), a2 = a.shift();
                 expect(a1).toBe('core/error');
@@ -1019,11 +1070,11 @@ describe('core/request', function () {
 
 
         var response = new Error('Message');
-        response.code = 404;
+
         request._handleError.call(ctx, response);
         expect(Constructor.prototype.parse).toHaveBeenCalled();
 
-        expect(ctx.statusCode).toBe(404);
+        expect(ctx.statusCode).toBe(500);
 
     });
 
@@ -1045,6 +1096,7 @@ describe('core/request', function () {
             },
             _getRouteInfo: function() {},
             getHeader: function () {},
+            _destroy: function () {},
             statusCode: 0,
             id: 1,
             isERROR: false
@@ -1347,16 +1399,14 @@ describe('core/request', function () {
         var message = tryCatch(function () {
             request._handleModule('@{modulesPath}/');
         });
-
-        expect(message.message).toBe("Missing module, DI.load, Cannot find module '"+cpath+"/test'");
+        expect(message.indexOf('Missing module') > -1).toBe(true);
 
 
         request.module = 'invalid2';
         message = tryCatch(function () {
             request._handleModule('@{modulesPath}/');
         });
-
-        expect(message.message).toBe('Module must be function type');
+        expect(message.indexOf('Module must be function type') > -1).toBe(true);
 
 
     });
@@ -1373,8 +1423,7 @@ describe('core/request', function () {
         message = tryCatch(function () {
             request._handleModule('@{modulesPath}/');
         });
-
-        expect(message.message).toBe('Module must be instance of ModuleInterface "core/module"');
+        expect(message.indexOf('Module must be instance of ModuleInterface "core/module"') > -1).toBe(true);
 
     });
 
@@ -1492,8 +1541,7 @@ describe('core/request', function () {
         var message = tryCatch(function () {
             return request._handleController('@{controllersPath}/');
         });
-
-        expect(message.message).toBe('Controller must be function type');
+        expect(message.indexOf('Controller must be function type') > -1).toBe(true);
     });
 
 
@@ -1508,8 +1556,7 @@ describe('core/request', function () {
         var message = tryCatch(function () {
             return request._handleController('@{controllersPath}/');
         });
-
-        expect(message.message).toBe('Missing action in controller');
+        expect(message.indexOf('Missing action in controller') > -1).toBe(true);
     });
 
 
@@ -1523,7 +1570,7 @@ describe('core/request', function () {
         var message = tryCatch(function () {
             return request._handleController('@{controllersPath}/');
         });
-        expect(message.message).toBe("Missing controller, DI.load, Cannot find module '"+cpath+"/index'");
+        expect(message.indexOf('Missing controller') > -1).toBe(true);
     });
 
 
@@ -1537,7 +1584,7 @@ describe('core/request', function () {
         var message = tryCatch(function () {
             return request._handleController('@{controllersPath}/');
         });
-        expect(message.message).toBe('Controller must be instance of ControllerInterface "core/controller"');
+        expect(message.indexOf('Controller must be instance of ControllerInterface "core/controller"') > -1).toBe(true);
     });
 
     it('forward', function () {
@@ -1569,7 +1616,7 @@ describe('core/request', function () {
         var message = tryCatch(function () {
             request.forwardUrl('/test/index?id=1');
         });
-        expect(message.message).toBe('Cannot forward to same url');
+        expect(message.indexOf('Cannot forward to same url') > -1).toBe(true);
     });
 
     it('forward error', function () {
@@ -1583,7 +1630,7 @@ describe('core/request', function () {
         var message = tryCatch(function() {
             request.forward('index/index', {id: 1});
         });
-        expect(message.message).toBe('Cannot forward to same route');
+        expect(message.indexOf('Cannot forward to same route') > -1).toBe(true);
     });
 
 

@@ -61,8 +61,7 @@ describe('interface/http', function () {
             if (typeof callback === 'function') {
                 callback(message);
             }
-            expect(message.data.method).toBe(method);
-            expect(message.message).toBe('HttpServiceInterface: missing method in HttpService object');
+            expect(message.indexOf('HttpServiceInterface: missing method in HttpService object') > -1).toBe(true);
         });
     }
 
