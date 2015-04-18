@@ -313,6 +313,18 @@ Controller = ControllerInterface.inherit({
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
+     * @method Controller#getRequestId
+     *
+     * @description
+     * Get request id
+     * @return {string}
+     */
+    getRequestId: function Controller_getRequestId() {
+        return this.__config__.id;
+    },
+    /**
+     * @since 0.0.1
+     * @author Igor Ivanovic
      * @method Controller#getControllerName
      *
      * @description

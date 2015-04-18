@@ -76,6 +76,7 @@ describe('core/request', function () {
                 on: function () {
 
                 },
+                once: function () {},
                 headers: {
                     'content-type': 'text/html',
                     'content-length': '180',
@@ -91,7 +92,8 @@ describe('core/request', function () {
                 },
                 on: function () {
 
-                }
+                },
+                once: function () {}
             }
         };
 
@@ -201,11 +203,11 @@ describe('core/request', function () {
 
     it('onEnd', function () {
         request = new Constructor(config, '/home/index');
-        spyOn(config.request, "on").and.callThrough();
+        spyOn(config.request, "once").and.callThrough();
         request.onEnd(function () {
 
         });
-        expect(config.request.on).toHaveBeenCalled();
+        expect(config.request.once).toHaveBeenCalled();
     });
 
 

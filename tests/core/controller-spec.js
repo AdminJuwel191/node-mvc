@@ -41,10 +41,10 @@ describe('core/controller', function () {
         controller = new C(request, {
             controller: 'c',
             action: 'a',
-            module: 'm'
+            module: 'm',
+            id: 'ID'
         });
     });
-
 
     it('parsedUrl', function () {
         request.parsedUrl = 'ABC';
@@ -268,6 +268,9 @@ describe('core/controller', function () {
     });
     it('getControllerName', function () {
         expect(controller.getControllerName()).toBe('c');
+    });
+    it('getControllerName', function () {
+        expect(controller.getRequestId()).toBe('ID');
     });
     it('getModuleName', function () {
         expect(controller.getModuleName()).toBe('m');

@@ -72,7 +72,7 @@ Request = Type.create({
      * Write header
      */
     onEnd: function Request_onEnd(callback) {
-        this.request.on('destory', callback);
+        this.request.once('destory', callback);
     },
     /**
      * @since 0.0.1
@@ -453,9 +453,7 @@ Request = Type.create({
 
 
         function destroy() {
-            if (this.isRendered) {
-                this.request.emit('destory');
-            }
+            this.request.emit('destory');
         }
     },
     /**
@@ -802,6 +800,7 @@ Request = Type.create({
             action: this.action,
             module: this.module,
             url: this.url,
+            id: this.id,
             viewsPath: viewsPath
         });
 
