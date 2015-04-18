@@ -587,7 +587,7 @@ Request = Type.create({
             response: response
         });
         // set status codes
-        if (response.code) {
+        if (response.code && Type.isNumber(response.code) && !isNaN(response.code)) {
             this.setStatusCode(response.code);
         } else {
             this.setStatusCode(500);
