@@ -77,6 +77,7 @@ Request = Type.create({
         this.body = [];
         this.isERROR = false;
         this.isCompressionEnabled = false;
+        this.id = null;
         // body and isForwarded can be overriden
         core.extend(this, config);
 
@@ -87,7 +88,10 @@ Request = Type.create({
         this.isPromiseChainStopped = false;
         this.isRendered = false;
         this.isCompressed = false;
-        this.id = this._uuid();
+
+        if (!this.id) {
+            this.id = this._uuid();
+        }
     },
     /**
      * @since 0.0.1
@@ -364,6 +368,7 @@ Request = Type.create({
                 request: this.request,
                 response: this.response,
                 isForwarded: true,
+                id: this.id,
                 body: this.body
             }, url);
 
@@ -399,6 +404,7 @@ Request = Type.create({
                 request: this.request,
                 response: this.response,
                 isForwarded: true,
+                id: this.id,
                 body: this.body
             }, router.createUrl(route, params));
 
@@ -641,7 +647,8 @@ Request = Type.create({
                 response: this.response,
                 isForwarded: true,
                 body: this.body,
-                isERROR: true
+                isERROR: true,
+                id: this.id
             }, router.createUrl(router.getErrorRoute()));
             // destroy current request this must after we transfer reference of request/response/body to forwarded route
             this._destroy();

@@ -756,8 +756,10 @@ describe('core/request', function () {
             request = new Constructor(config, '/home/index');
             request._render.call(ctx, {});
         });
+
         expect(message.indexOf('Invalid response type, string or buffer is required!') > -1).toBe(true);
         expect(message.indexOf('500') > -1).toBe(true);
+
         ctx.isRendered = true;
         expect(request._render.call(ctx, response)).toBe(false);
     });
@@ -1098,7 +1100,7 @@ describe('core/request', function () {
             getHeader: function () {},
             _destroy: function () {},
             statusCode: 0,
-            id: 1,
+            id: '1',
             isERROR: false
         };
         router.getErrorRoute = function () {
@@ -1608,14 +1610,18 @@ describe('core/request', function () {
             return this;
         };
         var request = new Constructor(config, '/core/index');
+        var id = request.id;
         var route = request.forwardUrl('/test/index?id=1');
+        var id2 = request.id;
         expect(route.url).toBe('/test/index?id=1');
         expect(request.isPromiseChainStopped).toBe(true);
+        expect(id).toBe(id2);
 
         request.url = '/test/index?id=1';
         var message = tryCatch(function () {
             request.forwardUrl('/test/index?id=1');
         });
+
         expect(message.indexOf('Cannot forward to same url') > -1).toBe(true);
     });
 

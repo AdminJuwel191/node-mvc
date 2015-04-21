@@ -125,6 +125,7 @@ describe("di", function () {
         } catch (e) {
             message = e;
         }
-        expect(message.indexOf("DI.readFileSync, ENOENT, no such file or directory") > -1).toBe(true);
+
+        expect(message.indexOf("DI.readFileSync, ENOENT: no such file or directory") > -1).toBe(true);
     });
 });

@@ -75,7 +75,7 @@ describe('core/favicon', function () {
         var message = tryCatch(function () {
             new Favicon(obj);
         });
-        expect(message.indexOf('Cannot load favicon, ENOENT, no such file or directory') > -1).toBe(true);
+        expect(message.indexOf('Cannot load favicon, ENOENT: no such file or directory') > -1).toBe(true);
     });
 
     it('onRequest', function () {

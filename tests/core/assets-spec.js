@@ -212,7 +212,8 @@ describe('core/assets', function () {
 
         var promise = instance.onRequest(api);
         promise.then(null, function (message) {
-            expect(message.indexOf("No file found, ENOENT, open") > -1).toBe(true);
+
+            expect(message.indexOf("No file found, ENOENT: no such file or directory") > -1).toBe(true);
             done();
         });
     });
