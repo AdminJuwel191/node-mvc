@@ -207,7 +207,7 @@ BodyParser = Type.create({
      * @return {boolean|string}
      */
     parseValue: function BodyParser_parseValue(str) {
-        return str.replace(/(.*)(([\S\s]+)(Content-Type:(.*)))?/i, '').slice(4);
+        return str.replace(/([\s\S]+name="[^\n]+)([\s\S]+Content-Type[^\n]+)?/i, '').slice(3);
     }
 });
 

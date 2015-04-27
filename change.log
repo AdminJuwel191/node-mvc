@@ -1,1 +1,8 @@
-0.1.5 First stable release
+0.1.8
+    - Fix Update of body parser, fix some cases
+0.1.7
+    - Fix error page messages all error messages should be resolved as string to provide correct error message
+0.1.6
+    - Fix id route forwarding
+0.1.5
+    - Stable release
