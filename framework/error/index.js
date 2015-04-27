@@ -46,16 +46,22 @@ function toString(name, trace, message, stack, data, code) {
 Exception = Type.create({},
     {
         _construct: function Exception(message, e) {
+            var stack;
 
-            if (e && e.message) {
-                message = message + ', ' + e.message;
+            if (Type.isObject(e)) {
+                if (e && e.message) {
+                    message = message + ', ' + e.message;
+                }
+                if (!e) {
+                    e = new Error();
+                }
+                stack = e.stack;
+                e = null;
+            } else {
+                stack = e;
             }
 
-            if (!(e instanceof Error)) {
-                e = new Error();
-            }
-
-            throw toString('Exception', core.trace(8, 9), message, e.stack);
+            throw toString('Exception', core.trace(8, 9), message, stack);
         }
     }
 );
@@ -74,15 +80,23 @@ DataError = Exception.inherit({},
     {
         _construct: function DataError(data, message, e) {
 
-            if (e && e.message) {
-                message = message + ', ' + e.message;
+            var stack;
+
+            if (Type.isObject(e)) {
+                if (e && e.message) {
+                    message = message + ', ' + e.message;
+                }
+                if (!e) {
+                    e = new Error();
+                }
+                stack = e.stack;
+                e = null;
+            } else {
+                stack = e;
             }
 
-            if (!(e instanceof Error)) {
-                e = new Error();
-            }
 
-            throw toString('DataError', core.trace(8, 9), message, e.stack, core.inspect(data));
+            throw toString('DataError', core.trace(8, 9), message, stack, core.inspect(data));
         }
     }
 );
@@ -99,16 +113,22 @@ DataError = Exception.inherit({},
 HttpError = DataError.inherit({},
     {
         _construct: function HttpError(code, data, message, e) {
+            var stack;
 
-            if (e && e.message) {
-                message = message + ', ' + e.message;
+            if (Type.isObject(e)) {
+                if (e && e.message) {
+                    message = message + ', ' + e.message;
+                }
+                if (!e) {
+                    e = new Error();
+                }
+                stack = e.stack;
+                e = null;
+            } else {
+                stack = e;
             }
 
-            if (!(e instanceof Error)) {
-                e = new Error();
-            }
-
-            throw toString('HttpError', core.trace(8, 9), message, e.stack, core.inspect(data), code);
+            throw toString('HttpError', core.trace(8, 9), message, stack, core.inspect(data), code);
         }
     }
 );
@@ -125,15 +145,22 @@ HttpError = DataError.inherit({},
  * @return string
  */
 function silentHttpError(code, data, message, e) {
-    if (e && e.message) {
-        message = message + ', ' + e.message;
+    var stack;
+
+    if (Type.isObject(e)) {
+        if (e && e.message) {
+            message = message + ', ' + e.message;
+        }
+        if (!e) {
+            e = new Error();
+        }
+        stack = e.stack;
+        e = null;
+    } else {
+        stack = e;
     }
 
-    if (!(e instanceof Error)) {
-        e = new Error();
-    }
-
-    return toString('SlientHttpError', core.trace(8, 9), message, e.stack, core.inspect(data), code);
+    return toString('SlientHttpError', core.trace(8, 9), message, stack, core.inspect(data), code);
 }
 
 

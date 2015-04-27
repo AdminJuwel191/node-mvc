@@ -765,18 +765,12 @@ Request = Type.create({
      */
     _chain: function Request__chain(promise, next) {
 
-        var errors = ['HttpError', 'DataError', 'Exception'];
-
         if (!promise) {
             return new Promise(function (resolve, reject) {
                 try {
                     resolve(next.apply(next, arguments));
                 } catch (e) {
-                    if (e && errors.indexOf(e.name) > -1) {
-                        reject(e);
-                    } else {
-                        reject(new error.HttpError(500, {}, "Error on executing action", e));
-                    }
+                    reject(new error.HttpError(500, {}, "Error on executing action", e));
                 }
             });
         }
@@ -792,11 +786,7 @@ Request = Type.create({
             try {
                 return next.apply(next, arguments);
             } catch (e) {
-                if (e && errors.indexOf(e.name) > -1) {
-                    throw e;
-                } else {
-                    throw new error.HttpError(500, {}, "Error on executing action", e);
-                }
+                throw new error.HttpError(500, {}, "Error on executing action", e);
             }
         }
     },
