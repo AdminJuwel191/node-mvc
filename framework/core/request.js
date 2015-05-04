@@ -357,7 +357,7 @@ Request = Type.create({
      * Forward to route
      */
     forwardUrl: function Request_forwardUrl(url) {
-        var request;
+        var request, that = this;
         if (this.url === url) {
             throw new error.HttpError(500, {
                 url: url
@@ -376,6 +376,11 @@ Request = Type.create({
                 url: url
             });
 
+            // destroy current request on end of request
+            request.onEnd(function () {
+                that._destroy();
+            });
+
             return request.parse();
         }
     },
@@ -389,7 +394,7 @@ Request = Type.create({
      */
     forward: function Request_forward(route, params) {
 
-        var request;
+        var request, that = this;
 
         if (router.trim(this.route, "/") === router.trim(route, '/')) {
             throw new error.HttpError(500, {
@@ -411,6 +416,10 @@ Request = Type.create({
             logger.info('Request.forward.route:', {
                 route: route,
                 params: params
+            });
+            // destroy current request on end of request
+            request.onEnd(function () {
+                that._destroy();
             });
 
             return request.parse();
@@ -610,7 +619,7 @@ Request = Type.create({
      * @return boolean
      */
     _handleError: function Request_handleError(response) {
-        var request, code;
+        var request, code, that = this;
 
         if (this.isRendered) {
             // we have multiple recursion in parse for catching
@@ -650,8 +659,6 @@ Request = Type.create({
                 isERROR: true,
                 id: this.id
             }, router.createUrl(router.getErrorRoute()));
-            // destroy current request this must after we transfer reference of request/response/body to forwarded route
-            this._destroy();
             // pass exception response over parsed url query as query parameter
             // assign to exception
             request.parsedUrl.query.exception = response;
@@ -659,7 +666,10 @@ Request = Type.create({
             request.setStatusCode(code);
             // return parsed request
 
-
+            // destroy current request on end of error request
+            request.onEnd(function () {
+                that._destroy();
+            });
 
             return request.parse();
         } else {

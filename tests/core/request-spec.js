@@ -138,6 +138,11 @@ describe('core/request', function () {
                     resolve();
                     return true;
                 },
+                once: function(name, resolve) {
+
+                    resolve();
+                    return true;
+                },
                 emit: function() {
                     return true;
                 }
@@ -1045,6 +1050,9 @@ describe('core/request', function () {
             stopPromiseChain: function () {
 
             },
+            request: {
+                once: function () {}
+            },
             getHeader: function () {},
             statusCode: 0,
             isERROR: false
@@ -1095,6 +1103,9 @@ describe('core/request', function () {
             },
             stopPromiseChain: function () {
 
+            },
+            request: {
+                once: function () {}
             },
             _getRouteInfo: function() {},
             getHeader: function () {},
