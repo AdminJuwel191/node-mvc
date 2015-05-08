@@ -39,7 +39,7 @@ describe("di", function () {
         } catch (e) {
             message = e;
         }
-        expect(message.indexOf('DI.exists:  file or fileType must bi string') > -1).toBe(true);
+        expect(message.indexOf('DI.exists') > -1).toBe(true);
 
     });
 
@@ -69,7 +69,7 @@ describe("di", function () {
         } catch (e) {
             message = e;
         }
-        expect(message.indexOf("DI.getAlias: \"test\" is not valid") > -1).toBe(true);
+        expect(message.indexOf("DI.getAlias") > -1).toBe(true);
 
     });
 
@@ -92,7 +92,7 @@ describe("di", function () {
         } catch (e) {
             message = e;
         }
-        expect(message.indexOf("DI.setAlias: Invalid alias value, chars") > -1).toBe(true);
+        expect(message.indexOf("DI.setAlias") > -1).toBe(true);
 
     });
 
@@ -104,7 +104,7 @@ describe("di", function () {
         } catch (e) {
             message = e;
         }
-        expect(message.indexOf("DI.load, Cannot find module") > -1).toBe(true);
+        expect(message.indexOf("DI.load") > -1).toBe(true);
     });
 
     it("load", function () {
@@ -126,6 +126,6 @@ describe("di", function () {
             message = e;
         }
 
-        expect(message.indexOf("DI.readFileSync, ENOENT: no such file or directory") > -1).toBe(true);
+        expect(message.indexOf("DI.readFileSync") > -1).toBe(true);
     });
 });
