@@ -23,7 +23,6 @@ describe("di", function () {
         }
         fs.renameSync(nFile, oFile);
 
-        console.log('message', message);
 
         expect(message.indexOf('Cannot load @{framework}/files.json path') > -1).toBe(true);
     });

@@ -131,7 +131,7 @@ describe('core/assets', function () {
 
             done();
         }, function (error) {
-            console.log('error', error);
+            fail(error)
             done();
         });
     });
