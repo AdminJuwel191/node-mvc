@@ -1,5 +1,5 @@
 
-MVC JS  [![Build Status](https://api.travis-ci.org/AdminJuwel191/node-mvc.svg?branch=0.1.x)](https://travis-ci.org/AdminJuwel191/node-mvc) 0.1.9
+MVC JS  [![Build Status](https://api.travis-ci.org/AdminJuwel191/node-mvc.svg?branch=0.1.x)](https://travis-ci.org/AdminJuwel191/node-mvc) 0.1.10
 =====
 
 Powerful lightweight mvc framework for nodejs.

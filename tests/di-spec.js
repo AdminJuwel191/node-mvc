@@ -62,7 +62,7 @@ describe("di", function () {
         expect(alias.replace(parent, "")).toBe("framework/");
     });
 
-    it("getAliasError", function () {
+    xit("getAliasError", function () {
         try {
             di.getAlias("test");
         } catch (e) {
