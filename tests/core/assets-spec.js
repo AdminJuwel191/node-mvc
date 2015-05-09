@@ -131,7 +131,7 @@ describe('core/assets', function () {
 
             done();
         }, function (error) {
-            console.log('error', error);
+            fail(error)
             done();
         });
     });
@@ -213,7 +213,7 @@ describe('core/assets', function () {
         var promise = instance.onRequest(api);
         promise.then(null, function (message) {
 
-            expect(message.indexOf("No file found, ENOENT: no such file or directory") > -1).toBe(true);
+            expect(message.indexOf("No file found") > -1).toBe(true);
             done();
         });
     });

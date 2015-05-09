@@ -67,7 +67,7 @@ describe('core/routeRule', function () {
         expect(routeRule.routeRule).toBe(null);
         expect(routeRule.route).toBe('posts/view');
 
-        expect(routeRule.pattern.regex.source).toBe('^posts\\/([^\\/]+)$');
+        expect(routeRule.pattern.regex.source).toEqual('^posts\/([^\/]+)$');
 
         expect(routeRule.methods[0]).toBe('GET');
         expect(routeRule.methods[1]).toBe('POST');
@@ -165,7 +165,7 @@ describe('core/routeRule', function () {
         expect(routeRule.routeRule).toBe('^posts/(?P<action>([a-z]+))$');
         expect(routeRule.route).toBe('posts/<action>');
 
-        expect(routeRule.pattern.regex.source).toBe('^posts\\/([a-z]+)\\/(\\d+)$');
+        expect(routeRule.pattern.regex.source).toEqual('^posts\/([a-z]+)\/(\\d+)$');
 
         expect(routeRule.methods[0]).toBe('GET');
         expect(routeRule.methods[1]).toBe('POST');
@@ -210,7 +210,7 @@ describe('core/routeRule', function () {
         expect(routeRule.routeRule).toBe('^posts/(?P<action>([a-z]+))$');
         expect(routeRule.route).toBe('posts/<action>');
 
-        expect(routeRule.pattern.regex.source).toBe('^posts\\/([a-z]+)\\/(\\d+)$');
+        expect(routeRule.pattern.regex.source).toEqual('^posts\/([a-z]+)\/(\\d+)$');
 
         expect(routeRule.methods[0]).toBe('GET');
         expect(routeRule.methods[1]).toBe('POST');
@@ -264,7 +264,7 @@ describe('core/routeRule', function () {
         expect(routeRule.route).toBe('posts/<action>');
 
 
-        expect(routeRule.pattern.regex.source).toBe('^posts\\/([a-z]+)$');
+        expect(routeRule.pattern.regex.source).toEqual('^posts\/([a-z]+)$');
 
         expect(routeRule.methods[0]).toBe('GET');
         expect(routeRule.methods[1]).toBe('POST');
@@ -300,7 +300,7 @@ describe('core/routeRule', function () {
         expect(routeRule.route).toBe('posts/index');
 
         expect(routeRule.pattern.group).toBe(false);
-        expect(routeRule.pattern.regex.source).toBe('^posts$');
+        expect(routeRule.pattern.regex).toEqual(/^posts$/g);
 
         expect(routeRule.methods[0]).toBe('GET');
         expect(routeRule.methods[1]).toBe('POST');
@@ -338,7 +338,7 @@ describe('core/routeRule', function () {
         expect(routeRule.routeRule).toBe(null);
         expect(routeRule.route).toBe('posts/index');
 
-        expect(routeRule.pattern.regex.source).toBe('^posts\\/([a-z]+)$');
+        expect(routeRule.pattern.regex.source).toEqual('^posts\/([a-z]+)$');
 
         expect(routeRule.methods[0]).toBe('GET');
 
@@ -423,7 +423,7 @@ describe('core/routeRule', function () {
         expect(routeRule.routeRule).toBe('^posts/(?P<action>(create|update|delete))$');
         expect(routeRule.route).toBe('posts/<action>');
 
-        expect(routeRule.pattern.regex.source).toBe('^posts\\/(create|update|delete)\\/(\\d+)$');
+        expect(routeRule.pattern.regex.source).toEqual('^posts\/(create|update|delete)\/(\\d+)$');
 
         expect(routeRule.methods[0]).toBe('GET');
 
@@ -561,7 +561,7 @@ describe('core/routeRule', function () {
 
         obj = routeRule.toRegex('abc/cd');
         expect(obj.group).toBe(false);
-        expect(obj.regex.source).toBe('abc\\/cd');
+        expect(obj.regex.source).toEqual('abc\/cd');
     });
 
 

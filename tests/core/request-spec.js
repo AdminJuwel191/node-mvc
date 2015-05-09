@@ -975,7 +975,6 @@ describe('core/request', function () {
             response: {
                 writeHead: function () {},
                 end: function (data) {
-                    console.log('Data', data);
                 }
             },
             request: {
