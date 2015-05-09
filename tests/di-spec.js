@@ -69,7 +69,7 @@ describe("di", function () {
         } catch (e) {
             message = e;
         }
-        expect(message.indexOf("DI.getAlias") > -1).toBe(true);
+        expect(message.indexOf("getAlias") > -1).toBe(true);
 
     });
 
