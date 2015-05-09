@@ -52,13 +52,13 @@ Exception = Type.create({},
                 if (e && e.message) {
                     message = message + ', ' + e.message;
                 }
-                if (!e) {
-                    e = new Error();
-                }
                 stack = e.stack;
                 e = null;
-            } else {
+            } else if (Type.isString(e)) {
                 stack = e;
+            } else {
+                e = new Error();
+                stack = e.stack;
             }
 
             throw toString('Exception', core.trace(8, 9), message, stack);
@@ -86,13 +86,13 @@ DataError = Exception.inherit({},
                 if (e && e.message) {
                     message = message + ', ' + e.message;
                 }
-                if (!e) {
-                    e = new Error();
-                }
                 stack = e.stack;
                 e = null;
-            } else {
+            } else if (Type.isString(e)) {
                 stack = e;
+            } else {
+                e = new Error();
+                stack = e.stack;
             }
 
 
@@ -119,13 +119,13 @@ HttpError = DataError.inherit({},
                 if (e && e.message) {
                     message = message + ', ' + e.message;
                 }
-                if (!e) {
-                    e = new Error();
-                }
                 stack = e.stack;
                 e = null;
-            } else {
+            } else if (Type.isString(e)) {
                 stack = e;
+            } else {
+                e = new Error();
+                stack = e.stack;
             }
 
             throw toString('HttpError', core.trace(8, 9), message, stack, core.inspect(data), code);
@@ -151,13 +151,13 @@ function silentHttpError(code, data, message, e) {
         if (e && e.message) {
             message = message + ', ' + e.message;
         }
-        if (!e) {
-            e = new Error();
-        }
         stack = e.stack;
         e = null;
-    } else {
+    } else if (Type.isString(e)) {
         stack = e;
+    } else {
+        e = new Error();
+        stack = e.stack;
     }
 
     return toString('SlientHttpError', core.trace(8, 9), message, stack, core.inspect(data), code);
