@@ -244,7 +244,9 @@ View = ViewInterface.inherit(
                 }
 
             } else if (this.isFile(dir) && this.suffix.test(dir)) {
-                this.setPreloaded(dir, this.swig.compileFile(dir));
+                process.nextTick(function compileTemplateAsync() {
+                    this.setPreloaded(dir, this.swig.compileFile(dir));
+                }.bind(this));
             }
         },
 
