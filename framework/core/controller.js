@@ -371,16 +371,17 @@ Controller = ControllerInterface.inherit({
      * @method Controller#setSession key value
      * @param key {string}
      * @param value {object|mixed}
+     * @param refreshSessionId {Boolean}
      * @description
      * Set session
      * @return {string}
      */
-    setSession: function Controller_setSession(key, value) {
+    setSession: function Controller_setSession(key, value, refreshSessionId) {
         var session = component.get('storage/session'),
             session_id = this.getCookie(session.getCookieKey());
         if (!Type.isString(key)) {
             throw new error.HttpError(500, {key: key, session_id: session_id}, 'Controller.getSession: key must be string type');
-        } else if (!session_id) {
+        } else if (!session_id || !!refreshSessionId) {
             session_id = this.__requestApi__.uuid() + '_' + (new Date).getTime();
             this.setCookie(session.getCookieKey(), session_id, session.getExpiredTime());
         }

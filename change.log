@@ -1,3 +1,5 @@
+0.1.13
+    - Added refresh session support to set session
 0.1.12
     - Update of mongoose lib to 4.1.x
 0.1.11
