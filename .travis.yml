@@ -1,7 +1,7 @@
 language: node_js
 
 node_js:
-  - 0.10
+  - "4.0.0"
 
 env:
   global:
@@ -9,8 +9,8 @@ env:
     - SAUCE_ACCESS_KEY=2b2136fe-063d-4485-9262-e6f57903bbb0
 
 install:
-  - nvm install 0.12.0
   - npm install --save-dev
   - npm install -g gulp
+  - npm install -g gulp-cli
 script:
   - gulp test

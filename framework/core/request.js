@@ -535,7 +535,7 @@ Request = Type.create({
                     return false;
                 }
                 return router
-                    .process(this.request.method, this.parsedUrl) // find route
+                    .process(this.request.method, this.parsedUrl, this.getHeaders()) // find route
                     .then(this._resolveRoute.bind(this)); // resolve route chain
 
             }.bind(this)) // handle hook chain

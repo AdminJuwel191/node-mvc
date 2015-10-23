@@ -1,3 +1,5 @@
+0.1.14
+    - Send headers to router parse request function
 0.1.13
     - Added refresh session support to set session
 0.1.12

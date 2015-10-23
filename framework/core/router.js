@@ -150,14 +150,14 @@ Router = Type.create({
      * @description
      * Parse request
      */
-    parseRequest: function Router_parseRequest(method, parsedUrl) {
+    parseRequest: function Router_parseRequest(method, parsedUrl, headers) {
         var all = [];
 
         this.routes.forEach(function (routeRule) {
             all.push(
                 new Promise(function (resolve, reject) {
                     try {
-                        resolve(routeRule.parseRequest(method, parsedUrl))
+                        resolve(routeRule.parseRequest(method, parsedUrl, headers));
                     } catch (e) {
                         reject(e);
                     }
@@ -218,9 +218,9 @@ Router = Type.create({
      * @description
      * Process request
      */
-    process: function Router_process(method, parsedUrl) {
+    process: function Router_process(method, parsedUrl, headers) {
 
-        return this.parseRequest(method, parsedUrl)
+        return this.parseRequest(method, parsedUrl, headers)
             .then(function (routeRule) {
                 if (Type.isArray(routeRule) && routeRule.length === 2) {
                     return Promise.resolve(routeRule);
