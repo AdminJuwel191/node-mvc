@@ -13,6 +13,7 @@ var di = require('../di'),
     core = di.load('core'),
     error = di.load('error'),
     Promise = di.load('promise'),
+    EventEmitter = di.load('events'),
     Request;
 
 
@@ -70,6 +71,7 @@ Request = Type.create({
     isCompressionEnabled: Type.BOOLEAN,
     encoding: Type.STRING,
     body: Type.ARRAY,
+    eventHander: Type.OBJECT,
     id: Type.STRING
 }, {
     _construct: function Request(config, url) {
@@ -88,7 +90,9 @@ Request = Type.create({
         this.isPromiseChainStopped = false;
         this.isRendered = false;
         this.isCompressed = false;
-
+        this.eventHander = new EventEmitter();
+        this.eventHander.setMaxListeners(1000);
+        this.request.once('destroy', this.eventHander.emit.bind(this.eventHander, 'destroy'));
         if (!this.id) {
             this.id = this._uuid();
         }
@@ -102,7 +106,7 @@ Request = Type.create({
      * Write header
      */
     onEnd: function Request_onEnd(callback) {
-        this.request.once('destory', callback);
+        this.eventHander.once('destory', callback);
     },
     /**
      * @since 0.0.1
@@ -482,6 +486,7 @@ Request = Type.create({
      */
     _destroy: function Request__destroy() {
         this.request.emit('destory');
+        this.eventHander.removeAllListeners();
         this.destroy();
     },
     /**
