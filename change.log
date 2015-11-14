@@ -1,3 +1,5 @@
+0.1.17
+    - Fix memory leaks caused by destroy event
 0.1.16
     - Update of event propagation in request.
     - Destroy event is handled internally.
