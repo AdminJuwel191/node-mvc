@@ -1,3 +1,19 @@
+0.1.17
+    - Fix memory leaks caused by destroy event
+0.1.16
+    - Update of event propagation in request.
+    - Destroy event is handled internally.
+    - Max internal events is set to 1000
+0.1.15
+    - Fix of send headers , send request headers instead of response one
+0.1.14
+    - Send headers to router parse request function
+0.1.13
+    - Added refresh session support to set session
+0.1.12
+    - Update of mongoose lib to 4.1.x
+0.1.11
+    - Bugfix Compile templates async while template cache is enabled
 0.1.10
     - Update or error handling
 0.1.9

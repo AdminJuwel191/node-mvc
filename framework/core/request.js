@@ -13,6 +13,7 @@ var di = require('../di'),
     core = di.load('core'),
     error = di.load('error'),
     Promise = di.load('promise'),
+    EventEmitter = di.load('events'),
     Request;
 
 
@@ -70,6 +71,7 @@ Request = Type.create({
     isCompressionEnabled: Type.BOOLEAN,
     encoding: Type.STRING,
     body: Type.ARRAY,
+    eventHandler: Type.OBJECT,
     id: Type.STRING
 }, {
     _construct: function Request(config, url) {
@@ -77,7 +79,7 @@ Request = Type.create({
         this.body = [];
         this.isERROR = false;
         this.isCompressionEnabled = false;
-        this.id = null;
+        this.id = config.id || null;
         // body and isForwarded can be overriden
         core.extend(this, config);
 
@@ -88,6 +90,9 @@ Request = Type.create({
         this.isPromiseChainStopped = false;
         this.isRendered = false;
         this.isCompressed = false;
+        this.eventHandler = config.eventHandler || new EventEmitter();
+        this.eventHandler.setMaxListeners(1000);
+        this.request.once('destroy', this.eventHandler.emit.bind(this.eventHandler, 'destroy'));
 
         if (!this.id) {
             this.id = this._uuid();
@@ -102,7 +107,7 @@ Request = Type.create({
      * Write header
      */
     onEnd: function Request_onEnd(callback) {
-        this.request.once('destory', callback);
+        this.eventHandler.once('destory', callback);
     },
     /**
      * @since 0.0.1
@@ -369,6 +374,7 @@ Request = Type.create({
                 response: this.response,
                 isForwarded: true,
                 id: this.id,
+                eventHandler: this.eventHandler,
                 body: this.body
             }, url);
 
@@ -410,6 +416,7 @@ Request = Type.create({
                 response: this.response,
                 isForwarded: true,
                 id: this.id,
+                eventHandler: this.eventHandler,
                 body: this.body
             }, router.createUrl(route, params));
 
@@ -417,10 +424,7 @@ Request = Type.create({
                 route: route,
                 params: params
             });
-            // destroy current request on end of request
-            request.onEnd(function () {
-                that._destroy();
-            });
+
 
             return request.parse();
         }
@@ -481,8 +485,11 @@ Request = Type.create({
      * Destroy current instance
      */
     _destroy: function Request__destroy() {
-        this.request.emit('destory');
-        this.destroy();
+        if (this.isRendered) {
+            this.request.emit('destory');
+            this.eventHandler.removeAllListeners();
+            this.destroy();
+        }
     },
     /**
      * @since 0.0.1
@@ -535,7 +542,7 @@ Request = Type.create({
                     return false;
                 }
                 return router
-                    .process(this.request.method, this.parsedUrl) // find route
+                    .process(this.request.method, this.parsedUrl, this.getRequestHeaders()) // find route
                     .then(this._resolveRoute.bind(this)); // resolve route chain
 
             }.bind(this)) // handle hook chain
@@ -619,7 +626,7 @@ Request = Type.create({
      * @return boolean
      */
     _handleError: function Request_handleError(response) {
-        var request, code, that = this;
+        var request, code;
 
         if (this.isRendered) {
             // we have multiple recursion in parse for catching
@@ -657,6 +664,7 @@ Request = Type.create({
                 isForwarded: true,
                 body: this.body,
                 isERROR: true,
+                eventHandler: this.eventHandler,
                 id: this.id
             }, router.createUrl(router.getErrorRoute()));
             // pass exception response over parsed url query as query parameter
@@ -665,11 +673,6 @@ Request = Type.create({
             // set status codes for new request
             request.setStatusCode(code);
             // return parsed request
-
-            // destroy current request on end of error request
-            request.onEnd(function () {
-                that._destroy();
-            });
 
             return request.parse();
         } else {
@@ -693,40 +696,60 @@ Request = Type.create({
             return false;
         }
 
+
+
         if (Type.isString(response)) {
-
             this._checkContentType('text/html');
             this.response.writeHead(this.statusCode, this.headers);
 
             this.addHeader('Content-Length', response.length);
             this.response.end(response);
             this.isRendered = true;
-
+            logger.info('Request.render:', {
+                url: this.url,
+                status: this.statusCode,
+                id: this.id,
+                isRendered: this.isRendered,
+                content_type: this.getHeader('content-type')
+            });
+            return true;
         } else if (response instanceof Buffer) {
-
             this._checkContentType('text/html');
             this.response.writeHead(this.statusCode, this.headers);
-
             this.addHeader('Content-Length', response.length);
             this.response.end(response);
             this.isRendered = true;
-
+            logger.info('Request.render:', {
+                url: this.url,
+                status: this.statusCode,
+                id: this.id,
+                isRendered: this.isRendered,
+                content_type: this.getHeader('content-type')
+            });
+            return true;
         } else if (!response) {
+            logger.error('Request.error:', {
+                url: this.url,
+                status: this.statusCode,
+                id: this.id,
+                response: response,
+                isRendered: this.isRendered,
+                content_type: this.getHeader('content-type'),
+                message: 'No data to render'
+            });
             throw new error.HttpError(500, {}, 'No data to render');
         } else {
+            logger.error('Request.error:', {
+                url: this.url,
+                status: this.statusCode,
+                id: this.id,
+                response: response,
+                isRendered: this.isRendered,
+                content_type: this.getHeader('content-type'),
+                message: 'Invalid response type'
+            });
             throw new error.HttpError(500, {}, 'Invalid response type, string or buffer is required!');
         }
-
-        logger.info('Request.render:', {
-            url: this.url,
-            status: this.statusCode,
-            id: this.id,
-            isRendered: this.isRendered,
-            content_type: this.getHeader('content-type')
-        });
-
-
-        return true;
     },
 
     /**

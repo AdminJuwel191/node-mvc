@@ -67,7 +67,7 @@ describe('core/request', function () {
         },
         core = di.load('core'),
         Type = di.load('typejs');
-
+    var eventHander;
     beforeEach(function () {
         config = {
             request: {
@@ -96,7 +96,12 @@ describe('core/request', function () {
                 once: function () {}
             }
         };
-
+        eventHander = {
+            once: function () {},
+            setMaxListeners: function () {},
+            emit: function () {},
+            removeAllListeners: function() {}
+        };
         mock = {
             typejs: Type,
             core: core,
@@ -105,6 +110,9 @@ describe('core/request', function () {
             util: di.load('util'),
             url: di.load('url'),
             zlib: zLib,
+            "events": function() {
+                return eventHander;
+            },
             "interface/controller": di.load('interface/controller'),
             "core/component": componentMock,
             "interface/module": di.load('interface/module')
@@ -210,11 +218,11 @@ describe('core/request', function () {
 
     it('onEnd', function () {
         request = new Constructor(config, '/home/index');
-        spyOn(config.request, "once").and.callThrough();
+        spyOn(eventHander, "once").and.callThrough();
         request.onEnd(function () {
 
         });
-        expect(config.request.once).toHaveBeenCalled();
+        expect(eventHander.once).toHaveBeenCalled();
     });
 
 
@@ -307,6 +315,7 @@ describe('core/request', function () {
                 on: function () {
 
                 },
+                once: function () {},
                 headers: {
                     'content-type': 'text/html',
                     'content-length': '180',
@@ -1104,7 +1113,8 @@ describe('core/request', function () {
 
             },
             request: {
-                once: function () {}
+                once: function () {},
+                on: ''
             },
             _getRouteInfo: function() {},
             getHeader: function () {},
