@@ -378,13 +378,10 @@ Request = Type.create({
                 body: this.body
             }, url);
 
+            this.isRendered = true;
+
             logger.info('Request.forward.url:', {
                 url: url
-            });
-
-            // destroy current request on end of request
-            request.onEnd(function () {
-                that._destroy();
             });
 
             return request.parse();
@@ -419,6 +416,8 @@ Request = Type.create({
                 eventHandler: this.eventHandler,
                 body: this.body
             }, router.createUrl(route, params));
+
+            this.isRendered = true;
 
             logger.info('Request.forward.route:', {
                 route: route,
@@ -463,7 +462,7 @@ Request = Type.create({
     sendNoChange: function () {
         this.stopPromiseChain();
         this.setStatusCode(304);
-        this._render('NO CHANGE');
+        this._render('MVCJS_NO_STATUS_CHANGE');
     },
     /**
      * @since 0.0.1
@@ -544,7 +543,6 @@ Request = Type.create({
                 return router
                     .process(this.request.method, this.parsedUrl, this.getRequestHeaders()) // find route
                     .then(this._resolveRoute.bind(this)); // resolve route chain
-
             }.bind(this)) // handle hook chain
             .then(this._compress.bind(this))
             .then(this._render.bind(this)) // resolve route chain
@@ -569,6 +567,11 @@ Request = Type.create({
         var accept = this.getRequestHeader('Accept-Encoding'),
             isForCompress = (Type.isString(response) || response instanceof Buffer) && !this.isCompressed,
             that = this;
+
+        if (this.isRendered) {
+            // we have multiple recursion in parse for catching
+            return false;
+        }
 
 
         if (isForCompress && !!this.isCompressionEnabled && Type.isString(accept)) {
@@ -656,8 +659,9 @@ Request = Type.create({
         response += 'ROUTE:' + core.inspect(this._getRouteInfo());
 
         if (!this.isERROR && !!router.getErrorRoute()) {
-
             // return new request
+            this.isRendered = true;
+
             request = new Request({
                 request: this.request,
                 response: this.response,
@@ -673,11 +677,10 @@ Request = Type.create({
             // set status codes for new request
             request.setStatusCode(code);
             // return parsed request
-
             return request.parse();
         } else {
             this.addHeader('Content-Type', 'text/plain');
-            return this._render(response);
+            return response;
         }
     },
 
