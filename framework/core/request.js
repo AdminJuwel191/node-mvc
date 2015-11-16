@@ -90,9 +90,8 @@ Request = Type.create({
         this.isPromiseChainStopped = false;
         this.isRendered = false;
         this.isCompressed = false;
-        this.eventHandler = config.eventHandler || new EventEmitter();
+        this.eventHandler = new EventEmitter();
         this.eventHandler.setMaxListeners(1000);
-        this.request.once('destroy', this.eventHandler.emit.bind(this.eventHandler, 'destroy'));
 
         if (!this.id) {
             this.id = this._uuid();
@@ -107,7 +106,7 @@ Request = Type.create({
      * Write header
      */
     onEnd: function Request_onEnd(callback) {
-        this.eventHandler.once('destory', callback);
+        this.eventHandler.once('destroy', callback);
     },
     /**
      * @since 0.0.1
@@ -374,7 +373,7 @@ Request = Type.create({
                 response: this.response,
                 isForwarded: true,
                 id: this.id,
-                eventHandler: this.eventHandler,
+                // eventHandler: this.eventHandler,
                 body: this.body
             }, url);
 
@@ -382,10 +381,6 @@ Request = Type.create({
 
             logger.info('Request.forward.url:', {
                 url: url
-            });
-
-            request.onEnd(function () {
-                that._destroy();
             });
 
             return request.parse();
@@ -417,7 +412,7 @@ Request = Type.create({
                 response: this.response,
                 isForwarded: true,
                 id: this.id,
-                eventHandler: this.eventHandler,
+                // eventHandler: this.eventHandler,
                 body: this.body
             }, router.createUrl(route, params));
 
@@ -427,11 +422,6 @@ Request = Type.create({
                 route: route,
                 params: params
             });
-
-            request.onEnd(function () {
-                that._destroy();
-            });
-
 
             return request.parse();
         }
@@ -492,7 +482,7 @@ Request = Type.create({
      * Destroy current instance
      */
     _destroy: function Request__destroy() {
-        this.request.emit('destory');
+        this.eventHandler.emit('destroy');
         this.eventHandler.removeAllListeners();
         this.destroy();
     },
@@ -505,16 +495,42 @@ Request = Type.create({
      * Parse request
      */
     parse: function Request_parse() {
-
+        var that = this, url = this.url;
         if (this.isForwarded) {
-            return this._process().then(this._destroy.bind(this), this._destroy.bind(this));
+            return this._process()
+                .then(function destroy() {
+                    logger.info('Request.destroy', {
+                        url: that.url,
+                        status: that.statusCode,
+                        id: that.id,
+                        isRendered: that.isRendered,
+                        content_type: that.getHeader('content-type')
+                    });
+                    that._destroy();
+                })
+                .catch(function error(e) {
+                    logger.error('Request.destroy', {error: e, url: url});
+                });
         }
         // receive body as buffer
         this.request.on('data', this.body.push.bind(this.body));
 
         return new Promise(this.request.on.bind(this.request, 'end'))
             .then(this._process.bind(this))
-            .then(this._destroy.bind(this), this._destroy.bind(this));  // emit destroy on error and resolve
+            .then(function destroy() {
+                logger.info('Request.destroy', {
+                    url: that.url,
+                    status: that.statusCode,
+                    id: that.id,
+                    isRendered: that.isRendered,
+                    content_type: that.getHeader('content-type')
+                });
+                that._destroy();
+            })
+            .catch(function error(e) {
+                logger.error('Request.destroy', {error: e, url: url});
+            });
+
     },
     /**
      * @since 0.0.1
@@ -674,7 +690,7 @@ Request = Type.create({
                 isForwarded: true,
                 body: this.body,
                 isERROR: true,
-                eventHandler: this.eventHandler,
+                // eventHandler: this.eventHandler,
                 id: this.id
             }, router.createUrl(router.getErrorRoute()));
             // pass exception response over parsed url query as query parameter
@@ -682,10 +698,6 @@ Request = Type.create({
             request.parsedUrl.query.exception = response;
             // set status codes for new request
             request.setStatusCode(code);
-
-            request.onEnd(function () {
-                that._destroy();
-            });
             // return parsed request
             return request.parse();
         } else {

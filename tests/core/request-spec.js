@@ -155,6 +155,7 @@ describe('core/request', function () {
                     return true;
                 }
             },
+            getHeader: function () {},
             _destroy: function () {},
             _process: function() {
                 return 'process';
@@ -186,12 +187,17 @@ describe('core/request', function () {
                     return true;
                 }
             },
+            getHeader: function () {},
             _destroy: function () {},
             _process: function() {
                 return {
-                    then: function(a, b) {
+                    then: function(a) {
                         a();
-                        b();
+                        return {
+                            catch: function (c) {
+                                c()
+                            }
+                        }
                     }
                 };
             }

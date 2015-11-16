@@ -191,8 +191,6 @@ Bootstrap = Type.create({
             }, request.url);
             /// parse request
             nRequest.parse();
-            // on end destory
-            nRequest.onEnd(nRequest.destroy.bind(nRequest));
 
         }.bind(this));
 
