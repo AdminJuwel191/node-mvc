@@ -79,8 +79,7 @@ Request = Type.create({
         this.body = [];
         this.isERROR = false;
         this.isCompressionEnabled = false;
-        this.id = config.id || null;
-        // body and isForwarded can be overriden
+        // body and isForwarded are forwarded to request
         core.extend(this, config);
 
         this.statusCode = 200;
@@ -90,13 +89,10 @@ Request = Type.create({
         this.isPromiseChainStopped = false;
         this.isRendered = false;
         this.isCompressed = false;
-        this.eventHandler = config.eventHandler || new EventEmitter();
+        this.eventHandler = new EventEmitter();
         this.eventHandler.setMaxListeners(1000);
-        this.request.once('destroy', this.eventHandler.emit.bind(this.eventHandler, 'destroy'));
 
-        if (!this.id) {
-            this.id = this._uuid();
-        }
+        this.id = this._uuid();
     },
     /**
      * @since 0.0.1
@@ -107,7 +103,7 @@ Request = Type.create({
      * Write header
      */
     onEnd: function Request_onEnd(callback) {
-        this.eventHandler.once('destory', callback);
+        this.eventHandler.once('destroy', callback);
     },
     /**
      * @since 0.0.1
@@ -373,8 +369,6 @@ Request = Type.create({
                 request: this.request,
                 response: this.response,
                 isForwarded: true,
-                id: this.id,
-                eventHandler: this.eventHandler,
                 body: this.body
             }, url);
 
@@ -397,7 +391,7 @@ Request = Type.create({
      */
     forward: function Request_forward(route, params) {
 
-        var request, that = this;
+        var request;
 
         if (router.trim(this.route, "/") === router.trim(route, '/')) {
             throw new error.HttpError(500, {
@@ -412,8 +406,6 @@ Request = Type.create({
                 request: this.request,
                 response: this.response,
                 isForwarded: true,
-                id: this.id,
-                eventHandler: this.eventHandler,
                 body: this.body
             }, router.createUrl(route, params));
 
@@ -423,7 +415,6 @@ Request = Type.create({
                 route: route,
                 params: params
             });
-
 
             return request.parse();
         }
@@ -484,11 +475,9 @@ Request = Type.create({
      * Destroy current instance
      */
     _destroy: function Request__destroy() {
-        if (this.isRendered) {
-            this.request.emit('destory');
-            this.eventHandler.removeAllListeners();
-            this.destroy();
-        }
+        this.eventHandler.emit('destroy');
+        this.eventHandler.removeAllListeners();
+        this.destroy();
     },
     /**
      * @since 0.0.1
@@ -499,16 +488,42 @@ Request = Type.create({
      * Parse request
      */
     parse: function Request_parse() {
-
+        var that = this, url = this.url;
         if (this.isForwarded) {
-            return this._process().then(this._destroy.bind(this), this._destroy.bind(this));
+            return this._process()
+                .then(function destroy() {
+                    logger.info('Request.destroy', {
+                        url: that.url,
+                        status: that.statusCode,
+                        id: that.id,
+                        isRendered: that.isRendered,
+                        content_type: that.getHeader('content-type')
+                    });
+                    that._destroy();
+                })
+                .catch(function error(e) {
+                    logger.error('Request.destroy', {error: e, url: url});
+                });
         }
         // receive body as buffer
         this.request.on('data', this.body.push.bind(this.body));
 
         return new Promise(this.request.on.bind(this.request, 'end'))
             .then(this._process.bind(this))
-            .then(this._destroy.bind(this), this._destroy.bind(this));  // emit destroy on error and resolve
+            .then(function destroy() {
+                logger.info('Request.destroy', {
+                    url: that.url,
+                    status: that.statusCode,
+                    id: that.id,
+                    isRendered: that.isRendered,
+                    content_type: that.getHeader('content-type')
+                });
+                that._destroy();
+            })
+            .catch(function error(e) {
+                logger.error('Request.destroy', {error: e, url: url});
+            });
+
     },
     /**
      * @since 0.0.1
@@ -629,7 +644,7 @@ Request = Type.create({
      * @return boolean
      */
     _handleError: function Request_handleError(response) {
-        var request, code;
+        var request, code, that = this;
 
         if (this.isRendered) {
             // we have multiple recursion in parse for catching
@@ -667,9 +682,7 @@ Request = Type.create({
                 response: this.response,
                 isForwarded: true,
                 body: this.body,
-                isERROR: true,
-                eventHandler: this.eventHandler,
-                id: this.id
+                isERROR: true
             }, router.createUrl(router.getErrorRoute()));
             // pass exception response over parsed url query as query parameter
             // assign to exception

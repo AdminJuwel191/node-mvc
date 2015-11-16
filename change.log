@@ -1,3 +1,9 @@
+0.1.21
+    - Each request should be new id
+0.1.20
+    - Fix destroy typo
+0.1.19
+    - Do destroy event on original request to
 0.1.18
     - Stop rendering old Request
 0.1.17
