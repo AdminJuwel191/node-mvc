@@ -384,6 +384,10 @@ Request = Type.create({
                 url: url
             });
 
+            request.onEnd(function () {
+                that._destroy();
+            });
+
             return request.parse();
         }
     },
@@ -422,6 +426,10 @@ Request = Type.create({
             logger.info('Request.forward.route:', {
                 route: route,
                 params: params
+            });
+
+            request.onEnd(function () {
+                that._destroy();
             });
 
 
@@ -484,11 +492,9 @@ Request = Type.create({
      * Destroy current instance
      */
     _destroy: function Request__destroy() {
-        if (this.isRendered) {
-            this.request.emit('destory');
-            this.eventHandler.removeAllListeners();
-            this.destroy();
-        }
+        this.request.emit('destory');
+        this.eventHandler.removeAllListeners();
+        this.destroy();
     },
     /**
      * @since 0.0.1
@@ -629,7 +635,7 @@ Request = Type.create({
      * @return boolean
      */
     _handleError: function Request_handleError(response) {
-        var request, code;
+        var request, code, that = this;
 
         if (this.isRendered) {
             // we have multiple recursion in parse for catching
@@ -676,6 +682,10 @@ Request = Type.create({
             request.parsedUrl.query.exception = response;
             // set status codes for new request
             request.setStatusCode(code);
+
+            request.onEnd(function () {
+                that._destroy();
+            });
             // return parsed request
             return request.parse();
         } else {
