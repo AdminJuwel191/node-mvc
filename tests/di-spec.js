@@ -84,16 +84,7 @@ describe("di", function () {
         expect(normalized).toBe("tests/newtest/b");
     });
 
-    it("setAliasError", function () {
-        var message, val = __dirname + "/newtest/%*:<>";
-        try {
-            di.setAlias("test", val);
-        } catch (e) {
-            message = e;
-        }
-        expect(message.indexOf("DI.setAlias") > -1).toBe(true);
 
-    });
 
     it("loadError", function () {
         var message;
