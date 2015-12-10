@@ -1,3 +1,5 @@
+0.1.23
+    - Fix windows path resolving on view component
 0.1.22
     - Fix windows path resolving on di
 0.1.21
