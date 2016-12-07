@@ -49,7 +49,6 @@ BodyParser = Type.create({
             throw new error.HttpError(500, {type: this.type, body: this.body}, "Unsupported body type");
         }
 
-
         if (this.type.indexOf('multipart/form-data') > -1) {
             this.parsedBody = this.parseBoundary(this.body, this.type.replace(/^.*boundary=/, ''));
         } else if (this.type.indexOf('application/x-www-form-urlencoded') > -1) {

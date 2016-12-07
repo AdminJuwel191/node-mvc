@@ -1,5 +1,7 @@
-0.1.22
+0.1.23
     - Fixed body parser error on unsupported body type
+0.1.22
+    - Fix windows path resolving on di
 0.1.21
     - Each request should be new id
 0.1.20

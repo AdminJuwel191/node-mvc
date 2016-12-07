@@ -5,7 +5,6 @@ var core = require('./core');
 var path = require('path');
 var util = require('util');
 var fs = require('fs');
-var INVALID_ALIAS_VALUE = /[\\?%*:|"<>\s]/ig;
 var error;
 /**
  * @license Mit Licence 2014
@@ -67,13 +66,7 @@ var DI = Type.create({
      * Set an path alias
      */
     setAlias: function DI_setAlias(key, value) {
-        /* @todo check if this will be required */
-        if (INVALID_ALIAS_VALUE.test(value)) {
-            error = this.load('error');
-            throw new error.Exception('DI.setAlias: Invalid alias value, chars \'\\?%*:|"<>.\' and spaces are not allowed. KEY: ' + key + ', VAL:' + value);
-        } else {
-            this.aliases[key] = this.normalizePath(value);
-        }
+        this.aliases[key] = this.normalizePath(value);
     },
     /**
      * @since 0.0.1

@@ -136,7 +136,7 @@ View = ViewInterface.inherit(
 
                     moduleInstance = new LoadedModule(name);
 
-                    if (!(moduleInstance instanceof  ModuleInterface)) {
+                    if (!(moduleInstance instanceof ModuleInterface)) {
                         throw new error.HttpError(500, moduleInstance, 'Module must be instance of ModuleInterface "core/module"');
                     }
 
@@ -269,13 +269,17 @@ View = ViewInterface.inherit(
                 normalizers = this.normalizers.slice(),
                 isNormalized = false,
                 path,
+                pathRegex,
+                pathReplace,
                 trace = [];
 
             // file name normalizers
             while (normalizers.length) {
                 path = di.normalizePath(normalizers.shift());
-                if (file.match(path)) {
-                    file = file.replace(path, '').replace(this.suffix, '');
+                pathReplace = path.replace(/\\/g, '\\\\');
+                pathRegex = new RegExp(pathReplace);
+                if (file.match(pathRegex)) {
+                    file = file.replace(pathRegex, '').replace(this.suffix, '');
                     isNormalized = true;
                     break;
                 }
@@ -287,7 +291,9 @@ View = ViewInterface.inherit(
                 // file name normalizers
                 while (normalizers.length) {
                     path = di.normalizePath(normalizers.shift());
-                    if (fromPath.match(path)) {
+                    pathReplace = path.replace(/\\/g, '\\\\');
+                    pathRegex = new RegExp(pathReplace);
+                    if (fromPath.match(pathRegex)) {
                         isNormalized = true;
                         break;
                     }
@@ -297,8 +303,9 @@ View = ViewInterface.inherit(
             // check themes
             if (isNormalized) {
                 while (themes.length) {
-                    theme = themes.shift();
-                    re = new RegExp('^' + theme + '/');
+                    theme = di.normalizePath(themes.shift() + '/');
+                    pathReplace = theme.replace(/\\/g, '\\\\');
+                    re = new RegExp('^' + pathReplace);
                     file = file.replace(re, '');
 
                     filePath = di.normalizePath(path + theme + '/' + file + this.config.suffix);
@@ -312,7 +319,6 @@ View = ViewInterface.inherit(
                     });
                 }
             }
-
 
 
             throw new error.HttpError(500, {
