@@ -147,7 +147,7 @@ describe('core/body-parser', function () {
             init.parse();
         });
 
-        expect(message.indexOf("Unsupported form type") > -1).toBe(true);
+        expect(message.indexOf("Unsupported body type") > -1).toBe(true);
     });
 
     function tryCatch(callback) {
