@@ -41,6 +41,15 @@ BodyParser = Type.create({
      * Parse body
      */
     parse: function BodyParser_parse() {
+
+        if (
+            (typeof this.type !== "string") ||
+            (typeof this.body !== "string")
+        ) {
+            throw new error.HttpError(500, {type: this.type, body: this.body}, "Unsupported body type");
+        }
+
+
         if (this.type.indexOf('multipart/form-data') > -1) {
             this.parsedBody = this.parseBoundary(this.body, this.type.replace(/^.*boundary=/, ''));
         } else if (this.type.indexOf('application/x-www-form-urlencoded') > -1) {
@@ -68,7 +77,7 @@ BodyParser = Type.create({
                 throw new error.HttpError(500, {type: this.type, body: this.body}, "Error parsing json", e);
             }
         } else {
-            throw new error.HttpError(500, {type: this.type, body: this.body}, "Unsupported form type");
+            throw new error.HttpError(500, {type: this.type, body: this.body}, "Unsupported body type");
         }
     },
     /**
