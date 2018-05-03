@@ -206,8 +206,8 @@ describe('core/logger', function () {
             chunks = chunks.map(function (item) {
                 return item.replace('\t', '').replace(/(.*\.js).*/, '$1)');
             });
-            expect(core.compare(chunks,[ '{"type":"INFO","message":"Publishing log write stream on port: ","trace":"at Type.Logger_info [as info] (/home/kristijan/projects/node-mvc/framework/core/logger.js)',
-  '{"type":"INFO","message":"info","trace":"at Type.Logger_info [as info] (/home/kristijan/projects/node-mvc/framework/core/logger.js)' ])).toBe(true);
+            expect(core.compare(chunks,[ '{"type":"INFO","message":"Publishing log write stream on port: ","trace":"at Type.Logger_info [as info] (' + cPath + 'framework/core/logger.js)',
+  '{"type":"INFO","message":"info","trace":"at Type.Logger_info [as info] (' + cPath + 'framework/core/logger.js)' ])).toBe(true);
 
             done();
         }, 500);
