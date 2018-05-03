@@ -49,6 +49,7 @@ Logger = Type.create({
                 write: false,
                 publish: false,
                 console: false,
+                streamFormat: 'text',
                 readLength: 50000,
                 port: 9001,
                 type: 'ALL',
@@ -178,15 +179,20 @@ Logger = Type.create({
                 }
 
                 if (this.stream) {
-                    this.stream.write('TYPE: ' + log.type);
-                    this.stream.write('\n');
-                    this.stream.write('CREATED: ' + log.created + '\t ');
-                    this.stream.write('\n');
-                    this.stream.write('MESSAGE: ' + log.message + '\t ' + log.trace);
-                    this.stream.write('\n');
-                    this.stream.write('DATA: ' + this.clean(log.data));
-                    this.stream.write('\n');
-                    this.stream.write('\n');
+                    if (this.config.streamFormat === 'json') {
+                        this.stream.write(JSON.stringify(log));
+                        this.stream.write('\n');
+                    } else {
+                        this.stream.write('TYPE: ' + log.type);
+                        this.stream.write('\n');
+                        this.stream.write('CREATED: ' + log.created + '\t ');
+                        this.stream.write('\n');
+                        this.stream.write('MESSAGE: ' + log.message + '\t ' + log.trace);
+                        this.stream.write('\n');
+                        this.stream.write('DATA: ' + this.clean(log.data));
+                        this.stream.write('\n');
+                        this.stream.write('\n');
+                    }
                 }
                 // clean log data for hook
                 log.data = this.clean(log.data);
