@@ -133,7 +133,7 @@ describe('core/logger', function () {
                 'MESSAGE: warn at Type.Logger_warn [as warn] (' + cPath + 'framework/core/logger.js)',
                 'DATA: {}',
                 'TYPE: ALL',
-                'MESSAGE: log at Object.<anonymous> (' + cPath + 'tests/core/logger-spec.js)',
+                'MESSAGE: log at UserContext.<anonymous> (' + cPath + 'tests/core/logger-spec.js)',
                 'DATA: {}' ,
                 'TYPE: INFO',
                 'MESSAGE: log at Type.Logger_info [as info] (' + cPath + 'framework/core/logger.js)',
