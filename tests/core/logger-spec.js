@@ -102,6 +102,7 @@ describe('core/logger', function () {
         expect(logger.config.publish).toBe(true);
         expect(logger.config.console).toBe(true);
         expect(logger.config.port).toBe(10000);
+        expect(logger.config.streamFormat).toBe('text');
         expect(logger.config.file).toBe('server.log');
         expect(logger.config.level).toBe(3);
 
@@ -133,7 +134,7 @@ describe('core/logger', function () {
                 'MESSAGE: warn at Type.Logger_warn [as warn] (' + cPath + 'framework/core/logger.js)',
                 'DATA: {}',
                 'TYPE: ALL',
-                'MESSAGE: log at Object.<anonymous> (' + cPath + 'tests/core/logger-spec.js)',
+                'MESSAGE: log at UserContext.<anonymous> (' + cPath + 'tests/core/logger-spec.js)',
                 'DATA: {}' ,
                 'TYPE: INFO',
                 'MESSAGE: log at Type.Logger_info [as info] (' + cPath + 'framework/core/logger.js)',
@@ -184,7 +185,33 @@ describe('core/logger', function () {
         };
     });
 
+    it('write json', function(done) {
+        var cfg = config;
+        cfg.streamFormat = 'json';
 
+        var cPath = path.normalize(__dirname + '/../../');
+
+        var chunks = [];
+        streamMock.write = function (chunk) {
+            chunks.push(chunk);
+        };
+
+        var logger = new Logger(cfg);
+        logger.info('info', {});
+        
+        setTimeout(function () {
+            chunks = chunks.filter(function (item) {
+                return item !== '\n' && item.indexOf('CREATED:') === -1;
+            });
+            chunks = chunks.map(function (item) {
+                return item.replace('\t', '').replace(/(.*\.js).*/, '$1)');
+            });
+            expect(core.compare(chunks,[ '{"type":"INFO","message":"Publishing log write stream on port: ","trace":"at Type.Logger_info [as info] (' + cPath + 'framework/core/logger.js)',
+  '{"type":"INFO","message":"info","trace":"at Type.Logger_info [as info] (' + cPath + 'framework/core/logger.js)' ])).toBe(true);
+
+            done();
+        }, 500);
+    });
 
     function tryCatch(callback) {
         try {

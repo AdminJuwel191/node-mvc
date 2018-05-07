@@ -190,7 +190,7 @@ describe('bootstrap', function () {
             return bootstrap.init('', 'invalid.json');
         }, mock);
 
-        expect(result.indexOf('Problem with parsing environment json file, Unexpected end of input') > -1).toBe(true);
+        expect(result.indexOf('Problem with parsing environment json file') > -1).toBe(true);
 
 
         bootstrap.initalized = false;
