@@ -168,13 +168,13 @@ Logger = Type.create({
             if (log && (this.config.type === log.type || this.config.type === 'ALL')) {
                 if (this.config.console) {
                     if (log.type === 'ERROR') {
-                        exec_console(console.error, log);
+                        exec_console(console.error, log, this.config.streamFormat);
                     } else if (log.type === 'INFO') {
-                        exec_console(console.info, log);
+                        exec_console(console.info, log, this.config.streamFormat);
                     } else if (log.type === 'WARNING') {
-                        exec_console(console.warn, log);
+                        exec_console(console.warn, log, this.config.streamFormat);
                     } else {
-                        exec_console(console.log, log);
+                        exec_console(console.log, log, this.config.streamFormat);
                     }
                 }
 
@@ -206,15 +206,19 @@ Logger = Type.create({
              * @param func
              * @param log
              */
-            function exec_console(func, log) {
-                func(
-                    ' ' + log.type + '\n',
-                    'CREATED: ' + log.created + '\t ' + '\n',
-                    'MESSAGE: ' + log.message + '\t ' + log.trace + '\n',
-                    !!log.data ? 'DATA:' + log.data + '\n' : '',
-                    '\n'
-                );
-            }
+            function exec_console(func, log, format) {
+                if (format === 'json') {
+                    func(log);
+                } else {
+                    func(
+                        ' ' + log.type + '\n',
+                        'CREATED: ' + log.created + '\t ' + '\n',
+                        'MESSAGE: ' + log.message + '\t ' + log.trace + '\n',
+                        !!log.data ? 'DATA:' + log.data + '\n' : '',
+                        '\n'
+                    );
+                }
+            };
         },
         /**
          * @since 0.0.1
