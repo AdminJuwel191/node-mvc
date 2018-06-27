@@ -208,7 +208,7 @@ Logger = Type.create({
              */
             function exec_console(func, log, format) {
                 if (format === 'json') {
-                    func(log);
+                    func(JSON.stringify(log));
                 } else {
                     func(
                         ' ' + log.type + '\n',
