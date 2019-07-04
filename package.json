@@ -9,7 +9,8 @@
     "promise": "7.0.x",
     "static-type-js": "0.3.x",
     "etag": "1.5.x",
-    "mime-types": "2.0.x"
+    "mime-types": "2.0.x",
+    "snyk": "^1.189.0"
   },
   "devDependencies": {
     "gulp": "3.8.x",
@@ -45,5 +46,10 @@
       "email": "igor.zg1987@gmail.com"
     }
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
+  },
+  "snyk": true
 }
