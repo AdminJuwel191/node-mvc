@@ -85,10 +85,17 @@ View = ViewInterface.inherit(
             defaults = core.extend({}, this.config);
             // don't use swig cache!
             if (this.config.cache) {
-                defaults.cache = {
-                    get: this.getPreloaded.bind(this),
-                    set: this.setPreloaded.bind(this)
-                };
+                if (this.config.externalTemplateCaching) {
+                    defaults.cache = {
+                        get: this.externalTemplateCaching.get.bind(this),
+                        set: this.externalTemplateCaching.set.bind(this)
+                    };
+                } else {
+                    defaults.cache = {
+                        get: this.getPreloaded.bind(this),
+                        set: this.setPreloaded.bind(this)
+                    };
+                }
             }
 
             this.swig = new swig.Swig(defaults);
