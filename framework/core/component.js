@@ -113,6 +113,7 @@ Component = ComponentInterface.inherit({}, {
             }
             this.checkDependency(component, components);
             if (!this.has(component.name)) {
+
                 this.set(component.name, component);
             }
         }

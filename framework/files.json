@@ -30,6 +30,7 @@
   "interface/http": "@{framework}/interface/http",
   "interface/component": "@{framework}/interface/component",
   "interface/view": "@{framework}/interface/view",
+  "interface/templateCache": "@{framework}/interface/templateCache",
   "interface/module": "@{framework}/interface/module",
 
   "storage/memory": "@{framework}/storage/memory",

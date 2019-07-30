@@ -54,6 +54,11 @@ View = ViewInterface.inherit(
 
 
             this.normalizers.push(this.config.views);
+            let cacheComponentInst;
+            if (this.config.cacheComponent) {
+                let cacheComponent = di.load(di.normalizePath(this.config.cacheComponent));
+                cacheComponentInst = new cacheComponent();
+            }
 
             di.setAlias('viewsPath', this.config.views);
 
@@ -85,10 +90,10 @@ View = ViewInterface.inherit(
             defaults = core.extend({}, this.config);
             // don't use swig cache!
             if (this.config.cache) {
-                if (this.config.externalTemplateCaching) {
+                if (this.config.cacheComponent) {
                     defaults.cache = {
-                        get: this.externalTemplateCaching.get.bind(this),
-                        set: this.externalTemplateCaching.set.bind(this)
+                        get: cacheComponentInst.get.bind(this),
+                        set: cacheComponentInst.set.bind(this)
                     };
                 } else {
                     defaults.cache = {
