@@ -45,6 +45,7 @@ View = ViewInterface.inherit(
                 cmtControls: ['{#', '#}'],
                 locals: {},
                 cacheComponent: false,
+                cacheComponentInst: false,
                 views: '@{appPath}/views/',
                 suffix: '.twig',
                 extensions: false,
@@ -58,6 +59,7 @@ View = ViewInterface.inherit(
             if (this.config.cacheComponent) {
                 let cacheComponent = di.load(di.normalizePath(this.config.cacheComponent));
                 cacheComponentInst = new cacheComponent();
+                this.cacheComponentInst = cacheComponentInst;
             }
 
             di.setAlias('viewsPath', this.config.views);
@@ -257,7 +259,11 @@ View = ViewInterface.inherit(
 
             } else if (this.isFile(dir) && this.suffix.test(dir)) {
                 process.nextTick(function compileTemplateAsync() {
-                    this.setPreloaded(dir, this.swig.compileFile(dir));
+                    if(this.cacheComponentInst) {
+                        this.cacheComponentInst.set(dir, this.swig.compileFile(dir));
+                    } else {
+                        this.setPreloaded(dir, this.swig.compileFile(dir));
+                    }
                 }.bind(this));
             }
         },
