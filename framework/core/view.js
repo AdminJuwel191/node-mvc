@@ -5,10 +5,13 @@ var di = require('../di'),
     ViewInterface = di.load('interface/view'),
     ModuleInterface = di.load('interface/module'),
     swig = di.load('swig'),
+    swig_filters = di.load('swig/lib/filters.js'), //needed for compiling
+    swig_utils = di.load('swig/lib/utils.js'),
     error = di.load('error'),
     fs = di.load('fs'),
     component = di.load('core/component'),
     logger = component.get('core/logger'),
+    preloaded = {}, //stupid
     View;
 
 /**
@@ -34,7 +37,6 @@ View = ViewInterface.inherit(
             var defaults;
             // extend
             this.aliasRegex = /@{.*}/g;
-            this.preloaded = {};
             this.paths = [];
             this.normalizers = [];
             this.config = core.extend({
@@ -45,7 +47,6 @@ View = ViewInterface.inherit(
                 cmtControls: ['{#', '#}'],
                 locals: {},
                 cacheComponent: false,
-                cacheComponentInst: false,
                 views: '@{appPath}/views/',
                 suffix: '.twig',
                 extensions: false,
@@ -55,12 +56,6 @@ View = ViewInterface.inherit(
 
 
             this.normalizers.push(this.config.views);
-            let cacheComponentInst;
-            if (this.config.cacheComponent) {
-                let cacheComponent = di.load(di.normalizePath(this.config.cacheComponent));
-                cacheComponentInst = new cacheComponent();
-                this.cacheComponentInst = cacheComponentInst;
-            }
 
             di.setAlias('viewsPath', this.config.views);
 
@@ -82,7 +77,6 @@ View = ViewInterface.inherit(
             } else {
                 throw new error.HttpError(500, this.config, 'View.construct: view suffix must be string type');
             }
-
             // create new swig env
             this.config.loader = {
                 resolve: this.resolve.bind(this),
@@ -92,17 +86,10 @@ View = ViewInterface.inherit(
             defaults = core.extend({}, this.config);
             // don't use swig cache!
             if (this.config.cache) {
-                if (this.config.cacheComponent) {
-                    defaults.cache = {
-                        get: cacheComponentInst.get.bind(this),
-                        set: cacheComponentInst.set.bind(this)
-                    };
-                } else {
-                    defaults.cache = {
-                        get: this.getPreloaded.bind(this),
-                        set: this.setPreloaded.bind(this)
-                    };
-                }
+                defaults.cache = {
+                    get: this.getPreloaded.bind(this),
+                    set: this.setPreloaded.bind(this)
+                };
             }
 
             this.swig = new swig.Swig(defaults);
@@ -112,7 +99,10 @@ View = ViewInterface.inherit(
             }
 
             if (this.config.cache) {
-                this.paths.forEach(this.preloadTemplates.bind(this));
+                //changed to play with number of paths to cache
+                for(var i = 0; i < this.paths.length; i++) {
+                    this.preloadTemplates.call(this, this.paths[i])
+                }
             }
 
             logger.info('View.construct:', this.config);
@@ -172,7 +162,7 @@ View = ViewInterface.inherit(
          * Set preloaded template
          */
         setPreloaded: function View_setPreloaded(key, value) {
-            this.preloaded[key] = value;
+            preloaded[key] = value;
         },
         /**
          * @since 0.0.1
@@ -184,8 +174,31 @@ View = ViewInterface.inherit(
          * @return {string|boolean}
          */
         getPreloaded: function View_getPreloaded(key) {
-            if (this.preloaded.hasOwnProperty(key)) {
-                return this.preloaded[key];
+            if (preloaded.hasOwnProperty(key)) {
+                var context = {};
+                var contextLength = swig_utils.keys(context).length;
+                var pre = {
+                    tpl: preloaded[key].tpl,
+                    tokens: preloaded[key].tokens
+                }
+
+                function compiled(locals) {
+                    var lcls;
+                    if (locals && contextLength) {
+                        lcls = swig_utils.extend({}, context, locals);
+                    } else if (locals && !contextLength) {
+                        lcls = locals;
+                    } else if (!locals && contextLength) {
+                        lcls = context;
+                    } else {
+                        lcls = {};
+                    }
+                    return pre.tpl(swig, lcls, swig_filters, swig_utils, ()=>{});
+                }
+
+                swig_utils.extend(compiled, pre.tokens);
+
+                return compiled;
             }
             return false;
         },
@@ -258,13 +271,14 @@ View = ViewInterface.inherit(
                 }
 
             } else if (this.isFile(dir) && this.suffix.test(dir)) {
-                process.nextTick(function compileTemplateAsync() {
-                    if(this.cacheComponentInst) {
-                        this.cacheComponentInst.set(dir, this.swig.compileFile(dir));
-                    } else {
-                        this.setPreloaded(dir, this.swig.compileFile(dir));
-                    }
-                }.bind(this));
+
+                try{
+                    var src = this.swig.options.loader.load(dir);
+                    this.setPreloaded(dir, this.swig.precompile(src));
+                } catch(e) {
+                    // The resolvement fails here
+                }
+
             }
         },
 
