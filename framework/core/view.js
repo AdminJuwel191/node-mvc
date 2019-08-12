@@ -72,34 +72,22 @@ View = ViewInterface.inherit(
             } else {
                 throw new error.HttpError(500, this.config, 'View.construct: view suffix must be string type');
             }
-            function customLoader() {
-
-            }
-            customLoader.prototype.getSource = function(name) {
-                var resolvedPath = this.resolve(name);
-                console.log("RESOLVED:", resolvedPath);
-                var source = this.load(source);
-                return {
-                    src: source,
-                    path: resolvedPath,
-                    noCache: false
-                }
-            }.bind(this);
-            console.log(this.config.cache);
 
             this.nunjucks = nunjucks.configure({ autoescape: true,
                 noCache: !this.config.cache,
                 watch: !this.config.cache,
                 throwOnUndefined: false,
             });
+
+            this.nunjucks.addGlobal('resolveTemplate', function (name) {
+                if(!name.includes('viewsPath'))
+                    name = di.getAlias('viewsPath') + name;
+                return this.resolve(name,false,true);
+            }.bind(this))
+
             if (this.config.extensions) {
                 di.load(this.config.extensions)(this, di);
             }
-
-
-            // if (this.config.cache) {
-            //     this.paths.forEach(this.preloadTemplates.bind(this));
-            // }
 
             logger.info('View.construct:', this.config);
         },
@@ -261,7 +249,7 @@ View = ViewInterface.inherit(
          * Resolve view
          * @return {string}
          */
-        resolve: function View_resolve(toPath, fromPath) {
+        resolve: function View_resolve(toPath, fromPath, silentError) {
             var file = di.normalizePath(toPath),
                 themes = this.config.themes.slice(),
                 theme,
@@ -310,6 +298,7 @@ View = ViewInterface.inherit(
                     file = file.replace(re, '');
 
                     filePath = di.normalizePath(path + theme + '/' + file + this.config.suffix);
+
                     if (this.isFile(filePath)) {
                         return filePath;
                     }
@@ -321,18 +310,21 @@ View = ViewInterface.inherit(
                 }
             }
 
+            if(!silentError) {
+                throw new error.HttpError(500, {
+                    from: fromPath,
+                    load: toPath,
+                    filePath: filePath,
+                    paths: this.paths,
+                    isNormalized: isNormalized,
+                    file: file,
+                    path: path,
+                    trace: trace,
+                    themes: this.config.themes
+                }, "View.resolve: template don't exists");
+            }
+            return '';
 
-            throw new error.HttpError(500, {
-                from: fromPath,
-                load: toPath,
-                filePath: filePath,
-                paths: this.paths,
-                isNormalized: isNormalized,
-                file: file,
-                path: path,
-                trace: trace,
-                themes: this.config.themes
-            }, "View.resolve: template don't exists");
         },
         /**
          * @since 0.0.1
