@@ -84,6 +84,12 @@ View = ViewInterface.inherit(
                     name = di.getAlias('viewsPath') + name;
                 return this.resolve(name,false,true);
             }.bind(this))
+            this.nunjucks.addGlobal('JSON', JSON);
+            this.nunjucks.addGlobal('Math', Math);
+            this.nunjucks.addGlobal('RegExp', RegExp);
+            this.nunjucks.addGlobal('Date', Date);
+            this.nunjucks.addGlobal('encodeURIComponent', encodeURIComponent);
+            this.nunjucks.addGlobal('decodeURIComponent', decodeURIComponent);
 
             if (this.config.extensions) {
                 di.load(this.config.extensions)(this, di);
