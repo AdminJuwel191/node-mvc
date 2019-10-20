@@ -4,7 +4,7 @@
   "description": "Powerful lightweight mvc framework for nodejs",
   "version": "0.3.3",
   "dependencies": {
-    "mongoose": "4.8.x",
+    "mongoose": "5.4.10",
     "swig": "1.4.x",
     "promise": "7.0.x",
     "static-type-js": "0.3.x",
