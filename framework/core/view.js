@@ -46,7 +46,7 @@ View = ViewInterface.inherit(
                 locals: {},
                 cacheComponent: false,
                 views: '@{appPath}/views/',
-                suffix: '.twig',
+                suffix: '.njk',
                 extensions: false,
                 defaultTheme: 'default',
                 themes: []
