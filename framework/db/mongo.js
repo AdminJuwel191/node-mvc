@@ -23,7 +23,8 @@ var di = require('../di'),
  */
 Mongo = Type.create({
     config: Type.OBJECT,
-    db: Type.OBJECT
+    db: Type.OBJECT,
+    dbConnCache: Type.OBJECT
 }, {
     /**
      * @since 0.0.1
@@ -45,9 +46,31 @@ Mongo = Type.create({
     _construct: function (config) {
         this.config = core.extend({
             connection: 'mongodb://localhost/mvcjs',
-            options: {}
+            options: {
+                replicaString: '',
+                clients: []
+            }
         }, config);
-        this.db = mongoose.connect(this.config.connection, this.config.options);
+        this.dbConnCache = {};
+        var clientKeys = Object.keys(this.config.options.clients);
+        if (clientKeys.length) {
+            clientKeys.forEach(function(client) {
+                var clientChefConfig = this.config.options.clients[client];
+                var replicaSet = this.config.options.replicaString ? this.config.options.replicaString : '';
+                try {
+                    this.dbConnCache[client] = mongoose.createConnection('mongodb://' +
+                        clientChefConfig.mongodbHost +'/' + clientChefConfig.partnerSiteName + replicaSet, this.config.options);
+                } catch(e) {
+                    console.log(e);
+                }
+
+            }.bind(this));
+            this.db = this.dbConnCache[clientKeys[0]];
+
+        } else {
+            this.db = mongoose.createConnection(this.config.connection, this.config.options);
+        }
+
         logger.info('Mongo.construct:', this.config);
     },
 
@@ -92,7 +115,13 @@ Mongo = Type.create({
         logger.info('Mongo.schema:', {
             name: name
         });
-        return mongoose.model(name, schema);
+        return this.db.model(name, schema);
+    },
+
+    useDb: function useDb(clientId) {
+        if(this.dbConnCache.hasOwnProperty(clientId)) {
+            this.db = this.dbConnCache[clientId];
+        }
     }
 });
 
