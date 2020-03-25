@@ -4,7 +4,7 @@ var di = require('../di'),
     Type = di.load('typejs'),
     ViewInterface = di.load('interface/view'),
     ModuleInterface = di.load('interface/module'),
-    swig = di.load('swig'),
+    nunjucks = di.load('nunjucks'),
     error = di.load('error'),
     fs = di.load('fs'),
     component = di.load('core/component'),
@@ -23,7 +23,7 @@ var di = require('../di'),
  */
 View = ViewInterface.inherit(
     {
-        swig: Type.OBJECT,
+        nunjucks: Type.OBJECT,
         preloaded: Type.OBJECT,
         paths: Type.ARRAY,
         aliasRegex: Type.REGEX,
@@ -51,8 +51,6 @@ View = ViewInterface.inherit(
                 defaultTheme: 'default',
                 themes: []
             }, config);
-
-
             this.normalizers.push(this.config.views);
 
             di.setAlias('viewsPath', this.config.views);
@@ -67,7 +65,6 @@ View = ViewInterface.inherit(
             } else {
                 throw new error.HttpError(500, this.config, 'View.construct: themes are not array type');
             }
-
             this.setModulesViewsPath(di.getAlias('modulesPath'));
 
             if (Type.assert(Type.STRING, this.config.suffix)) {
@@ -76,29 +73,26 @@ View = ViewInterface.inherit(
                 throw new error.HttpError(500, this.config, 'View.construct: view suffix must be string type');
             }
 
-            // create new swig env
-            this.config.loader = {
-                resolve: this.resolve.bind(this),
-                load: this.load.bind(this)
-            };
+            this.nunjucks = nunjucks.configure({ autoescape: true,
+                noCache: !this.config.cache,
+                watch: !this.config.cache,
+                throwOnUndefined: false,
+            });
 
-            defaults = core.extend({}, this.config);
-            // don't use swig cache!
-            if (this.config.cache) {
-                defaults.cache = {
-                    get: this.getPreloaded.bind(this),
-                    set: this.setPreloaded.bind(this)
-                };
-            }
-
-            this.swig = new swig.Swig(defaults);
+            this.nunjucks.addGlobal('resolveTemplate', function (name) {
+                if(!name.includes('viewsPath'))
+                    name = di.getAlias('viewsPath') + name;
+                return this.resolve(name,false,true);
+            }.bind(this))
+            this.nunjucks.addGlobal('JSON', JSON);
+            this.nunjucks.addGlobal('Math', Math);
+            this.nunjucks.addGlobal('RegExp', RegExp);
+            this.nunjucks.addGlobal('Date', Date);
+            this.nunjucks.addGlobal('encodeURIComponent', encodeURIComponent);
+            this.nunjucks.addGlobal('decodeURIComponent', decodeURIComponent);
 
             if (this.config.extensions) {
                 di.load(this.config.extensions)(this, di);
-            }
-
-            if (this.config.cache) {
-                this.paths.forEach(this.preloadTemplates.bind(this));
             }
 
             logger.info('View.construct:', this.config);
@@ -245,7 +239,8 @@ View = ViewInterface.inherit(
 
             } else if (this.isFile(dir) && this.suffix.test(dir)) {
                 process.nextTick(function compileTemplateAsync() {
-                    this.setPreloaded(dir, this.swig.compileFile(dir));
+                    // var src = this.load(this.resolve(dir));
+                    // this.setPreloaded(dir, nunjucks.compile(dir));
                 }.bind(this));
             }
         },
@@ -260,7 +255,7 @@ View = ViewInterface.inherit(
          * Resolve view
          * @return {string}
          */
-        resolve: function View_resolve(toPath, fromPath) {
+        resolve: function View_resolve(toPath, fromPath, silentError) {
             var file = di.normalizePath(toPath),
                 themes = this.config.themes.slice(),
                 theme,
@@ -309,6 +304,7 @@ View = ViewInterface.inherit(
                     file = file.replace(re, '');
 
                     filePath = di.normalizePath(path + theme + '/' + file + this.config.suffix);
+
                     if (this.isFile(filePath)) {
                         return filePath;
                     }
@@ -320,18 +316,21 @@ View = ViewInterface.inherit(
                 }
             }
 
+            if(!silentError) {
+                throw new error.HttpError(500, {
+                    from: fromPath,
+                    load: toPath,
+                    filePath: filePath,
+                    paths: this.paths,
+                    isNormalized: isNormalized,
+                    file: file,
+                    path: path,
+                    trace: trace,
+                    themes: this.config.themes
+                }, "View.resolve: template don't exists");
+            }
+            return '';
 
-            throw new error.HttpError(500, {
-                from: fromPath,
-                load: toPath,
-                filePath: filePath,
-                paths: this.paths,
-                isNormalized: isNormalized,
-                file: file,
-                path: path,
-                trace: trace,
-                themes: this.config.themes
-            }, "View.resolve: template don't exists");
         },
         /**
          * @since 0.0.1
@@ -364,7 +363,7 @@ View = ViewInterface.inherit(
          * Set loader
          */
         setLoader: function View_setLoader(resolve, load) {
-            this.swig.setDefaults({
+            this.nunjucks.setDefaults({
                 loader: {
                     resolve: resolve,
                     load: load
@@ -380,7 +379,7 @@ View = ViewInterface.inherit(
          * Set swig filter
          */
         setFilter: function View_setFilter(name, method) {
-            this.swig.setFilter(name, method);
+            this.nunjucks.addFilter(name, method);
         },
         /**
          * @since 0.0.1
@@ -391,7 +390,7 @@ View = ViewInterface.inherit(
          * Set swig tag
          */
         setTag: function View_setTag(name, parse, compile, ends, blockLevel) {
-            this.swig.setTag(name, parse, compile, ends, blockLevel);
+            this.nunjucks.addTag(name, parse, compile, ends, blockLevel);
         },
         /**
          * @since 0.0.1
@@ -402,7 +401,7 @@ View = ViewInterface.inherit(
          * Set swig extension
          */
         setExtension: function View_setExtension(name, parse, compile, ends, blockLevel) {
-            this.swig.setExtension(name, parse, compile, ends, blockLevel);
+            this.nunjucks.addExtension(name, parse, compile, ends, blockLevel);
         },
         /**
          * @since 0.0.1
@@ -414,7 +413,7 @@ View = ViewInterface.inherit(
          * @return {string}
          */
         render: function View_render(source, locals, escape) {
-            return this.swig.render(source, {
+            return this.nunjucks.renderString(source, {
                 locals: locals,
                 autoescape: !escape
             });
@@ -432,7 +431,10 @@ View = ViewInterface.inherit(
             if (!viewsPath) {
                 viewsPath = di.getAlias('viewsPath');
             }
-            return this.swig.renderFile(viewsPath + templateName, locals);
+            return this.nunjucks.render(this.resolve(viewsPath + templateName),locals);
+        },
+        getNunjucksInstance: function getNunjucksInstance() {
+            return this.nunjucks;
         }
     }
 );
