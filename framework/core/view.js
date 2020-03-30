@@ -79,10 +79,10 @@ View = ViewInterface.inherit(
                 throwOnUndefined: false,
             });
 
-            this.nunjucks.addGlobal('resolveTemplate', function (name) {
+            this.nunjucks.addGlobal('resolveTemplate', function (name, themes) {
                 if(!name.includes('viewsPath'))
                     name = di.getAlias('viewsPath') + name;
-                return this.resolve(name,false,true);
+                return this.resolve(name,false,true, themes);
             }.bind(this))
             this.nunjucks.addGlobal('JSON', JSON);
             this.nunjucks.addGlobal('Math', Math);
