@@ -52,6 +52,7 @@ Mongo = Type.create({
             }
         }, config);
         this.dbConnCache = {};
+        this.db = {};
         var clientKeys = Object.keys(this.config.options.clients);
         if (clientKeys.length) {
             clientKeys.forEach(function(client) {
@@ -59,7 +60,7 @@ Mongo = Type.create({
                 var replicaSet = this.config.options.replicaString ? this.config.options.replicaString : '';
                 try {
                     this.dbConnCache[client] = mongoose.createConnection('mongodb://' +
-                        clientChefConfig.mongodbHost +'/' + clientChefConfig.partnerSiteName + replicaSet, this.config.options);
+                        clientChefConfig.mongodbHost + '/' + clientChefConfig.partnerSiteName + replicaSet, this.config.options);
                 } catch(e) {
                     console.log(e);
                 }
@@ -115,7 +116,11 @@ Mongo = Type.create({
         logger.info('Mongo.schema:', {
             name: name
         });
-        return this.db.model(name, schema);
+        var model = {};
+        Object.keys(this.dbConnCache).forEach(function(clientId) {
+            model[clientId] = this.dbConnCache[clientId].model(name, schema)
+        }.bind(this));
+        return model;
     },
 
     useDb: function useDb(clientId) {

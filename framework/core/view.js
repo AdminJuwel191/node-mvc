@@ -255,9 +255,9 @@ View = ViewInterface.inherit(
          * Resolve view
          * @return {string}
          */
-        resolve: function View_resolve(toPath, fromPath, silentError) {
+        resolve: function View_resolve(toPath, fromPath, silentError, themes1) {
             var file = di.normalizePath(toPath),
-                themes = this.config.themes.slice(),
+                themes = themes1 || this.config.themes.slice(),
                 theme,
                 re,
                 filePath,
@@ -267,6 +267,7 @@ View = ViewInterface.inherit(
                 pathRegex,
                 pathReplace,
                 trace = [];
+
 
             // file name normalizers
             while (normalizers.length) {
@@ -427,11 +428,25 @@ View = ViewInterface.inherit(
          * Render file
          *  @return {string}
          */
-        renderFile: function View_renderFile(templateName, locals, viewsPath) {
+        renderFile: function View_renderFile(templateName, locals,  viewsPath) {
+            var themes = [];
             if (!viewsPath) {
                 viewsPath = di.getAlias('viewsPath');
             }
-            return this.nunjucks.render(this.resolve(viewsPath + templateName),locals);
+
+            if(!locals.clientThemes) {
+                themes = [
+                    'wls/' + locals.chef.partnerName,
+                    locals.chef.theme,
+                    'default'
+                ]
+            } else {
+                themes = [...locals.clientThemes];
+            }
+            console.log(templateName);
+            return this.nunjucks.render(this.resolve(viewsPath + templateName, null, false, themes),locals/*, (err, succ) => {
+                console.log(err);
+            }*/);
         },
         getNunjucksInstance: function getNunjucksInstance() {
             return this.nunjucks;
