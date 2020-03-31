@@ -52,7 +52,6 @@ View = ViewInterface.inherit(
                 themes: []
             }, config);
             this.normalizers.push(this.config.views);
-
             di.setAlias('viewsPath', this.config.views);
             if (Type.isArray(this.config.themes)) {
                 if (this.config.themes.indexOf(this.config.defaultTheme) === -1) {
@@ -79,7 +78,6 @@ View = ViewInterface.inherit(
             });
 
             this.nunjucks.addGlobal('resolveTemplate', function (name, themes) {
-                console.log(name, themes);
                 if(!name.includes('viewsPath')) {
                     name = di.getAlias('viewsPath') + name;
                 }
@@ -260,7 +258,7 @@ View = ViewInterface.inherit(
          */
         resolve: function View_resolve(toPath, fromPath, silentError, providedThemes) {
             var file = di.normalizePath(toPath),
-                themes = !!providedThemes && providedThemes.length? providedThemes : this.config.themes.slice(),
+                themes = !!providedThemes && providedThemes.length? providedThemes.slice() : this.config.themes.slice(),
                 theme,
                 re,
                 filePath,
@@ -444,7 +442,7 @@ View = ViewInterface.inherit(
                     'default'
                 ]
             } else {
-                themes = [...locals.clientThemes];
+                themes = locals.clientThemes.slice();
             }
             return this.nunjucks.render(this.resolve(viewsPath + templateName, null, false, themes),locals/*, (err, succ) => {
                 console.log(err);
