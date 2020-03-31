@@ -27,11 +27,19 @@ Favicon = Type.create({
     _construct: function Favicon_construct(config) {
         this.config = core.extend({
             path: '@{basePath}/favicon.ico',
-            hook: '\\/favicon\\.ico$'
+            hook: '\\/favicon\\.ico$',
+            clients: []
         }, config);
         this.readFile();
         logger.info('Favicon.construct:', config);
-        hook.set(new RegExp(this.config.hook), this.onRequest.bind(this));
+        if(this.config.clients.length) {
+            this.config.clients.forEach(function(client) {
+                hook.set(new RegExp(client + '/' + this.config.hook), this.onRequest.bind(this));
+            }.bind(this));
+        } else {
+            hook.set(new RegExp(this.config.hook), this.onRequest.bind(this));
+        }
+
     },
     /**
      * @since 0.0.1
@@ -42,7 +50,6 @@ Favicon = Type.create({
      * On request handle favicon
      */
     onRequest: function Favicon_onRequest(api) {
-
         var maxAge = 60 * 60 * 24 * 30 * 12; // one year
 
         api.addHeader('Content-Type', 'image/x-icon');
@@ -67,6 +74,7 @@ Favicon = Type.create({
      */
     readFile: function Favicon_readFile() {
         var path = di.normalizePath(this.config.path);
+        console.log("THIS IS FUCKING PATH", path);
         logger.info('Favicon.readFile:', {
             path: path
         });

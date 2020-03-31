@@ -54,7 +54,6 @@ View = ViewInterface.inherit(
             this.normalizers.push(this.config.views);
 
             di.setAlias('viewsPath', this.config.views);
-
             if (Type.isArray(this.config.themes)) {
                 if (this.config.themes.indexOf(this.config.defaultTheme) === -1) {
                     this.config.themes.push(this.config.defaultTheme);
@@ -80,8 +79,12 @@ View = ViewInterface.inherit(
             });
 
             this.nunjucks.addGlobal('resolveTemplate', function (name, themes) {
-                if(!name.includes('viewsPath'))
+                console.log(name, themes);
+                if(!name.includes('viewsPath')) {
                     name = di.getAlias('viewsPath') + name;
+                }
+                if(name.includes('partials/header'))
+                    console.log(this.resolve(name, false, true, themes));
                 return this.resolve(name,false,true, themes);
             }.bind(this))
             this.nunjucks.addGlobal('JSON', JSON);
@@ -255,9 +258,9 @@ View = ViewInterface.inherit(
          * Resolve view
          * @return {string}
          */
-        resolve: function View_resolve(toPath, fromPath, silentError, themes1) {
+        resolve: function View_resolve(toPath, fromPath, silentError, providedThemes) {
             var file = di.normalizePath(toPath),
-                themes = themes1 || this.config.themes.slice(),
+                themes = !!providedThemes && providedThemes.length? providedThemes : this.config.themes.slice(),
                 theme,
                 re,
                 filePath,
@@ -443,7 +446,6 @@ View = ViewInterface.inherit(
             } else {
                 themes = [...locals.clientThemes];
             }
-            console.log(templateName);
             return this.nunjucks.render(this.resolve(viewsPath + templateName, null, false, themes),locals/*, (err, succ) => {
                 console.log(err);
             }*/);
