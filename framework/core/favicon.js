@@ -73,8 +73,7 @@ Favicon = Type.create({
      * Get default error route
      */
     readFile: function Favicon_readFile() {
-        var path = di.normalizePath(this.config.path);
-        console.log("THIS IS FUCKING PATH", path);
+        var path = di.normalizePath('@{basePath}/favicons/dailymailcouk.ico');
         logger.info('Favicon.readFile:', {
             path: path
         });
