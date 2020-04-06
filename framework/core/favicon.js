@@ -28,15 +28,22 @@ Favicon = Type.create({
         this.config = core.extend({
             path: '@{basePath}/favicon.ico',
             hook: '\\/favicon\\.ico$',
-            clients: []
+            clients: {}
         }, config);
-        this.readFile();
+        this.file = {};
         logger.info('Favicon.construct:', config);
-        if(this.config.clients.length) {
-            this.config.clients.forEach(function(client) {
-                hook.set(new RegExp(client + '/' + this.config.hook), this.onRequest.bind(this));
-            }.bind(this));
+        console.log("IN FAVICON", this.config.clients.length);
+        if(!!this.config.clients) {
+            Object.keys(this.config.clients).forEach(function(clientId) {
+                const clientName = this.config.clients[clientId];
+                this.readFile({
+                    clientName,
+                    clientId
+                });
+            }.bind(this))
+            hook.set(new RegExp(this.config.hook), this.onRequest.bind(this));
         } else {
+            this.readFile();
             hook.set(new RegExp(this.config.hook), this.onRequest.bind(this));
         }
 
@@ -51,18 +58,27 @@ Favicon = Type.create({
      */
     onRequest: function Favicon_onRequest(api) {
         var maxAge = 60 * 60 * 24 * 30 * 12; // one year
+        var file;
 
+        if(!!this.config.clients) {
+            const clientIdRegex = new RegExp('([a-z|0-9]){32}');
+            const matches = api.url.match(clientIdRegex);
+            if(!!matches) {
+                file = this.file[matches[0]];
+            }
+        } else {
+            file = this.file;
+        }
         api.addHeader('Content-Type', 'image/x-icon');
         api.addHeader('Cache-Control',  'public, max-age=' + ~~(maxAge));
-        api.addHeader('ETag', etag(this.file));
+        api.addHeader('ETag', etag(file));
 
         if (api.getMethod() !== 'GET') {
             throw new error.HttpError(500, {}, 'Favicon is accessible only via GET request');
         } else if (api.isHeaderCacheUnModified()) {
             api.sendNoChange();
         }
-
-        return this.file;
+        return file;
     },
     /**
      * @since 0.0.1
@@ -72,13 +88,19 @@ Favicon = Type.create({
      * @description
      * Get default error route
      */
-    readFile: function Favicon_readFile() {
-        var path = di.normalizePath('@{basePath}/favicons/dailymailcouk.ico');
+    readFile: function Favicon_readFile(client) {
+
+        var path;
+        if(!!this.config.clients) {
+            path = di.normalizePath(this.config.path.replace('{{CLIENT}}', client.clientName));
+        } else {
+            path = di.normalizePath(this.config.path);
+        }
         logger.info('Favicon.readFile:', {
             path: path
         });
         try {
-            this.file = fs.readFileSync(path, {encoding: null});
+            this.file[client.clientId] = fs.readFileSync(path, {encoding: null});
         } catch (e) {
             throw new error.HttpError(500, {}, 'Cannot load favicon', e);
         }
