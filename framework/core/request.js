@@ -683,7 +683,7 @@ Request = Type.create({
                 isForwarded: true,
                 body: this.body,
                 isERROR: true
-            }, router.createUrl(router.getErrorRoute()));
+            }, router.createUrl(this._extractClientIdFromUrl(this.url) + router.getErrorRoute()));
             // pass exception response over parsed url query as query parameter
             // assign to exception
             request.parsedUrl.query.exception = response;
@@ -997,8 +997,16 @@ Request = Type.create({
             localAddress: this.getRequestLocalAddress(),
             localPort: this.getRequestLocalPort()
         };
+    },
+    _extractClientIdFromUrl: function extractClientIdFromUrl(url) {
+        var clientId = '';
+        var clientRegex = /\/([a-z|0-9]){32}/;
+        var matches = url.match(clientRegex);
+        if(matches.length) {
+            clientId = matches[0] + '/';
+        }
+        return clientId;
     }
-
 });
 
 
