@@ -122,6 +122,7 @@ Mongo = Type.create({
         var model;
         var keys = Object.keys(this.dbConnCache);
         if(keys.length) {
+            model = {};
             Object.keys(this.dbConnCache).forEach(function(clientId) {
                 model[clientId] = this.dbConnCache[clientId].model(name, schema);
             }.bind(this));
