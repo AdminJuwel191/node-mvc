@@ -32,7 +32,6 @@ Favicon = Type.create({
         }, config);
         this.file = {};
         logger.info('Favicon.construct:', config);
-        console.log("IN FAVICON", this.config.clients.length);
         if(!!this.config.clients) {
             Object.keys(this.config.clients).forEach(function(clientId) {
                 const clientName = this.config.clients[clientId];
