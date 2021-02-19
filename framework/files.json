@@ -33,7 +33,6 @@
   "interface/module": "@{framework}/interface/module",
 
   "storage/memory": "@{framework}/storage/memory",
-  "storage/session": "@{framework}/storage/session",
 
   "typejs": "static-type-js"
 }
