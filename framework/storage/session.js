@@ -32,26 +32,22 @@ SessionStorage = Type.create({
      * @return {object}
      */
     _construct: function SessionStorage_construct(config) {
-        // this.timeouts = {};
-        // this.config = core.extend(
-        //     {
-        //         cookieKey: 'session_id',
-        //         time: 60 * 20 * 1000, // 20 min default session time
-        //         storage: null,
-        //         key_prefix: 'SESSION_ID_KEY_'
-        //     },
-        //     config
-        // );
+        this.timeouts = {};
+        this.config = core.extend(
+            {
+            },
+            config
+        );
 
-        // if (!this.config.storage) {
-        //     this.config.storage = cache;
-        // } else if (Type.isString(this.config.storage)) {
-        //     this.config.storage = di.load(this.config.storage);
-        // }
+        if (!this.config.storage) {
+            this.config.storage = cache;
+        } else if (Type.isString(this.config.storage)) {
+            this.config.storage = di.load(this.config.storage);
+        }
 
-        // if(!(this.config.storage instanceof StorageInterface)) {
-        //     throw new error.HttpError(500, this.config, 'Session storage must be instance of interface/storage');
-        // }
+        if(!(this.config.storage instanceof StorageInterface)) {
+            throw new error.HttpError(500, this.config, 'Session storage must be instance of interface/storage');
+        }
     },
     /**
      * @since 0.0.1
