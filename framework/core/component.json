@@ -22,5 +22,8 @@
   ],
   "hooks/request": [
     "core/logger"
+  ],	
+  "storage/session": [	
+    "storage/memory"	
   ]
 }
