@@ -34,7 +34,12 @@ SessionStorage = Type.create({
     _construct: function SessionStorage_construct(config) {
         this.timeouts = {};
         this.config = core.extend(
-           null,
+            {
+                cookieKey: 'testttt',
+                time: 60 * 20 * 1000, // 20 min default session time
+                storage: null,
+                key_prefix: 'xxx'
+            },
             config
         );
 
