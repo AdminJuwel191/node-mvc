@@ -34,8 +34,7 @@ SessionStorage = Type.create({
     _construct: function SessionStorage_construct(config) {
         this.timeouts = {};
         this.config = core.extend(
-            {
-            },
+           null,
             config
         );
 
