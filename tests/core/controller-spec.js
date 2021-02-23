@@ -3,11 +3,6 @@ describe('core/controller', function () {
     var Controller,
         request = {},
         view = {},
-        session = {
-            getCookieKey: function () {
-                return 'session_id';
-            }
-        },
         BodyParser = function () {
 
         },
@@ -26,8 +21,6 @@ describe('core/controller', function () {
                 get: function(name) {
                     if (name === "core/view") {
                         return view;
-                    } else if (name === 'storage/session') {
-                        return session;
                     }
                 },
                 has: function (name) {
@@ -407,9 +400,6 @@ describe('core/controller', function () {
         expect(cookies).toBe(cookies2); // reference
     });
 
-
-
-
     it('getCookies', function () {
         var ctx = {
             getCookies: function () {
@@ -425,91 +415,6 @@ describe('core/controller', function () {
         expect(u_id).toBe(null);
     });
 
-
-    it('getSession', function () {
-        var ctx = {
-            getCookie: function () {
-                return '1234123234567';
-            }
-        };
-        session.get = function (key) {};
-        spyOn(session, 'get');
-        controller.getSession.call(ctx, "id");
-        expect(session.get).toHaveBeenCalledWith('1234123234567id');
-
-        var message = tryCatch(function () {
-            controller.getSession.call(ctx, 1);
-        });
-        expect(message.indexOf('Controller.getSession: key must be string type') > -1).toBe(true);
-
-    });
-
-
-    it('removeSession', function () {
-        var ctx = {
-            getCookie: function () {
-                return '1234123234567';
-            }
-        };
-        session.remove = function (key) {};
-        spyOn(session, 'remove');
-        controller.removeSession.call(ctx, "id");
-        expect(session.remove).toHaveBeenCalledWith('1234123234567id');
-
-
-        var message = tryCatch(function () {
-            controller.removeSession.call(ctx, 1);
-        });
-        expect(message.indexOf('Controller.removeSession: key must be string type') > -1).toBe(true);
-
-    });
-
-
-
-    it('setSession', function () {
-        var ctx = {
-            getCookie: function () {
-                return '1234123234567';
-            }
-        };
-        session.set = function (key) {};
-        spyOn(session, 'set');
-        controller.setSession.call(ctx, "id", {a: 1});
-
-        expect(session.set).toHaveBeenCalledWith('1234123234567id', {a: 1});
-
-        var message = tryCatch(function () {
-            controller.setSession.call(ctx, 1);
-        });
-        expect(message.indexOf('Controller.getSession: key must be string type') > -1).toBe(true);
-    });
-
-
-
-    it('setSession 2' , function () {
-        var ctx = {
-            getCookie: function () {
-                return null;
-            },
-            __requestApi__: {
-                uuid: function () {
-                    return 1111;
-                }
-            },
-            setCookie: function () {}
-        };
-
-        session.getExpiredTime = function () {
-            return 10;
-        };
-        session.set = function (key) {};
-        spyOn(ctx, 'setCookie');
-
-        controller.setSession.call(ctx, "id", {a: 1});
-
-        expect(ctx.setCookie).toHaveBeenCalled();
-
-    });
     function tryCatch(callback) {
         try {
             return callback();

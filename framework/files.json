@@ -12,13 +12,10 @@
   "core/logger": "@{framework}/core/logger",
   "core/router": "@{framework}/core/router",
   "core/request": "@{framework}/core/request",
-  "core/controller": "@{framework}/core/controller",
   "core/module": "@{framework}/core/module",
   "core/routeRule": "@{framework}/core/routeRule",
   "core/view": "@{framework}/core/view",
   "core/bodyParser": "@{framework}/core/bodyParser",
-
-  "db/mongo": "@{framework}/db/mongo",
 
   "hooks/request": "@{framework}/hooks/request",
 
@@ -33,7 +30,6 @@
   "interface/module": "@{framework}/interface/module",
 
   "storage/memory": "@{framework}/storage/memory",
-  "storage/session": "@{framework}/storage/session",
 
   "typejs": "static-type-js"
 }

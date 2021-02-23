@@ -349,66 +349,6 @@ Controller = ControllerInterface.inherit({
     /**
      * @since 0.0.1
      * @author Igor Ivanovic
-     * @method Controller#getSession
-     * @param key {string}
-     * @description
-     * Get session key
-     * @return {string}
-     */
-    getSession: function Controller_getSession(key) {
-        var session = component.get('storage/session'),
-            session_id = this.getCookie(session.getCookieKey());
-
-        if (Type.isString(key)) {
-            return session.get(session_id + key);
-        }
-
-        throw new error.HttpError(500, {key: key, session_id: session_id}, 'Controller.getSession: key must be string type');
-    },
-    /**
-     * @since 0.0.1
-     * @author Igor Ivanovic
-     * @method Controller#setSession key value
-     * @param key {string}
-     * @param value {object|mixed}
-     * @param refreshSessionId {Boolean}
-     * @description
-     * Set session
-     * @return {string}
-     */
-    setSession: function Controller_setSession(key, value, refreshSessionId) {
-        var session = component.get('storage/session'),
-            session_id = this.getCookie(session.getCookieKey());
-        if (!Type.isString(key)) {
-            throw new error.HttpError(500, {key: key, session_id: session_id}, 'Controller.getSession: key must be string type');
-        } else if (!session_id || !!refreshSessionId) {
-            session_id = this.__requestApi__.uuid() + '_' + (new Date).getTime();
-            this.setCookie(session.getCookieKey(), session_id, session.getExpiredTime());
-        }
-        session.set(session_id + key, value);
-    },
-    /**
-     * @since 0.0.1
-     * @author Igor Ivanovic
-     * @method Controller#removeSession
-     * @param key {string}
-     * @description
-     * Remove session key
-     * @return {string}
-     */
-    removeSession: function Controller_removeSession(key) {
-        var session = component.get('storage/session'),
-            session_id = this.getCookie(session.getCookieKey());
-
-        if (Type.isString(key)) {
-            return session.remove(session_id + key);
-        }
-
-        throw new error.HttpError(500, {key: key, session_id: session_id}, 'Controller.removeSession: key must be string type');
-    },
-    /**
-     * @since 0.0.1
-     * @author Igor Ivanovic
      * @method Controller#setCookie
      * @param key {string}
      * @param value {string}
