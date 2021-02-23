@@ -3,6 +3,7 @@
 var di = require('../di'),
     Type = di.load('typejs'),
     error = di.load('error'),
+    Promise = di.load('promise'),
     component = di.load('core/component'),
     ControllerInterface = di.load('interface/controller'),
     BodyParser = di.load('core/bodyParser'),
@@ -356,7 +357,7 @@ Controller = ControllerInterface.inherit({
      * @return {string}
      */
     getSession: function Controller_getSession(key) {
-        return "";
+        return Promise.resolve("");
     },
     /**
      * @since 0.0.1
@@ -382,7 +383,7 @@ Controller = ControllerInterface.inherit({
      * @return {string}
      */
     removeSession: function Controller_removeSession(key) {
-
+        return Promise.resolve("");
     },
     /**
      * @since 0.0.1
