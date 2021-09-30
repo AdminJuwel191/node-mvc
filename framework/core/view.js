@@ -81,7 +81,6 @@ View = ViewInterface.inherit(
                 if(!name.includes('viewsPath')) {
                     name = di.getAlias('viewsPath') + name;
                 }
-                if(name.includes('partials/header'))
                 return this.resolve(name,false,true, themes);
             }.bind(this))
             this.nunjucks.addGlobal('JSON', JSON);
