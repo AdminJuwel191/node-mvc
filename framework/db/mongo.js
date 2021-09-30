@@ -60,12 +60,12 @@ Mongo = Type.create({
                 var replicaSet = this.config.options.replicaString ? this.config.options.replicaString : '';
                 try {
                     var connectionString = this.config.connection.length ? this.config.connection : clientChefConfig.mongodbHost;
-                    console.log(connectionString + '/' +
+                    console.log('[mongo] connecting: ', connectionString + '/' +
                         clientChefConfig.partnerSiteName + replicaSet);
                     this.dbConnCache[client] = mongoose.createConnection('mongodb://' + connectionString + '/' +
                         clientChefConfig.partnerSiteName + replicaSet, this.config.options);
                 } catch(e) {
-                    console.log(e);
+                    console.log('[mongo] exception', e);
                 }
 
             }.bind(this));
